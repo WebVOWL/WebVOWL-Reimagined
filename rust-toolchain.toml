@@ -1,0 +1,6 @@
+[toolchain]
+    channel="nightly-2025-07-30"
+    components=[
+        "rust-src", # Makes the source code of the standard library available for compilation
+    ]
+    targets=["wasm32-unknown-unknown"]

@@ -1,0 +1,32 @@
+{
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    },
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+        "source.sortImports": "always"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "evenBetterToml.formatter.alignComments": true,
+    "evenBetterToml.formatter.alignEntries": false,
+    "evenBetterToml.formatter.compactEntries": true,
+    "evenBetterToml.formatter.compactArrays": true,
+    "evenBetterToml.formatter.compactInlineTables": true,
+    "evenBetterToml.formatter.arrayAutoCollapse": true,
+    "evenBetterToml.formatter.arrayAutoExpand": true,
+    "evenBetterToml.formatter.arrayTrailingComma": true,
+    "evenBetterToml.formatter.indentEntries": true,
+    "evenBetterToml.formatter.indentTables": true,
+    "evenBetterToml.formatter.inlineTableExpand": true,
+    "evenBetterToml.formatter.reorderArrays": true,
+    "evenBetterToml.formatter.reorderInlineTables": true,
+    "evenBetterToml.formatter.reorderKeys": true,
+    "evenBetterToml.formatter.trailingNewline": true
+}
