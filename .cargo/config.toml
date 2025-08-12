@@ -1,9 +1,16 @@
-# This config uses unstable features to improve compile times.
+# This config uses (unstable) features to improve compile times.
 #
 # "-fuse-ld=lld"
 # One of the slowest aspects of compiling large Rust programs is the linking time. This file configures LLD as
 # an alternate linker that may improve build times. LLD is a linker from the LLVM project that supports
 # Linux, Windows, macOS, and Wasm.
+#
+# "-Clinker-plugin-lto"
+# Allows for deferring the LTO optimization to the actual linking step, which in turn allows for performing
+# interprocedural optimizations across programming language boundaries if all the object files being linked
+# were created by LLVM based toolchains. The prime example here would be linking Rust code together with
+# Clang-compiled C/C++ code. Note that the Rust code has to be compiled with -C linker-plugin-lto and the
+# C/C++ code with -flto or -flto=thin so that object files are emitted as LLVM bitcode.
 #
 # "-Zshare-generics=y"
 # Make the current crate share its generic instantiations
@@ -17,19 +24,29 @@
 
 [build]
     rustflags=["-Zshare-generics=y", "-Zthreads=0"]
-    target="wasm32-unknown-unknown"
 
+# Docker
+[target.x86_64-unknown-linux-musl]
+    linker="clang"
+    rustflags=[
+        "-Clinker-plugin-lto",
+        "-Clink-arg=-fuse-ld=lld",
+        "-Clink-arg=-flto",
+    ]
+
+# Local dev server
 [target.x86_64-unknown-linux-gnu]
     linker="clang"
     rustflags=["-Clink-arg=-fuse-ld=lld"]
 
+# Frontend of program
 [target.wasm32-unknown-unknown]
     rustflags=[
         "-Clink-arg=--max-memory=4294967296",
-        "-Ctarget-feature=+atomics",          #+bulk-memory,+mutable-globals",
+        "-Ctarget-feature=+atomics",
     ]
 
 [unstable]
     # We need to build the standard library from source to support the "wasm32-unknown-unknown" target.
-    build-std = ["std", "panic_abort", "core", "alloc"]
-    build-std-features = ["panic_immediate_abort"]
+    build-std=["alloc", "core", "panic_abort", "std"]
+    build-std-features=["panic_immediate_abort"]

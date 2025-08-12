@@ -1,22 +1,42 @@
-FROM node:22-alpine
+FROM rustlang/rust:nightly-alpine AS builder
 
-WORKDIR /code
+RUN apk update && apk add --no-cache \
+    bash \
+    curl \
+    binaryen \
+    clang \
+    lld
 
-COPY package.json /code/.
-COPY package-lock.json /code/.
+# Install a prebuilt binary of cargo-leptos
+RUN curl --proto '=https' --tlsv1.3 -LsSf https://github.com/leptos-rs/cargo-leptos/releases/latest/download/cargo-leptos-installer.sh | sh
 
-RUN npm ci
+WORKDIR /work
+COPY . .
 
-COPY .cargo /code/.cargo
-COPY Cargo.toml /code/.
-COPY rust-toolchain.toml /code/.
-COPY global-paths.js /code/.
-COPY rspack.config.js /code/.
-COPY tsconfig.json /code/.
-COPY src /code/src
-COPY LICENSE /code/.
+# Override bin-target-triple defined in Cargo.toml
+ENV LEPTOS_BIN_TARGET_TRIPLE="x86_64-unknown-linux-musl"
 
-RUN npm install serve -g
-RUN npm run release
+# Build WebVOWL
+RUN cargo leptos build --release --precompress -vv --
 
-CMD ["serve", "deploy"]
+
+FROM scratch AS runner
+# FROM rustlang/rust:nightly-alpine AS runner
+
+WORKDIR /app
+
+USER 10001
+
+COPY --chown=10001 --from=builder /work/target/x86_64-unknown-linux-musl/release/webvowl-reimagined /app/
+COPY --chown=10001 --from=builder /work/target/site /app/site
+# COPY --chown=10001 --from=builder /work/Cargo.toml /app/
+
+ENV RUST_LOG="info"
+ENV LEPTOS_SITE_ADDR="0.0.0.0:8080"
+ENV LEPTOS_SITE_ROOT=./site
+
+# Depends on the port you choose
+EXPOSE 8080
+
+# Must match your final server executable name
+CMD ["/app/webvowl-reimagined"]
