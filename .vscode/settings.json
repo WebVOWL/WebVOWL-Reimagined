@@ -2,18 +2,30 @@
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
+    "rust-analyzer.cargo.features": ["csr", "ssr", "hydrate", "wasm"],
     "[markdown]": {
-        "files.trimTrailingWhitespace": false
+        "files.trimTrailingWhitespace": false,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": "always",
         "source.sortImports": "always"
     },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
-    "[toml]": {
-        "editor.defaultFormatter": "tamasfe.even-better-toml"
-    },
+
+    // Even Better TOML
     "evenBetterToml.formatter.alignComments": true,
     "evenBetterToml.formatter.alignEntries": false,
     "evenBetterToml.formatter.compactEntries": true,
@@ -25,8 +37,27 @@
     "evenBetterToml.formatter.indentEntries": true,
     "evenBetterToml.formatter.indentTables": true,
     "evenBetterToml.formatter.inlineTableExpand": true,
-    "evenBetterToml.formatter.reorderArrays": true,
+    "evenBetterToml.formatter.reorderArrays": false,
     "evenBetterToml.formatter.reorderInlineTables": true,
     "evenBetterToml.formatter.reorderKeys": true,
-    "evenBetterToml.formatter.trailingNewline": true
+    "evenBetterToml.formatter.trailingNewline": true,
+
+    // TailwindCSS
+    "emmet.includeLanguages": {
+        "rust": "html",
+        "*.rs": "html"
+    },
+    "tailwindCSS.includeLanguages": {
+        "rust": "html",
+        "*.rs": "html"
+    },
+    "files.associations": {
+        "*.rs": "rust"
+    },
+    "editor.quickSuggestions": {
+        "other": "on",
+        "comments": "on",
+        "strings": true
+    },
+    "css.validate": false
 }
