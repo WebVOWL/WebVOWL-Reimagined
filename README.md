@@ -23,8 +23,7 @@ Or use the [docker compose file](/docker-compose.yml) with command `docker-compo
 
 ## Development setup
 
-[!NOTE]
-
+> [!NOTE]
 > Using Linux is recommended
 
 0. Clone the project locally, e.g. `git clone https://github.com/WebVOWL/WebVOWL-Reimagined.git`
