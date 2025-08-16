@@ -21,7 +21,6 @@ RUN cargo leptos build --release --precompress -vv --
 
 
 FROM scratch AS runner
-# FROM rustlang/rust:nightly-alpine AS runner
 
 WORKDIR /app
 
@@ -29,7 +28,6 @@ USER 10001
 
 COPY --chown=10001 --from=builder /work/target/x86_64-unknown-linux-musl/release/webvowl-reimagined /app/
 COPY --chown=10001 --from=builder /work/target/site /app/site
-# COPY --chown=10001 --from=builder /work/Cargo.toml /app/
 
 ENV RUST_LOG="info"
 ENV LEPTOS_SITE_ADDR="0.0.0.0:8080"
