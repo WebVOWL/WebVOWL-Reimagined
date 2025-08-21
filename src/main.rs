@@ -7,14 +7,14 @@ use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 
-// // Use mimalloc as memory allocator when running containerized
-// // to avoid poor performance
-// #[cfg(target_env = "musl")]
-// use mimalloc::MiMalloc;
+// Use mimalloc as memory allocator when running containerized
+// to avoid poor performance
+#[cfg(all(target_family = "unix", target_env = "gnu"))]
+use mimalloc::MiMalloc;
 
-// #[cfg(target_env = "musl")]
-// #[global_allocator]
-// static GLOBAL: MiMalloc = MiMalloc;
+#[cfg(all(target_family = "unix", target_env = "gnu"))]
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -47,6 +47,9 @@ async fn main() -> std::io::Result<()> {
                                 // <AutoReload options=leptos_options.clone() />
                                 <HydrationScripts options=leptos_options.clone() />
                                 <MetaTags />
+                                <script>
+                                    "await initThreadPool(navigator.hardwareConcurrency)"
+                                </script>
                             </head>
                             <body>
                                 <App />
@@ -59,10 +62,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Compress::default())
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .add(("Cross-Origin-Opener-Policy", "same-origin")),
-            )
-            .wrap(
-                middleware::DefaultHeaders::new()
+                    .add(("Cross-Origin-Opener-Policy", "same-origin"))
                     .add(("Cross-Origin-Embedder-Policy", "require-corp")),
             )
     })
