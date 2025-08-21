@@ -3,21 +3,21 @@ mod app;
 use crate::app::App;
 use actix_files::Files;
 use actix_web::*;
+use env_logger::Env;
 use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
-
-// Use mimalloc as memory allocator when running containerized
-// to avoid poor performance
-#[cfg(all(target_family = "unix", target_env = "gnu"))]
-use mimalloc::MiMalloc;
-
-#[cfg(all(target_family = "unix", target_env = "gnu"))]
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
+use log::info;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("trace")).init();
+    env_logger::init();
+
+    let pkg_name = env!("CARGO_PKG_NAME");
+    let pkg_version = env!("CARGO_PKG_VERSION");
+    info!("Starting {pkg_name} server [v{pkg_version}]");
+
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
 
