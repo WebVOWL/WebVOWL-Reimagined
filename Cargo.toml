@@ -27,32 +27,28 @@
         "compress-gzip",
     ]}
     console_error_panic_hook={version="0.1", optional=true}
+    console_log={version="1.0", optional=true}
+    env_logger={version="0.11", optional=true}
     getrandom={version="0.2", features=["js"]}
-    # glam="0.29.0"
-    # horned-owl={version="1.0.0", default-features=false}
+    grapher={version=">=0.2.3", git="https://github.com/WebVOWL/RustGrapher.git", optional=true}
     http={version="1.3.1", optional=true}
     leptos={version="0.8.2", features=["nightly"]}
     leptos_actix={version="0.8.2", optional=true}
     leptos_meta={version="0.8.2"}
     leptos_router={version="0.8.2", features=["nightly"]}
-    # petgraph="0.6.5"
+    log="0.4"
     rayon="1.10"
-    # serde={version="1.0", features=["derive"]}
-    # serde_json="1.0"
-    # futures = "0.3"
     wasm-bindgen={version="0.2", optional=true}
     wasm-bindgen-futures={version="0.4", optional=true}
     wasm-bindgen-rayon={version="1.3", optional=true}
 
-    [dependencies.grapher]
-        default-features=false
-        git="https://github.com/WebVOWL/RustGrapher.git"
-        version=">=0.2.3"
-        # features = ["wasm"]
-        optional=true
+    # serde={version="1.0", features=["derive"]}
+    # serde_json="1.0"
+    # futures = "0.3"
+    # glam="0.29.0"
+    # horned-owl={version="1.0.0", default-features=false}
+    # petgraph="0.6.5"
 
-[target.'cfg(target_env = "gnu")'.dependencies]
-    mimalloc="0.1.47"
     # [dependencies.tokio]
     #     version="1.43"
     #     # https://docs.rs/tokio/latest/tokio/index.html#feature-flags
@@ -72,20 +68,18 @@
     #         # "console",
     #     ]
 
-    # console_log = "1.0"
+
     # egui_wgpu_backend = { version = "0.25", features = ["web"] }
     # egui_winit_platform = { version = "0.19", features = ["webbrowser"] }
     # # winit = { version = "0.28.7" }
     # wasm-cookies = "0.2"
     # wgpu = { version = "0.17", features = ["webgl"] }
 
-    # [build-dependencies]
-    #     cc={version="1.0", features=["parallel"]}
-
 
 [features]
     csr=["leptos/csr"]
     hydrate=["leptos/hydrate"]
+    server=["dep:env_logger"]
     ssr=[
         "dep:actix-files",
         "dep:actix-web",
@@ -96,6 +90,7 @@
     ]
     wasm=[
         "dep:console_error_panic_hook",
+        "dep:console_log",
         "dep:wasm-bindgen",
         "dep:wasm-bindgen-futures",
         "dep:wasm-bindgen-rayon",
@@ -164,7 +159,6 @@
 # But we're doing lots of compute intensive physics simulations on the frontend,
 # so we'll be optimizing aggressively for speed.
 [profile.wasm-release]
-    # codegen-units=1
     inherits="release"
     # opt-level='z'
 
@@ -206,7 +200,7 @@
         # The features to use when compiling the bin target
         #
         # Optional. Can be over-ridden with the command line parameter --bin-features
-        bin-features=["ssr"]
+        bin-features=["ssr", "server"]
         # If the --no-default-features flag should be used when compiling the bin target
         #
         # Optional. Defaults to false.
