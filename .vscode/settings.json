@@ -3,9 +3,6 @@
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
     "rust-analyzer.cargo.features": ["csr", "ssr", "hydrate", "wasm"],
-    "rust-analyzer.cargo.extraEnv": {
-        "RUSTFLAGS": "-Clinker=clang -Clink-arg=-fuse-ld=lld"
-    },
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -13,6 +10,10 @@
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonl]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
