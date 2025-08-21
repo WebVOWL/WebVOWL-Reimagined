@@ -14,6 +14,9 @@ pub mod pages;
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use crate::app::App;
+    use log::Level;
+
     console_error_panic_hook::set_once();
+    console_log::init_with_level(Level::Warn).expect("error initializing log");
     leptos::mount::hydrate_body(App);
 }
