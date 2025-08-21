@@ -3,6 +3,9 @@
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
     "rust-analyzer.cargo.features": ["csr", "ssr", "hydrate", "wasm"],
+    "rust-analyzer.cargo.extraEnv": {
+        "RUSTFLAGS": "-Clinker=clang -Clink-arg=-fuse-ld=lld"
+    },
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
