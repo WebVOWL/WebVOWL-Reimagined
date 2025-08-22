@@ -1,13 +1,21 @@
 FROM rustlang/rust:nightly-alpine AS builder
 
-RUN apk update && apk add --no-cache \
+RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     bash \
     curl \
+    git \
     binaryen \
     clang \
-    lld \
-    # Using secure mode
-    mimalloc2
+    lld
+
+# Get script to patch and install mimalloc
+RUN git clone "https://github.com/WebVOWL/rust-alpine-mimalloc"
+
+WORKDIR /rust-alpine-mimalloc
+
+# Use latest stable version of mimalloc (2025-06-09)
+RUN /rust-alpine-mimalloc/build.sh 2.2.4 SECURE
+
 
 # Install a prebuilt binary of cargo-leptos
 RUN curl --proto '=https' --tlsv1.3 -LsSf https://github.com/leptos-rs/cargo-leptos/releases/latest/download/cargo-leptos-installer.sh | sh
