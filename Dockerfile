@@ -9,12 +9,12 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     lld
 
 # Get script to patch and install mimalloc
-RUN git clone "https://github.com/WebVOWL/rust-alpine-mimalloc"
+# RUN git clone "https://github.com/WebVOWL/rust-alpine-mimalloc"
 
-WORKDIR /rust-alpine-mimalloc
+# WORKDIR /rust-alpine-mimalloc
 
 # Use latest stable version of mimalloc (2025-06-09)
-RUN /rust-alpine-mimalloc/build.sh 2.2.4 SECURE
+# RUN /rust-alpine-mimalloc/build.sh 2.2.4 SECURE
 
 
 # Install a prebuilt binary of cargo-leptos
@@ -24,7 +24,7 @@ WORKDIR /work
 COPY . .
 
 # Set LD_PRELOAD to use mimalloc globally
-ENV LD_PRELOAD=/usr/lib/libmimalloc.so
+# ENV LD_PRELOAD=/usr/lib/libmimalloc.so
 
 # Override bin-target-triple defined in Cargo.toml
 ENV LEPTOS_BIN_TARGET_TRIPLE="x86_64-unknown-linux-musl"
