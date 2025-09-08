@@ -2,7 +2,7 @@
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
-    "rust-analyzer.cargo.features": ["csr", "ssr", "hydrate", "wasm"],
+    "rust-analyzer.cargo.features": ["csr", "ssr", "hydrate", "wasm", "server"],
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
