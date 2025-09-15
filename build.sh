@@ -2,8 +2,8 @@
 
 modes=("dev" "preview" "release")
 commands=(
-    "cargo leptos watch --wasm-debug -v"
-    "cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
+    "RUST_LOG=info cargo leptos watch --wasm-debug -v"
+    "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
     "RUST_LOG=info cargo leptos build --release --precompress -v"
     )
 help=(
