@@ -72,20 +72,20 @@ pub fn HydrationScripts(
 
     let pkg_path = &options.site_pkg_dir;
     #[cfg(feature = "nonce")]
-    let nonce = crate::nonce::use_nonce();
+    let nonce = leptos::nonce::use_nonce();
     #[cfg(not(feature = "nonce"))]
     let nonce = None::<String>;
     let script = if islands {
         if let Some(sc) = Owner::current_shared_context() {
             sc.set_is_hydrating(false);
         }
-        include_str!("../public/js/island_script.js")
+        include_str!("./scripts/island_script.js")
     } else {
-        include_str!("../public/js/hydration_script.js")
+        include_str!("./scripts/hydration_script.js")
     };
 
     let islands_router = islands_router
-        .then_some(include_str!("../public/js/islands_routing.js"))
+        .then_some(include_str!("./scripts/islands_routing.js"))
         .unwrap_or_default();
 
     let root = root.unwrap_or_default();
