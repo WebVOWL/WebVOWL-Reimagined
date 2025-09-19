@@ -32,7 +32,7 @@
     getrandom={version="0.2", features=["js"]}
     grapher={version=">=0.2.3", git="https://github.com/WebVOWL/RustGrapher.git", optional=true}
     http={version="1.3.1", optional=true}
-icondata = "0.6.0"
+    icondata = "0.6.0"
     leptos={version="0.8.2", features=["nightly"]}
     leptos_actix={version="0.8.2", optional=true}
     leptos_meta={version="0.8.2"}
