@@ -6,6 +6,7 @@
             mod.hydrate()
             mod.initThreadPool(navigator.hardwareConcurrency).then(() => {
                 console.log("Threadpool initialized")
+                mod.run_web()
             })
         })
     })

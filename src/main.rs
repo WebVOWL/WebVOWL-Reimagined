@@ -6,6 +6,7 @@ use crate::app::App;
 use actix_files::Files;
 use actix_web::*;
 use env_logger::Env;
+use leptos::html::canvas;
 use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
@@ -50,7 +51,7 @@ async fn main() -> std::io::Result<()> {
                                 <MetaTags />
                             </head>
                             <body>
-                                // <canvas id="canvas" />
+                                <canvas id="canvas" width=800 height=600 />
                                 <App />
                             </body>
                         </html>
