@@ -6,6 +6,7 @@ use leptos_router::{
     components::{FlatRoutes, Route, Router},
 };
 use thaw::*;
+
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
@@ -48,6 +49,7 @@ fn Home() -> impl IntoView {
     let ontologyversion = RwSignal::new("0.99".to_string());
     let ontologyauthors = RwSignal::new("Alice, Bob, Charlie".to_string());
     let ontologylanguages = RwSignal::new(vec!["en".to_string()]);
+
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
