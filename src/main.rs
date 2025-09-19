@@ -50,6 +50,7 @@ async fn main() -> std::io::Result<()> {
                                 </script>
                             </head>
                             <body>
+                                // <canvas id="canvas" />
                                 <App />
                             </body>
                         </html>
