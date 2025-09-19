@@ -8,14 +8,14 @@ pub use wasm_bindgen_rayon::init_thread_pool;
 
 pub mod app;
 pub mod components;
+pub mod hydration_scripts;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use crate::app::App;
-    use log::Level;
-
+    use leptos::leptos_dom::logging::console_log;
     console_error_panic_hook::set_once();
-    console_log::init_with_level(Level::Warn).expect("error initializing log");
     leptos::mount::hydrate_body(App);
+    console_log("Hydration complete");
 }
