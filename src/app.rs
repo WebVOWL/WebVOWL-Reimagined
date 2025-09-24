@@ -1,3 +1,4 @@
+use leptos::html::canvas;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{
@@ -52,6 +53,7 @@ fn Home() -> impl IntoView {
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
+            <canvas id="canvas" width=800 height=600 />
             <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
                 <div class="flex fixed bottom-0 left-0 flex-row flex-wrap p-0 font-mono text-white">
                     <ConfigProvider>

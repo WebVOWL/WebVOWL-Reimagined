@@ -51,7 +51,6 @@ async fn main() -> std::io::Result<()> {
                                 <MetaTags />
                             </head>
                             <body>
-                                <canvas id="canvas" width=800 height=600 />
                                 <App />
                             </body>
                         </html>
