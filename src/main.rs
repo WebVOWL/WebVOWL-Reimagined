@@ -1,4 +1,7 @@
 mod app;
+mod hydration_scripts;
+
+use crate::HydrationScripts as Hydro;
 use crate::app::App;
 use actix_files::Files;
 use actix_web::*;
@@ -42,12 +45,9 @@ async fn main() -> std::io::Result<()> {
                                     content="width=device-width, initial-scale=1"
                                 />
                                 <meta apple-mobile-web-app-capable="yes" />
-                                <AutoReload options=leptos_options.clone() />
-                                <HydrationScripts options=leptos_options.clone() />
+                                // <AutoReload options=leptos_options.clone() />
+                                <Hydro options=leptos_options.clone() />
                                 <MetaTags />
-                                <script>
-                                    "await initThreadPool(navigator.hardwareConcurrency)"
-                                </script>
                             </head>
                             <body>
                                 <App />
