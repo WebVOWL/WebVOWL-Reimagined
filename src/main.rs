@@ -1,8 +1,6 @@
-mod app;
 mod hydration_scripts;
 
 use crate::HydrationScripts as Hydro;
-use crate::app::App;
 use actix_files::Files;
 use actix_web::*;
 use env_logger::Env;
@@ -10,6 +8,7 @@ use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 use log::info;
+use webvowl_reimagined::app::App;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

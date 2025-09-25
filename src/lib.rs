@@ -1,4 +1,3 @@
-
 // Expose an async initThreadPool function in the final generated JavaScript.
 // You'll need to invoke it right after instantiating your module on the main
 // thread in order to prepare the threadpool before calling into actual library functions.
@@ -6,10 +5,9 @@
 pub use wasm_bindgen_rayon::init_thread_pool;
 
 pub mod app;
-pub mod components;
-pub mod hydration_scripts;
-pub mod pages;
 pub mod buttons;
+pub mod components;
+pub mod pages;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
