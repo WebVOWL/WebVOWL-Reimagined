@@ -1,4 +1,64 @@
 @import "tailwindcss";
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 78%;
+    background-color: rgb(24, 32, 42);
+    padding: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+.bottom-bar button {
+    background-color: rgb(24, 32, 42);
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1rem;
+    outline: none;
+}
+
+.bottom-bar button:hover {
+    background-color: #34495e;
+}
+
+.bottom-bar button:focus {
+    outline: none; /* Remove outline on focus */
+    box-shadow: none; /* Remove any focus shadow */
+}
+
+.bottom-bar input {
+    background-color: #ffffff;
+}
+
+.bottom-bar input::placeholder {
+    color: #95a5a6;
+}
+.zoom.slider {
+    position: fixed;
+    bottom: 8%;
+    right: 23%;
+}
+
+.ontology-menu {
+    font-size: 14px;
+    width: 22%;
+    height: 28px;
+}
+
+.zoom.slider button {
+    border: 1px solid #000000;
+    width: 100%;
+    height: 28px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+}
+
+
 .info-bar {
     position: fixed;
     top: 0;
@@ -6,7 +66,6 @@
     width: 22%;
     height: 100vh;
     background-color: rgb(24, 32, 42);
-    border-left: 1px solid #34495e;
     color: #ecf0f1;
     padding: 0.1rem;
     overflow-y: auto;
@@ -30,6 +89,7 @@
     margin: 0.5rem 0;
     text-align: center;
     border-bottom: 1px solid #34495e;
+    background-color: rgb(24, 32, 42);
     color: #ecf0f1;
 }
 
@@ -55,6 +115,7 @@
     padding: 0.5rem;
     cursor: pointer;
     color: #ecf0f1;
+    
 }
 
 
