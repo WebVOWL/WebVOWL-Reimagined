@@ -6,6 +6,9 @@ use leptos_router::{
 };
 use thaw::*;
 use leptos_meta::Link;
+
+use crate::buttons::pause_button::PauseButton;
+
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
@@ -148,7 +151,7 @@ fn Home() -> impl IntoView {
                             <Button>"Pick & pin"</Button>
                         </Menu>
                         <Button icon=icondata::VsDebugRestart>"Reset"</Button>
-                        <Button icon=icondata::AiPauseOutlined>"Pause"</Button>
+                        <PauseButton />
                         <Menu on_select position=MenuPosition::Top>
                             <MenuTrigger slot>
                                 <Button icon=icondata::AiCopyrightOutlined>"About"</Button>
