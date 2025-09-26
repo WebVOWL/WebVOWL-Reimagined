@@ -35,7 +35,7 @@ pub fn Home() -> impl IntoView {
                         <PauseButton />
                         <AboutMenu />
                     </div>
-                    <div class="info-bar">
+                    <div class="sidebar">
                         <p class="ontology-title">{displayed_title}</p>
                         <OntologyIri />
                         <Version />

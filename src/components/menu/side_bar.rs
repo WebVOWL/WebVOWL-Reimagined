@@ -5,7 +5,7 @@ use thaw::*;
 pub fn OntologyIri() -> impl IntoView{
     let ontologyiri = RwSignal::new("http://xmlns.com/foaf/0.1/".to_string());
     view! {
-        <p class="info-section">
+        <p class="sidebar-section">
             <a 
                 href={move || ontologyiri.get()} 
                 target="_blank" 
@@ -21,7 +21,7 @@ pub fn OntologyIri() -> impl IntoView{
 pub fn Version() -> impl IntoView{
     let ontologyversion = RwSignal::new("0.99".to_string());
     view! {
-        <p class="info-section">"Version: "{move || ontologyversion.get()}</p>
+        <p class="sidebar-section">"Version: "{move || ontologyversion.get()}</p>
     }
 }
 
@@ -30,7 +30,7 @@ pub fn Author() -> impl IntoView{
     let ontologyauthors = RwSignal::new("Alice, Bob, Charlie".to_string());
     view! {
         <ConfigProvider>
-            <p class="info-section"><Caption1Strong>Author(s): {move || ontologyauthors.get()}</Caption1Strong></p>
+            <p class="sidebar-section"><Caption1Strong>Author(s): {move || ontologyauthors.get()}</Caption1Strong></p>
         </ConfigProvider>
     }
 }
@@ -40,7 +40,7 @@ pub fn Language() -> impl IntoView{
     let ontologylanguages = RwSignal::new(vec!["english".to_string(), "german".to_string(), "french".to_string()]);
     view! {
         <ConfigProvider>
-            <p class="info-section">
+            <p class="sidebar-section">
                 <Caption1Strong>Language(s): </Caption1Strong>
                 <Select class="language-button">
                     {move || ontologylanguages.get().into_iter().map(|lang| view! {
@@ -58,16 +58,14 @@ pub fn Description() -> impl IntoView{
     let ontologydescription = RwSignal::new("The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.".to_string());
     view! {
         <ConfigProvider>
-                    <div class="accordion-header">
-                        <Accordion collapsible=true multiple=true>
-                            <AccordionItem value="description">
-                                <AccordionHeader slot>
-                                    "Description"
-                                </AccordionHeader>
-                                <p class="info-section-content">{move || ontologydescription.get()}</p>
-                            </AccordionItem>
-                        </Accordion>
-                        </div>
+            <Accordion class="accordion" collapsible=true multiple=true>
+                <AccordionItem value="description">
+                    <AccordionHeader slot>
+                        <p class="accordion-header">"Description"</p>
+                    </AccordionHeader>
+                    <p class="accordion-section-content">{move || ontologydescription.get()}</p>
+                </AccordionItem>
+            </Accordion>
         </ConfigProvider>
     }
 }
@@ -78,12 +76,12 @@ pub fn MetaData() -> impl IntoView{
     let metadata = RwSignal::new("The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.".to_string());
     view! {
         <ConfigProvider>
-            <Accordion collapsible=true multiple=true>
-                <AccordionItem value="setadata">
-                        <AccordionHeader slot>
-                            "Metadata"
-                        </AccordionHeader>
-                        <p class="info-section-content">{move || metadata.get()}</p>
+            <Accordion class="accordion" collapsible=true multiple=true>
+                <AccordionItem value="metadata">
+                    <AccordionHeader slot>
+                        <p class="accordion-header">"Metadata"</p>
+                    </AccordionHeader>
+                    <p class="accordion-section-content">{move || metadata.get()}</p>
                 </AccordionItem>
             </Accordion>
         </ConfigProvider>
@@ -100,19 +98,17 @@ pub fn Statistics() -> impl IntoView{
     let edgecount = RwSignal::new(0);
     view! {
         <ConfigProvider>
-        <Accordion collapsible=true multiple=true>
+        <Accordion class="accordion" collapsible=true multiple=true>
             <AccordionItem value="statistics">
                 <AccordionHeader slot>
-                    "Statistics"
+                    <p class="accordion-header">"Statistics"</p>
                 </AccordionHeader>
-                    <p class="info-section-content">
-                    "Classes: "{move || classcount.get()}
-                    "Object Properties: " {move || objectpropertycount.get()}
-                    "Datatype Properties: " {move || datatypepropertycount.get()}
-                    "Individuals: " {move || individualcount.get()}
-                    "Nodes: " {move || nodecount.get()}
-                    "Edges: " {move || edgecount.get()}
-                    </p>
+                <p class="accordion-section-content">"Classes: "{move || classcount.get()}</p>
+                <p class="accordion-section-content">"Object Properties: " {move || objectpropertycount.get()}</p>
+                <p class="accordion-section-content">"Datatype Properties: " {move || datatypepropertycount.get()}</p>
+                <p class="accordion-section-content">"Individuals: " {move || individualcount.get()}</p>
+                <p class="accordion-section-content">"Nodes: " {move || nodecount.get()}</p>
+                <p class="accordion-section-content">"Edges: " {move || edgecount.get()}</p>
             </AccordionItem>
         </Accordion>
         </ConfigProvider>
@@ -124,12 +120,12 @@ pub fn Statistics() -> impl IntoView{
 pub fn SelectionDetails() -> impl IntoView{
     view! {
         <ConfigProvider>
-            <Accordion collapsible=true multiple=true>
+            <Accordion class="accordion" collapsible=true multiple=true>
                 <AccordionItem value="selection details">
                     <AccordionHeader slot>
-                        "Selection Details"
+                        <p class="accordion-header">"Selection Details"</p>
                     </AccordionHeader>
-                    <p class="info-section-content">"Select an element in the visualization."</p>
+                    <p class="accordion-section-content">"Select an element in the visualization."</p>
                 </AccordionItem>
             </Accordion>
         </ConfigProvider>
