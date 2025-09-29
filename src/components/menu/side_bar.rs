@@ -29,9 +29,7 @@ pub fn Version() -> impl IntoView{
 pub fn Author() -> impl IntoView{
     let ontologyauthors = RwSignal::new("Alice, Bob, Charlie".to_string());
     view! {
-        <ConfigProvider>
-            <p class="sidebar-section"><Caption1Strong>Author(s): {move || ontologyauthors.get()}</Caption1Strong></p>
-        </ConfigProvider>
+        <p class="sidebar-section">Author(s): {move || ontologyauthors.get()}</p>
     }
 }
 
@@ -41,7 +39,7 @@ pub fn Language() -> impl IntoView{
     view! {
         <ConfigProvider>
             <p class="sidebar-section">
-                <Caption1Strong>Language(s): </Caption1Strong>
+                "Language(s):"
                 <Select class="language-button">
                     {move || ontologylanguages.get().into_iter().map(|lang| view! {
                         <option>{lang}</option> 
