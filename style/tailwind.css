@@ -58,6 +58,7 @@
     color: #ecf0f1;
     padding: 0.1rem;
     overflow-y: auto;
+    overflow: visible;
 }
 
 .ontology-title {
@@ -137,17 +138,67 @@
     color: #ecf0f1;
 }
 
-.zoom.slider button {
-    border: 1px solid #000000;
-    width: 100%;
-    height: 28px;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
+@keyframes sidebar-collapse {
+    0% { width: 22%; }
+    100% { width: 0%; }
+}
+@keyframes sidebar-expand {
+    0% { width: 0%; }
+    100% { width: 22%; }
+}
+.sidebar-collapse {
+    animation: sidebar-collapse 0.5s forwards;
+}
+.sidebar-expand {
+    animation: sidebar-expand 0.5s forwards;
 }
 
-.zoom.slider {
+@keyframes bottombar-expand {
+    0% { width: 78%; }
+    100% { width: 100%; }
+}
+@keyframes bottombar-collapse {
+    0% { width: 100%; }
+    100% { width: 78%; }
+}
+.bottombar-expand {
+    animation: bottombar-expand 0.5s forwards;
+}
+.bottombar-collapse {
+    animation: bottombar-collapse 0.5s forwards;
+}
+
+.toggle-sidebar-btn {
     position: fixed;
-    bottom: 8%;
-    right: 23%;
+    height: 24px;
+    width: 24px;
+    top: 5%;
+    right: 22%;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    transition: right 0.5s;
+    z-index: 101;
+}
+
+.toggle-sidebar-btn-collapsed {
+    right: 0%;
+}
+
+.toggle-sidebar-btn:hover {
+    background-color: #d90;
+}
+
+.sidebar-content {
+    transition: opacity 0.4s, transform 0.4s;
+    opacity: 1;
+    transform: translateX(0);
+    overflow-x: visible;
+}
+
+.sidebar-collapse .sidebar-content {
+    opacity: 0;
+    pointer-events: none;
 }

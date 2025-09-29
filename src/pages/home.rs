@@ -18,24 +18,37 @@ pub fn Home() -> impl IntoView {
     let ontologytitle = RwSignal::new("Friend of a Friend (FOAF) vocabulary".to_string());
     provide_context(ontologytitle);
     let displayed_title = move || ontologytitle.get();
-    
+    let sidebar_open = RwSignal::new(true);
     view! {
         <Title text="Leptos + Tailwindcss" />
-            <main>
-                <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
-                    <div class="bottom-bar">
-                        <SearchButton />
-                        <LocateButton />
-                        <OntologyMenu />
-                        <ExportMenu />
-                        <FilterMenu />
-                        <OptionsMenu />
-                        <ModesMenu />
-                        <ResetButton />
-                        <PauseButton />
-                        <AboutMenu />
-                    </div>
-                    <div class="sidebar">
+        <main>
+            <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
+                <button
+                    class={move || {
+                        if sidebar_open.get() {
+                            "toggle-sidebar-btn"
+                        } else {
+                            "toggle-sidebar-btn toggle-sidebar-btn-collapsed"
+                        }
+                    }}
+                    on:click=move |_| { sidebar_open.update(|open| *open = !*open); }
+                >
+                    {move || if sidebar_open.get() { ">" } else { "<" }}
+                </button>
+                <div class={move || if sidebar_open.get() { "bottom-bar bottombar-collapse" } else { "bottom-bar bottombar-expand" }}>
+                    <SearchButton />
+                    <LocateButton />
+                    <OntologyMenu />
+                    <ExportMenu />
+                    <FilterMenu />
+                    <OptionsMenu />
+                    <ModesMenu />
+                    <ResetButton />
+                    <PauseButton />
+                    <AboutMenu />
+                </div>
+                <div class={move || if sidebar_open.get() { "sidebar sidebar-expand" } else { "sidebar sidebar-collapse" }}>
+                    <div class="sidebar-content">
                         <p class="ontology-title">{displayed_title}</p>
                         <OntologyIri />
                         <Version />
@@ -47,6 +60,7 @@ pub fn Home() -> impl IntoView {
                         <SelectionDetails />
                     </div>
                 </div>
-            </main>
+            </div>
+        </main>
     }
 }
