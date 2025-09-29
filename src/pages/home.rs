@@ -19,6 +19,8 @@ pub fn Home() -> impl IntoView {
     provide_context(ontologytitle);
     let displayed_title = move || ontologytitle.get();
     let sidebar_open = RwSignal::new(true);
+    let is_first_load = RwSignal::new(false);
+
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
@@ -31,11 +33,26 @@ pub fn Home() -> impl IntoView {
                             "toggle-sidebar-btn toggle-sidebar-btn-collapsed"
                         }
                     }}
-                    on:click=move |_| { sidebar_open.update(|open| *open = !*open); }
+                    on:click=move |_| {
+                        sidebar_open.update(|open| *open = !*open);
+                        if !is_first_load.get() {
+                            is_first_load.set(true);
+                        }
+                    }
                 >
                     {move || if sidebar_open.get() { ">" } else { "<" }}
                 </button>
-                <div class={move || if sidebar_open.get() { "bottom-bar bottombar-collapse" } else { "bottom-bar bottombar-expand" }}>
+                <div class={move || {
+                    if is_first_load.get() {
+                        if sidebar_open.get() {
+                            "bottom-bar bottombar-collapse"
+                        } else {
+                            "bottom-bar bottombar-expand"
+                        }
+                    } else {
+                        "bottom-bar"
+                    }
+                }}>
                     <SearchButton />
                     <LocateButton />
                     <OntologyMenu />
@@ -47,7 +64,21 @@ pub fn Home() -> impl IntoView {
                     <PauseButton />
                     <AboutMenu />
                 </div>
-                <div class={move || if sidebar_open.get() { "sidebar sidebar-expand" } else { "sidebar sidebar-collapse" }}>
+                <div class={move || {
+                    if is_first_load.get() {
+                        if sidebar_open.get() {
+                            "sidebar sidebar-expand"
+                        } else {
+                            "sidebar sidebar-collapse sidebar-collapsed"
+                        }
+                    } else {
+                        if sidebar_open.get() {
+                            "sidebar"
+                        } else {
+                            "sidebar sidebar-collapsed"
+                        }
+                    }
+                }}>
                     <div class="sidebar-content">
                         <p class="ontology-title">{displayed_title}</p>
                         <OntologyIri />
