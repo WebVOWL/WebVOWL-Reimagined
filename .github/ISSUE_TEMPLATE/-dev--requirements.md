@@ -2,7 +2,7 @@
 name: "[Dev] Requirements"
 about: Requirements template used by developers
 title: ''
-labels: ''
+labels: requirement
 assignees: ''
 
 ---
