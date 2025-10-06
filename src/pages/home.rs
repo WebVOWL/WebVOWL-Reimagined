@@ -11,6 +11,7 @@ use crate::components::buttons::reset_button::ResetButton;
 use crate::components::buttons::pause_button::PauseButton;
 use crate::components::menu::about_menu::AboutMenu;
 use crate::components::menu::side_bar::*;
+use crate::components::zoom_slider::ZoomSlider;
 
 
 #[component]
@@ -91,6 +92,7 @@ pub fn Home() -> impl IntoView {
                         <SelectionDetails />
                     </div>
                 </div>
+                <ZoomSlider />
             </div>
         </main>
     }
