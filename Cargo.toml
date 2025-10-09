@@ -139,12 +139,10 @@
     inherits="release"
 
 # Defines a size-optimized profile for the WASM bundle in release mode
-# But we're doing lots of compute intensive physics simulations on the frontend,
-# so we'll be optimizing aggressively for speed.
 [profile.wasm-release]
     inherits="release"
+    opt-level='z'
     strip=true
-    # opt-level='z'
 
 
     [package.metadata.leptos]
@@ -155,17 +153,17 @@
             # Monomorphization of functions to increase performance significantly (~2x)
             # at the cost of file size.
             # https://github.com/WebAssembly/binaryen/wiki/Optimizer-Cookbook#monomorphization
-            "-O3",
-            "--monomorphize",
-            "--pass-arg=monomorphize-min-benefit@50",
-            # -O4 optimizes very aggressively for performance at the cost of compile time.
-            # https://github.com/WebAssembly/binaryen/blob/c62a0c97168e88f97bca4bd96298a5ffc041844d/test/lit/help/wasm-opt.test#L539
-            "-O4",
+            # "-O3",
+            # "--monomorphize",
+            # "--pass-arg=monomorphize-min-benefit@50",
+            # # -O4 optimizes very aggressively for performance at the cost of compile time.
+            # # https://github.com/WebAssembly/binaryen/blob/c62a0c97168e88f97bca4bd96298a5ffc041844d/test/lit/help/wasm-opt.test#L539
+            # "-O4",
 
             # Reduce file size in multiple passes (disabled in favor of speed)
             # https://github.com/WebAssembly/binaryen/wiki/Optimizer-Cookbook#converge
-            # "--converge",
-            # "-Oz",
+            "--converge",
+            "-Oz",
 
             "--enable-bulk-memory",
             "--enable-nontrapping-float-to-int",
