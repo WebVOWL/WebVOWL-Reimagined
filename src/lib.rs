@@ -1,10 +1,9 @@
-#![allow(non_snake_case)]
+#[cfg(feature = "wasm")]
+pub use grapher::web::init_render;
 
 // Expose an async initThreadPool function in the final generated JavaScript.
 // You'll need to invoke it right after instantiating your module on the main
 // thread in order to prepare the threadpool before calling into actual library functions.
-#[cfg(feature = "wasm")]
-pub use grapher::web::run_web;
 #[cfg(feature = "wasm")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
