@@ -36,6 +36,7 @@ pub fn HydrationScripts(
         let manifest = WasmSplitManifest(ArcStoredValue::new((
             format!("{root}/{pkg_dir}"),
             serde_json::from_str(&file).expect("could not read manifest file"),
+            format!("__wasm_split_manifest.json"),
         )));
 
         Some(manifest)
