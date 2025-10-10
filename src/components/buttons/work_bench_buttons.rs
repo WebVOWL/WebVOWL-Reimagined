@@ -3,12 +3,16 @@ use thaw::*;
 
 #[component]
 pub fn OntologyButton() -> impl IntoView {
+    let show_ontology_menu =
+        use_context::<RwSignal<bool>>().expect("show_ontology_menu should be provided");
+
     view! {
         <ConfigProvider>
             <Button
                 class="work-bench-button"
                 shape=ButtonShape::Square
                 icon=icondata::BiMenuRegular
+                on_click=move |_| show_ontology_menu.update(|val| *val = !*val)
             ></Button>
         </ConfigProvider>
     }

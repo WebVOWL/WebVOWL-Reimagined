@@ -15,7 +15,7 @@
     z-index: 10;
 }
 
-
+/* A lot of cursed css that needs to be fixed later */
 .work-bench-button {
     width: 100%;
     height: 50px;
@@ -51,12 +51,105 @@
     border: none;
     transition: background-color 0.3s, transform 0.2s;
     position: absolute;
-    bottom: 1.5rem;
+    bottom: 0.5rem;
     left: 0.5rem;
 }
 
+.ontology-menu {
+    position: fixed;
+    top: 0;
+    left: 3%;
+    width: 15%;
+    height: 100vh;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    padding: 1rem;
+    z-index: 15;
+    overflow-y: auto;
+}
+
+.ontology-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #34495e;
+}
+
+.ontology-menu-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #ecf0f1;
+}
+
+.ontology-menu-content .thaw-config-provider{
+    display: flex;
+    background-color: rgb(24, 32, 42);
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ontology-menu-item {
+    width: 100%;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: 1px solid #34495e;
+    padding: 0.75rem;
+    text-align: left;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.custom-ontology-section {
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #34495e;
+    border-bottom: 1px solid #34495e;
+}
+
+.custom-ontology-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #ecf0f1;
+}
+
+.custom-ontology-section input {
+    margin: 0;
+    border: 1px solid #34495e;
+    height: 1.5rem;
+}
+
+.custom-ontology-section button {
+    margin: 0;
+}
+
+.ontology-input-label {
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 500;
+}
 
 
+.ontology-dropdown {
+    width: 100%;
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: 1px solid #34495e;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.ontology-dropdown select {
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: none;
+    width: 100%;
+}
+/* End of cursed css */
 .locateButton {
     font-size: 2rem;
 }
