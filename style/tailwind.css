@@ -1,51 +1,64 @@
 @import "tailwindcss";
-.bottom-bar {
+.work-bench {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
-    width: 78%;
+    width: 3%;
+    height: 100vh;
     background-color: rgb(24, 32, 42);
     padding: 0.5rem;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     gap: 0.5rem;
     z-index: 10;
 }
 
-.bottom-bar button {
+
+.work-bench-button {
+    width: 100%;
+    height: 50px;
     background-color: rgb(24, 32, 42);
-    color: #ffffff;
+    color: #ecf0f1;
     border: none;
-    padding: 0.5rem 1rem;
-    outline: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
-.bottom-bar button:hover {
-    background-color: #34495e;
+.work-bench-button-bottom-1 {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: none;
+    transition: background-color 0.3s, transform 0.2s;
+    position: absolute;
+    bottom: 3rem;
+    left: 0.5rem;
+}
+.work-bench-button-bottom-2 {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: none;
+    transition: background-color 0.3s, transform 0.2s;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0.5rem;
 }
 
-.bottom-bar button:focus {
-    outline: none; /* Remove outline on focus */
-    box-shadow: none; /* Remove any focus shadow */
-}
 
-.bottom-bar input {
-    background-color: #ffffff;
-}
 
 .locateButton {
     font-size: 2rem;
-}
-
-.bottom-bar input::placeholder {
-    color: #95a5a6;
-}
-
-.ontology-menu {
-    font-size: 14px;
-    width: 22%;
-    height: 28px;
 }
 
 .sidebar {
@@ -201,10 +214,14 @@
     pointer-events: none;
 }
 
-.zoomslider {
+.zoom-slider {
     width: 28px;
     cursor: pointer;
     position: absolute;
     right: 23%;
     bottom: 8%;
+}
+
+.zoom-slider .thaw-slider__thumb {
+    background-color: #ff0000;
 }

@@ -1,18 +1,7 @@
 use leptos::prelude::*;
 use leptos_meta::*;
-use crate::components::menu::ontology_menu::OntologyMenu;
-use crate::components::buttons::search::SearchButton;
-use crate::components::buttons::locate_button::LocateButton;
-use crate::components::menu::export_menu::ExportMenu;
-use crate::components::menu::filter_menu::FilterMenu;
-use crate::components::menu::options_menu::OptionsMenu;
-use crate::components::menu::modes_menu::ModesMenu;
-use crate::components::buttons::reset_button::ResetButton;
-use crate::components::buttons::pause_button::PauseButton;
-use crate::components::menu::about_menu::AboutMenu;
 use crate::components::menu::side_bar::*;
-use crate::components::zoom_slider::ZoomSlider;
-
+use crate::components::buttons::work_bench_buttons::*;
 
 #[component]
 pub fn Home() -> impl IntoView {
@@ -43,27 +32,13 @@ pub fn Home() -> impl IntoView {
                 >
                     {move || if sidebar_open.get() { ">" } else { "<" }}
                 </button>
-                <div class={move || {
-                    if is_first_load.get() {
-                        if sidebar_open.get() {
-                            "bottom-bar bottombar-collapse"
-                        } else {
-                            "bottom-bar bottombar-expand"
-                        }
-                    } else {
-                        "bottom-bar"
-                    }
-                }}>
+                <div class="work-bench">
+                    <OntologyButton />
                     <SearchButton />
-                    <LocateButton />
-                    <OntologyMenu />
-                    <ExportMenu />
-                    <FilterMenu />
-                    <OptionsMenu />
-                    <ModesMenu />
-                    <ResetButton />
-                    <PauseButton />
-                    <AboutMenu />
+                    <FilterButton />
+                    <ExportButton />
+                    <OptionsButton />
+                    <AboutButton />
                 </div>
                 <div class={move || {
                     if is_first_load.get() {
@@ -92,7 +67,6 @@ pub fn Home() -> impl IntoView {
                         <SelectionDetails />
                     </div>
                 </div>
-                <ZoomSlider />
             </div>
         </main>
     }
