@@ -17,6 +17,7 @@ pub fn hydrate() {
     use crate::app::App;
     use leptos::leptos_dom::logging::console_log;
     console_error_panic_hook::set_once();
+    console_log::init_with_level(log::Level::Info).expect("error initializing logge");
     leptos::mount::hydrate_body(App);
     console_log("Hydration complete");
 }
