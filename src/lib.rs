@@ -1,5 +1,3 @@
-use log::info;
-
 #[cfg(feature = "wasm")]
 pub use grapher::web::init_render;
 
@@ -18,6 +16,7 @@ pub mod pages;
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use crate::app::App;
+    use log::info;
     console_error_panic_hook::set_once();
     console_log::init_with_level(log::Level::Info).expect("error initializing logge");
     leptos::mount::hydrate_body(App);
