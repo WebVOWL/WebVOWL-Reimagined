@@ -18,6 +18,7 @@ pub fn Home() -> impl IntoView {
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
+            <canvas id="canvas" width=800 height=600 />
             <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
                 <button
                     class=move || {
@@ -45,35 +46,35 @@ pub fn Home() -> impl IntoView {
                     <AboutButton />
                 </div>
 
-                <OntologyMenu />
+            // <OntologyMenu />
 
-                <div class=move || {
-                    if is_first_load.get() {
-                        if sidebar_open.get() {
-                            "sidebar sidebar-expand"
-                        } else {
-                            "sidebar sidebar-collapse sidebar-collapsed"
-                        }
-                    } else {
-                        if sidebar_open.get() {
-                            "sidebar"
-                        } else {
-                            "sidebar sidebar-collapsed"
-                        }
-                    }
-                }>
-                    <div class="sidebar-content">
-                        <p class="ontology-title">{displayed_title}</p>
-                        <OntologyIri />
-                        <Version />
-                        <Author />
-                        <Language />
-                        <Description />
-                        <MetaData />
-                        <Statistics />
-                        <SelectionDetails />
-                    </div>
-                </div>
+            // <div class=move || {
+            // if is_first_load.get() {
+            // if sidebar_open.get() {
+            // "sidebar sidebar-expand"
+            // } else {
+            // "sidebar sidebar-collapse sidebar-collapsed"
+            // }
+            // } else {
+            // if sidebar_open.get() {
+            // "sidebar"
+            // } else {
+            // "sidebar sidebar-collapsed"
+            // }
+            // }
+            // }>
+            // <div class="sidebar-content">
+            // <p class="ontology-title">{displayed_title}</p>
+            // <OntologyIri />
+            // <Version />
+            // <Author />
+            // <Language />
+            // <Description />
+            // <MetaData />
+            // <Statistics />
+            // <SelectionDetails />
+            // </div>
+            // </div>
             </div>
         </main>
     }
