@@ -83,7 +83,7 @@
     color: #ecf0f1;
 }
 
-.ontology-menu-content .thaw-config-provider{
+.ontology-menu-content .thaw-config-provider {
     display: flex;
     background-color: rgb(24, 32, 42);
     flex-direction: column;
@@ -131,7 +131,6 @@
     color: #bdc3c7;
     font-weight: 500;
 }
-
 
 .ontology-dropdown {
     width: 100%;
@@ -217,13 +216,13 @@
     text-align: left;
 }
 
-.accordion{
+.accordion {
     background-color: rgb(24, 32, 42);
     color: #ecf0f1;
     border-bottom: #34495e 1px solid;
 }
 
-.thaw-accordion-header__button{
+.thaw-accordion-header__button {
     color: #ecf0f1;
 }
 
@@ -235,8 +234,7 @@
     color: #ecf0f1;
 }
 
- 
-.accordion-section-content{
+.accordion-section-content {
     font-size: 0.9rem;
     line-height: 1.3;
     text-align: left;
@@ -244,12 +242,20 @@
 }
 
 @keyframes sidebar-collapse {
-    0% { width: 22%; }
-    100% { width: 0%; }
+    0% {
+        width: 22%;
+    }
+    100% {
+        width: 0%;
+    }
 }
 @keyframes sidebar-expand {
-    0% { width: 0%; }
-    100% { width: 22%; }
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 22%;
+    }
 }
 .sidebar-collapse {
     animation: sidebar-collapse 0.5s forwards;
@@ -259,12 +265,20 @@
 }
 
 @keyframes bottombar-expand {
-    0% { width: 78%; }
-    100% { width: 100%; }
+    0% {
+        width: 78%;
+    }
+    100% {
+        width: 100%;
+    }
 }
 @keyframes bottombar-collapse {
-    0% { width: 100%; }
-    100% { width: 78%; }
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 78%;
+    }
 }
 .bottombar-expand {
     animation: bottombar-expand 0.5s forwards;

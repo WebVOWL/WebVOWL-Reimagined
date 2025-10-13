@@ -1,14 +1,16 @@
 #!/bin/bash
 
-modes=("dev" "preview" "release")
+modes=("dev" "preview" "release" "binary")
 commands=(
     "RUST_LOG=info cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
+    "RUST_LOG=info cargo leptos watch --release --precompress -v"
     "RUST_LOG=info cargo leptos build --release --precompress -v"
     )
 help=(
     "Builds WebVOWL in development mode and runs it on a local server"
     "Builds WebVOWL in production mode but with debug info and runs it on a local server"
+    "Builds WebVOWL in production mode and runs it on a local server"
     "Builds WebVOWL in production mode, ready for deployment"
     )
 
