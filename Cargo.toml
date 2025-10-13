@@ -71,6 +71,7 @@
         "leptos/ssr",
         "leptos_meta/ssr",
         "leptos_router/ssr",
+        "thaw/ssr"
     ]
     wasm=[
         "dep:console_error_panic_hook",
@@ -102,8 +103,7 @@
                 "ssr",
                 "hydrate",
             ],
-            [
-            ],
+            [],
         ]
 
 # Default profile for devs, fast to compile, okay enough to run
