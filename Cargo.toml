@@ -26,7 +26,7 @@
     getrandom={version="0.3", features=["wasm_js"]}
     http={version="1.3.1", optional=true}
     icondata="0.6.0"
-    leptos={version="0.8.8", features=["nightly", "rkyv"]}
+    leptos={version="0.8.8", features=["nightly"]}
     leptos_actix={version="0.8.5", optional=true}
     leptos_meta={version="0.8.5"}
     leptos_router={version="0.8.6", features=["nightly"]}
@@ -141,7 +141,7 @@
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
     inherits="release"
-    opt-level='z'
+    # opt-level='z'
     strip=true
 
 
@@ -153,20 +153,22 @@
             # Monomorphization of functions to increase performance significantly (~2x)
             # at the cost of file size.
             # https://github.com/WebAssembly/binaryen/wiki/Optimizer-Cookbook#monomorphization
-            # "-O3",
-            # "--monomorphize",
-            # "--pass-arg=monomorphize-min-benefit@50",
-            # # -O4 optimizes very aggressively for performance at the cost of compile time.
-            # # https://github.com/WebAssembly/binaryen/blob/c62a0c97168e88f97bca4bd96298a5ffc041844d/test/lit/help/wasm-opt.test#L539
-            # "-O4",
+            "-O3",
+            "--monomorphize",
+            "--pass-arg=monomorphize-min-benefit@50",
+            # -O4 optimizes very aggressively for performance at the cost of compile time.
+            # https://github.com/WebAssembly/binaryen/blob/c62a0c97168e88f97bca4bd96298a5ffc041844d/test/lit/help/wasm-opt.test#L539
+            "-O4",
 
             # Reduce file size in multiple passes (disabled in favor of speed)
             # https://github.com/WebAssembly/binaryen/wiki/Optimizer-Cookbook#converge
-            "--converge",
-            "-Oz",
+            # "--converge",
+            # "-Oz",
 
             "--enable-bulk-memory",
             "--enable-nontrapping-float-to-int",
+            "--enable-simd",
+            "--enable-threads",
         ]
         # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
         output-name="webvowl"
