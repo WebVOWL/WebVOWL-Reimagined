@@ -1,14 +1,179 @@
-.info-bar {
+.work-bench {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 3%;
+    height: 100vh;
+    background-color: rgb(24, 32, 42);
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+/* A lot of cursed css that needs to be fixed later */
+.work-bench-button {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.work-bench-button-bottom-1 {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: none;
+    transition: background-color 0.3s, transform 0.2s;
+    position: absolute;
+    bottom: 3rem;
+    left: 0.5rem;
+}
+.work-bench-button-bottom-2 {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: none;
+    transition: background-color 0.3s, transform 0.2s;
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0.5rem;
+}
+
+.ontology-menu {
+    position: fixed;
+    top: 0;
+    left: 3.5%;
+    width: 20%;
+    height: 100vh;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    padding: 1rem;
+    z-index: 15;
+    overflow-y: auto;
+}
+
+.ontology-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #34495e;
+}
+
+.ontology-menu-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #ecf0f1;
+}
+
+.ontology-menu-content .thaw-config-provider {
+    display: flex;
+    background-color: rgb(24, 32, 42);
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ontology-menu-item {
+    width: 100%;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border: 1px solid #34495e;
+    padding: 0.75rem;
+    text-align: left;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.custom-ontology-section {
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #34495e;
+    border-bottom: 1px solid #34495e;
+}
+
+.custom-ontology-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #ecf0f1;
+}
+
+.ontology-url-input {
+    margin: 0;
+    border: 1px solid #34495e;
+    height: 1.5rem;
+    width: 100%;
+}
+
+.ontology-sparql-input {
+    margin: 0;
+    border: 1px solid #34495e;
+    height: 15rem;
+    resize: vertical;
+    width: 100%;
+}
+
+.custom-ontology-section button {
+    margin: 0;
+    border: 1px solid #34495e;
+    height: 2rem;
+}
+
+.ontology-input-label {
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 500;
+}
+
+.ontology-dropdown {
+    width: 100%;
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: 1px solid #34495e;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.ontology-dropdown select {
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: none;
+    width: 100%;
+}
+/* End of cursed css */
+.locateButton {
+    font-size: 2rem;
+}
+
+.sidebar {
     position: fixed;
     top: 0;
     right: 0;
     width: 22%;
     height: 100vh;
     background-color: rgb(24, 32, 42);
-    border-left: 1px solid #34495e;
     color: #ecf0f1;
     padding: 0.1rem;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .ontology-title {
@@ -19,51 +184,162 @@
     border-bottom: 1px solid #34495e;
 }
 
-/* Language dropdown button styling */
-.language-button {
-    width: auto;
-    min-width: 120px;
-    max-width: 150px;
-    padding: 0.5rem;
-    margin: 0.5rem;
+.sidebar-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border-bottom: 1px solid #34495e;
+}
+
+.ontology-link {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.ontology-link:hover {
+    text-decoration: underline;
+}
+
+.language-button.thaw-select {
+    width: 90px;
+    height: 25px;
+}
+
+.language-button.thaw-select .thaw-select__select {
+    width: 100%;
+    height: 100%;
     background-color: #34495e;
     border: 1px solid #455d75;
     border-radius: 4px;
     color: #ecf0f1;
-    cursor: pointer;
     font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    justify-content: flex-end;
+    text-align: left;
 }
 
-.language-button:hover {
-    background-color: #455d75;
+.accordion {
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
+    border-bottom: #34495e 1px solid;
 }
 
-/* Text area sections with borders */
-.info-section {
-    padding: 0.5rem 0;
-    font-size: 0.9rem;
-    margin: 0.5rem 0;
-    text-align: center;
-    border-bottom: 1px solid #34495e;
+.thaw-accordion-header__button {
     color: #ecf0f1;
 }
 
 .accordion-header {
     font-size: 1.1rem;
     padding: 0.5rem;
-    cursor: pointer;
+    background-color: rgb(24, 32, 42);
+    border: none;
     color: #ecf0f1;
 }
 
-.locateButton {
-    font-size: 2rem;
-}
-
-.info-section-content {
-    padding: 0.5rem;
+.accordion-section-content {
     font-size: 0.9rem;
     line-height: 1.3;
     text-align: left;
-    background-color: rgb(24, 32, 42);
     color: #ecf0f1;
 }
+
+@keyframes sidebar-collapse {
+    0% {
+        width: 22%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+@keyframes sidebar-expand {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 22%;
+    }
+}
+.sidebar-collapse {
+    animation: sidebar-collapse 0.5s forwards;
+}
+.sidebar-expand {
+    animation: sidebar-expand 0.5s forwards;
+}
+
+@keyframes bottombar-expand {
+    0% {
+        width: 78%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+@keyframes bottombar-collapse {
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 78%;
+    }
+}
+.bottombar-expand {
+    animation: bottombar-expand 0.5s forwards;
+}
+.bottombar-collapse {
+    animation: bottombar-collapse 0.5s forwards;
+}
+
+.toggle-sidebar-btn {
+    position: fixed;
+    height: 24px;
+    width: 24px;
+    top: 5%;
+    right: 22%;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    transition: right 0.5s;
+    z-index: 101;
+}
+
+.toggle-sidebar-btn-collapsed {
+    right: 0%;
+}
+
+.toggle-sidebar-btn:hover {
+    background-color: #d90;
+}
+
+.sidebar-content {
+    transition: opacity 0.4s, transform 0.4s;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-collapse .sidebar-content {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.zoom-slider {
+    width: 28px;
+    cursor: pointer;
+    position: absolute;
+    right: 23%;
+    bottom: 8%;
+}
+
+.zoom-slider .thaw-slider__thumb {
+    background-color: #ff0000;
+}
+

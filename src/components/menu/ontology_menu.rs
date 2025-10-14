@@ -25,7 +25,7 @@ pub fn OntologyMenu() -> impl IntoView {
                 </div>
                 <div class="ontology-menu-content">
                     <ConfigProvider>
-                        <p class="ontology-section">"Select Ontology:"</p>
+                        <p class="ontology-input-label">"Select Ontology:"</p>
                         <Select class="ontology-dropdown" value=selected_ontology>
                             {move || {
                                 vec![
@@ -50,13 +50,15 @@ pub fn OntologyMenu() -> impl IntoView {
                     <div class="custom-ontology-section">
                         <h4>"Custom Ontology:"</h4>
                         <p class="ontology-input-label">"From URL:"</p>
-                        <Input placeholder="Enter ontology IRI" />
+                        <Input class="ontology-url-input" placeholder="Enter ontology IRI" />
                         <p class="ontology-input-label">"From File:"</p>
                         <Upload>
                             <Button class="ontology-menu-item">
                                 "Select ontology file"
                             </Button>
                         </Upload>
+                        <p class="ontology-input-label">"SPARQL Query:"</p>
+                        <Textarea class="ontology-sparql-input" placeholder="Enter SPARQL query"/>
                     </div>
                 </div>
             </div>
