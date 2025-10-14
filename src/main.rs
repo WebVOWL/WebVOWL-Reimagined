@@ -1,5 +1,6 @@
 mod app;
 mod hydration_scripts;
+mod network;
 
 use crate::HydrationScripts as Hydro;
 use crate::app::App;
@@ -10,6 +11,8 @@ use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 use log::info;
+use actix_web::{web, App, HttpServer};
+use network::{NetworkModule, fetch_handler};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -21,6 +24,8 @@ async fn main() -> std::io::Result<()> {
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
+
+    let network = web::Data::new(NetworkModule::new());
 
     HttpServer::new(move || {
         // Generate the list of routes in your Leptos App
@@ -63,6 +68,8 @@ async fn main() -> std::io::Result<()> {
                     .add(("Cross-Origin-Opener-Policy", "same-origin"))
                     .add(("Cross-Origin-Embedder-Policy", "require-corp")),
             )
+            .app_data(network.clone())
+            .route("/fetch", web::get().to(fetch_handler))
     })
     .bind(&addr)?
     .run()
