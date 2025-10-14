@@ -1,3 +1,5 @@
+#![recursion_limit = "4096"]
+
 use actix_files::Files;
 use actix_web::*;
 use env_logger::Env;

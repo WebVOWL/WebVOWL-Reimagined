@@ -1,3 +1,5 @@
+#![recursion_limit = "4096"]
+
 #[cfg(feature = "wasm")]
 pub use grapher::web::init_render;
 
