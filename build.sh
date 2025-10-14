@@ -2,10 +2,10 @@
 
 modes=("dev" "preview" "release" "binary")
 commands=(
-    "RUST_LOG=info cargo leptos watch --wasm-debug -v"
-    "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
-    "RUST_LOG=info cargo leptos watch --release --precompress -v"
-    "RUST_LOG=info cargo leptos build --release --precompress -v"
+    "cargo update && RUST_LOG=info cargo leptos watch --wasm-debug -v"
+    "cargo update && RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
+    "cargo update && RUST_LOG=info cargo leptos watch --release --precompress -v"
+    "cargo update && RUST_LOG=info cargo leptos build --release --precompress -vv"
     )
 help=(
     "Builds WebVOWL in development mode and runs it on a local server"
