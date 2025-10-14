@@ -1,10 +1,9 @@
 # This config uses (unstable) features to improve compile times.
 #
-# "-fuse-ld=lld"
-# One of the slowest aspects of compiling large Rust programs is the linking time. This file configures LLD as
-# an alternate linker that may improve build times. LLD is a linker from the LLVM project that supports
-# Linux, Windows, macOS, and Wasm.
-# https://lld.llvm.org/
+# "-fuse-ld=mold"
+# One of the slowest aspects of compiling large Rust programs is the linking time. This file configures Mold as
+# an alternate linker that significantly improves linking time.
+# https://github.com/rui314/mold
 #
 # "-Zshare-generics=y"
 # Unstable. Make the current crate share its generic instantiations
@@ -45,20 +44,22 @@
     rustflags=[
         "-Ctarget-feature=+crt-static",
         "-Clinker-plugin-lto",
-        "-Clink-arg=-fuse-ld=lld",
+        "-Clink-arg=-fuse-ld=mold",
         "-Clink-arg=-flto",
     ]
 
 # Local dev server
 [target.x86_64-unknown-linux-gnu]
     linker="clang"
-    rustflags=["-Clink-arg=-fuse-ld=lld"]
+    rustflags=["-Clink-arg=-fuse-ld=mold"]
 
 # Frontend of program
 [target.wasm32-unknown-unknown]
     rustflags=[
         "-Clink-arg=--max-memory=4294967296",
         "-Ctarget-feature=+atomics",
+        '--cfg',
+        'getrandom_backend="wasm_js"',
     ]
 
 [unstable]

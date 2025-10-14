@@ -1,0 +1,23 @@
+@use "canvas";
+@use "test";
+
+body {
+    background: rgb(24, 32, 42);
+    font-size: 14px;
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    // line-height: 1;
+    margin: 0;
+    // overflow: hidden;
+    padding: 0;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+}
+
+main {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}

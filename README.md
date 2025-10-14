@@ -2,10 +2,6 @@
 
 This branch tracks development of WebVOWL Reimagined, which is a total rewrite of WebVOWL in Rust.
 
-The rewrite must satisfy the following:
-
--   The GUI must be similar to the [original WebVOWL](https://github.com/VisualDataWeb/WebVOWL)
-
 ## Run using Docker
 
 Pull image: `docker pull ghcr.io/webvowl/webvowl-reimagined:latest`
@@ -28,7 +24,7 @@ Or use the [docker compose file](/docker-compose.yml) with command `docker-compo
 
 0. Clone the project locally, e.g. `git clone https://github.com/WebVOWL/WebVOWL-Reimagined.git`
 1. Install Rust from [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
-2. Install the LLD linker, e.g. `dnf install lld`
+2. Install the mold linker, e.g. `dnf install mold`
 3. Run `cargo install leptosfmt`
 4. Run `cargo install --locked cargo-leptos --version 0.2.42`
     > If you get a compile error `Can't locate FindBin.pm in @INC` you can either install Perl (e.g. `dnf install perl`) or [download a prebuilt binary](https://github.com/leptos-rs/cargo-leptos/releases/latest)

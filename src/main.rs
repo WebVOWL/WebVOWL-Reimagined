@@ -1,9 +1,3 @@
-mod app;
-mod hydration_scripts;
-mod network;
-
-use crate::HydrationScripts as Hydro;
-use crate::app::App;
 use actix_files::Files;
 use actix_web::*;
 use env_logger::Env;
@@ -11,6 +5,8 @@ use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 use log::info;
+use webvowl_reimagined::app::App;
+use webvowl_reimagined::hydration_scripts::HydrationScripts as Hydro;
 use actix_web::{web, App, HttpServer};
 use network::{NetworkModule, fetch_handler};
 
@@ -50,7 +46,7 @@ async fn main() -> std::io::Result<()> {
                                     content="width=device-width, initial-scale=1"
                                 />
                                 <meta apple-mobile-web-app-capable="yes" />
-                                // <AutoReload options=leptos_options.clone() />
+                                <AutoReload options=leptos_options.clone() />
                                 <Hydro options=leptos_options.clone() />
                                 <MetaTags />
                             </head>

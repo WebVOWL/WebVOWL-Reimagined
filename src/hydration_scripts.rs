@@ -5,6 +5,7 @@ use std::{path::PathBuf, sync::OnceLock};
 /// Inserts hydration scripts that add interactivity to your server-rendered HTML.
 ///
 /// This should be included in the `<head>` of your application shell.
+#[allow(dead_code)]
 #[component]
 pub fn HydrationScripts(
     /// Configuration options for this project.
@@ -35,6 +36,7 @@ pub fn HydrationScripts(
         let manifest = WasmSplitManifest(ArcStoredValue::new((
             format!("{root}/{pkg_dir}"),
             serde_json::from_str(&file).expect("could not read manifest file"),
+            format!("__wasm_split_manifest.json"),
         )));
 
         Some(manifest)
