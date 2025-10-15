@@ -9,6 +9,7 @@ commands=(
     "RUST_LOG=info cargo leptos build --release --precompress -vv"
     )
 help=(
+    "Builds WebVOWL in development mode (without debug info) and runs it on a local server. This is significantly faster than "dev""
     "Builds WebVOWL in development mode and runs it on a local server"
     "Builds WebVOWL in production mode but with debug info and runs it on a local server"
     "Builds WebVOWL in production mode and runs it on a local server"
