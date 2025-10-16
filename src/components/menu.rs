@@ -5,3 +5,4 @@ pub mod options_menu;
 pub mod modes_menu;
 pub mod about_menu;
 pub mod side_bar;
+pub mod search_menu;

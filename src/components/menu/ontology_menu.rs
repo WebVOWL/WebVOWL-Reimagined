@@ -1,28 +1,28 @@
 use leptos::prelude::*;
 use thaw::*;
+use crate::pages::home::*;
 
 #[component]
 pub fn OntologyMenu() -> impl IntoView {
     let ontologytitle =
         use_context::<RwSignal<String>>().expect("ontologytitle should be provided");
-    let show_ontology_menu =
-        use_context::<RwSignal<bool>>().expect("show_ontology_menu should be provided");
-
-    // Create a signal to track the selected ontology
+    let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
     let selected_ontology = RwSignal::new("Friend of a Friend (FOAF) vocabulary".to_string());
-
-    // Watch for changes in selected_ontology and update the title
     Effect::new(move |_| {
         let selected = selected_ontology.get();
         ontologytitle.set(selected);
     });
-
     view! {
-        <Show when=move || show_ontology_menu.get()>
-            <div class="ontology-menu">
-                <div class="ontology-menu-header">
-                    <h3>"Select Ontology"</h3>
-                </div>
+        <div class=move || {
+            if show_ontology_menu.get() {
+                "ontology-menu"
+            } else {
+                "ontology-menu menu-hidden"
+            }
+        }>
+            <div class="ontology-menu-header">
+                <h3>"Select Ontology"</h3>
+            </div>
                 <div class="ontology-menu-content">
                     <ConfigProvider>
                         <p class="ontology-input-label">"Select Ontology:"</p>
@@ -46,7 +46,6 @@ pub fn OntologyMenu() -> impl IntoView {
                             }}
                         </Select>
                     </ConfigProvider>
-
                     <div class="custom-ontology-section">
                         <h4>"Custom Ontology:"</h4>
                         <p class="ontology-input-label">"From URL:"</p>
@@ -62,6 +61,5 @@ pub fn OntologyMenu() -> impl IntoView {
                     </div>
                 </div>
             </div>
-        </Show>
     }
 }

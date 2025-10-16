@@ -1,11 +1,12 @@
 use leptos::prelude::*;
 use thaw::*;
+use leptos::logging::log;
+use crate::pages::home::*;
 
 #[component]
 pub fn OntologyButton() -> impl IntoView {
-    let show_ontology_menu =
-        use_context::<RwSignal<bool>>().expect("show_ontology_menu should be provided");
-
+    let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
+    let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
     view! {
         <ConfigProvider>
             <Button
@@ -19,12 +20,15 @@ pub fn OntologyButton() -> impl IntoView {
 }
 
 pub fn SearchButton() -> impl IntoView {
+    let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
+    let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
     view! {
         <ConfigProvider>
             <Button
                 class="work-bench-button"
                 shape=ButtonShape::Square
                 icon=icondata::AiSearchOutlined
+                on_click=move |_| show_search_menu.update(|val| *val = !*val)
             ></Button>
         </ConfigProvider>
     }
