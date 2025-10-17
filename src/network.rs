@@ -1,4 +1,4 @@
-use actix_web::{HttpResponse, web, Responder};
+use actix_web::{HttpResponse, web};
 use reqwest::Client;
 use std::{collections::HashMap, fs, path::Path};
 
@@ -8,12 +8,15 @@ pub struct NetworkModule {
     client: Client,
 }
 
+
+// Represents the different endpoints needed
 #[derive(Debug, Clone)]
 pub enum NetworkEndpoint {
-    Local(String),
-    Remote(String),
+    Local(String), // path
+    Remote(String), // url 
     SPARQL {endpoint: String, query: String},
 }
+
 
 #[derive(Debug, Clone)]
 pub enum DataType {
@@ -22,7 +25,7 @@ pub enum DataType {
     RDF,
     SPARQLJSON,
     SPARQLXML,
-    UNKNOWN,
+    UNKNOWN, // fallback when type cant be determined
 }
 
 
@@ -33,12 +36,15 @@ impl DataType {
             "owl" => Self::OWL,
             "ttl" => Self::TTL,
             "rdf" => Self::RDF,
-            "sqarql" => Self::SPARQLJSON,
+            "sparql" => Self::SPARQLJSON,
             _ => Self::UNKNOWN,
         }
     }
 
-    pub fn mime_type(&self) -> &'static str {
+
+    // labels the data
+    // Fixed string literals called by reference as to not allocate new memory each time the function is called
+    pub fn mime_type(&self) -> &'static str { 
         match self {
             Self::OWL => "application/owl+xml",
             Self::TTL => "text/turtle",
@@ -52,52 +58,70 @@ impl DataType {
 
 
 impl NetworkModule {
+    // constructor
     pub fn new() -> Self {
         Self {
             client: Client::new(),
         }
     }
 
-    pub async fn fetch_response(&self, source: NetworkEndpoint) -> impl Responder {
-        // 1: Fetch the data
-        let fetch_result: Result<(DataType, String), String> = match source {
-            NetworkEndpoint::Local(path) => {
-                let content = fs::read_to_string(&path) 
-                    .map(|e| format!("Error reading local file: {e}"))?;
-                let dtype = Path::new(&path)
-                    .extension()
-                    .and_then(|e| e.to_str())
-                    .map(DataType::RDF);
-                Ok((dtype, content))
+    // Determines what datatype the given data at the endpoint is 
+    // example: is it OWL, TTL, RDF, etc. the local endpoint is given?
+    fn find_data_type(path: &str) -> Option<DataType> {
+        Path::new(path)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(DataType::from_extension) // identifies the type from the file extension
+    }
+    
+    pub async fn retrieval_response(&self, source: NetworkEndpoint) -> HttpResponse {
+        // 1: retrieves the data
+        let result = match source { 
+            // Local reads file and calls for the datatype label and returns (label, data content)
+            NetworkEndpoint::Local(path) => { 
+                match fs::read_to_string(&path) {
+                    Ok(content) => Ok((Self::find_data_type(&path).unwrap_or(DataType::RDF), content)),
+                    Err(e) => Err(format!("Error reading local file: {}", e))
+                } 
             }
 
-            NetworkEndpoint::Remote(url) => {
-                let resp = self.client.get(&url).send().await 
-                    .map_err(|e| format!("Error fetching remote URL: {e}"))?;
-                let text = resp.text().await
-                    .map_err(|e| format!("Error reading remote response text: {e}"))?;
-                let dtype = Path::new(&url)
-                    .extension()
-                    .and_then(|e| e.to_str())
-                    .map(DataType::RDF);
-                Ok((dtype, content))
+
+            // Remote requests an URL waits for an answer and calls for the datatype label and returns (label, data content)
+            NetworkEndpoint::Remote(url) => { 
+                match self.client.get(&url).send().await {
+                    Ok(resp) => match resp.text().await {
+                        Ok(text) => Ok((Self::find_data_type(&url).unwrap_or(DataType::RDF), text)),
+                        Err(e) => Err(format!("Error reading remote response text: {}", e)),
+                    },
+                    Err(e) => Err(format!("Error retrieving remote URL: {}", e)),
+                }
             }
 
-            NetworkEndpoint::SPARQL { endpoint, query } => {
-                let resp = self.client
+
+            // SPARQL requests the URL and puts the query itself in the request body and calls for the datatype label and returns (label, query)
+            NetworkEndpoint::SPARQL { endpoint, query } => { 
+                let accept_type = DataType::SPARQLJSON.mime_type(); //default
+
+                match self.client
                     .post(&endpoint)
-                    .header("Accept", DataType::SPARQLJSON.mime_type())
+                    .header("Accept", accept_type)
                     .form (&[("query", query)])
                     .send()
-                    .await 
-                    .map_err(|e| format!("Error querying SPARQL endpoint: {e}"))?;
-                let text = resp.text().await
-                    .map_err(|e| format!("Error reading SPARQL response: {e}"))?;
-                Ok((DataType::SPARQLJSON, text))
+                    .await {
+                        Ok(resp) => match resp.text().await {
+                            Ok(text) => Ok((if accept_type.contains("xml"){
+                                DataType::SPARQLXML
+                            } else {
+                                DataType::SPARQLJSON
+                            }, text)),
+                            Err(e) => Err(format!("Error reading SPARQL response: {}", e)),
+                        },
+                        Err(e) => Err(format!("Error querying SPARQL endpoint: {}", e))
+                    }
             }
         };
 
-        // 2: Handle result 
+        // 2: Handles response result so (datatype label, data content)
         match result {
             Ok((dtype, content)) => {
 
@@ -113,10 +137,10 @@ impl NetworkModule {
 }
 
 
-pub async fn fetch_handler(
-    query: web::Query<HashMap<String, String>>, 
-    data: web::Data<NetworkModule>
-) -> impl Responder {
+pub async fn retrieval_handler(
+    query: web::Query<HashMap<String, String>>, // turns URL into query parameters (endpoint, data)
+    data: web::Data<NetworkModule> // shared instance so we only have one NetworkModule with client shared by all users.
+) -> HttpResponse {
     // Determine datatype of source
     let source = if let Some(path) = query.get("local"){
         NetworkEndpoint::Local(path.clone())
@@ -125,6 +149,10 @@ pub async fn fetch_handler(
         NetworkEndpoint::Remote(url.clone())
 
     }   else if let (Some(endpoint), Some(q)) = (query.get("sparql_endpoint"), query.get("sparql_query")) {
+        let dtype = query.get("format")
+            .map(|f| if f.to_lowercase() == "xml" {DataType::SPARQLXML} else {DataType::SPARQLJSON})
+            .unwrap_or(DataType::SPARQLJSON);
+        
         NetworkEndpoint::SPARQL { 
             endpoint: endpoint.clone(), 
             query: q.clone() 
@@ -135,6 +163,6 @@ pub async fn fetch_handler(
         
     };
 
-    // Fetch and Parse data
-    data.fetch_respone(source).await
+    // Retrieve and Parse data (takes the determined endpoint and passes it to retrieval_response)
+    data.retrieval_response(source).await 
 }
