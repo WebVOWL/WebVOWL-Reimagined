@@ -1,5 +1,7 @@
 use actix_files::Files;
+use actix_session::{SessionMiddleware, storage::RedisSessionStore};
 use actix_web::*;
+use actix_web::cookie::Key;
 use env_logger::Env;
 use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
@@ -7,8 +9,7 @@ use leptos_meta::MetaTags;
 use log::info;
 use webvowl_reimagined::app::App;
 use webvowl_reimagined::hydration_scripts::HydrationScripts as Hydro;
-use actix_web::{web, App, HttpServer};
-use network::{NetworkModule, fetch_handler};
+use webvowl_reimagined::session_handler::index;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -21,15 +22,33 @@ async fn main() -> std::io::Result<()> {
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
 
-    let network = web::Data::new(NetworkModule::new());
+    // When using `Key::generate()` it is important to initialize outside of the
+    // `HttpServer::new` closure. When deployed the secret key should be read from a
+    // configuration file or environment variables.
+    let secret_key = Key::generate();
+
+    let redis_store = RedisSessionStore::new("redis://127.0.0.1:6379")
+        .await
+        .unwrap();
+
+
 
     HttpServer::new(move || {
         // Generate the list of routes in your Leptos App
         let routes = generate_route_list(App);
         let leptos_options = &conf.leptos_options;
         let site_root = &leptos_options.site_root;
+        
 
         App::new()
+            // Add session management to your application using Redis for session state storage
+            .wrap(
+                SessionMiddleware::new(
+                    redis_store.clone(),
+                    secret_key.clone(),
+                )
+            )
+            .route("/counter", web::get().to(index))
             .leptos_routes(routes, {
                 let leptos_options = leptos_options.clone();
                 move || {
@@ -64,8 +83,6 @@ async fn main() -> std::io::Result<()> {
                     .add(("Cross-Origin-Opener-Policy", "same-origin"))
                     .add(("Cross-Origin-Embedder-Policy", "require-corp")),
             )
-            .app_data(network.clone())
-            .route("/fetch", web::get().to(fetch_handler))
     })
     .bind(&addr)?
     .run()

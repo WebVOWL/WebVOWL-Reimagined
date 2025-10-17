@@ -7,14 +7,17 @@ pub use grapher::web::init_render;
 #[cfg(feature = "wasm")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
+
 #[cfg(feature = "server")]
 pub mod network;
-
 
 pub mod app;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
+
+#[cfg(feature = "server")]
+pub mod session_handler;
 
 
 #[cfg(feature = "hydrate")]
