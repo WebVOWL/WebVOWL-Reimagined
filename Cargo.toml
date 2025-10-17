@@ -106,20 +106,15 @@
             ],
         ]
 
-# Default profile for devs, fast to compile, okay enough to run
+# Default profile for devs, fast to compile, okay enough to run.
 [profile.dev]
-    debug=true
-    debug-assertions=true
+    debug=false            # Set to false for faster compile time
+    debug-assertions=false # Set to false for faster compile time
     incremental=true
     lto=false
     opt-level=1
     overflow-checks=true
     panic="unwind"
-
-[profile.fastdev]
-    debug=false
-    debug-assertions=false
-    inherits="dev"
 
 # This profile is used for production releases - compile time doesn't matter.
 [profile.release]
