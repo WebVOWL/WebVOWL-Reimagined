@@ -108,8 +108,8 @@
 
 # Default profile for devs, fast to compile, okay enough to run.
 [profile.dev]
-    debug=false            # Set to false for faster compile time
-    debug-assertions=false # Set to false for faster compile time
+    debug=true            # Set to false for faster compile time
+    debug-assertions=true # Set to false for faster compile time
     incremental=true
     lto=false
     opt-level=1
