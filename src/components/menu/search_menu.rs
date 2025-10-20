@@ -9,25 +9,24 @@ pub fn SearchMenu() -> impl IntoView {
     view! {
         <div class=move || {
         if show_search_menu.get() {
-            "search-menu"
+            "workbench-menu"
         } else {
-            "search-menu menu-hidden"
+            "workbench-menu menu-hidden"
         }
         }>
-            <div class="search-menu-header">
+            <div class="workbench-menu-header">
                 <h3>"Search"</h3>
             </div>
-            <div class="search-menu-content">
-                <p class="ontology-input-label">"Enter search query:"</p>
+            <div class="workbench-menu-content">
+                <p class="workbench-input-label">"Enter search query:"</p>
                 <Input
-                    class="search-url-input"
+                    class="workbench-url-input"
                     placeholder="Enter search query"
                     value=search_query
                 />
-                <p class="ontology-input-label">"SPARQL Query:"</p>
-                <Textarea class="ontology-sparql-input" placeholder="Enter SPARQL query"/>
+                <p class="workbench-input-label">"SPARQL Query:"</p>
+                <Textarea class="workbench-sparql-input" placeholder="Enter SPARQL query"/>
             </div>
         </div>
     }
-
 }

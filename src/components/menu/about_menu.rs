@@ -1,28 +1,27 @@
-use leptos::*;
+use leptos::prelude::*;
 use thaw::*;
-
-
+use crate::pages::home::*;
 
 #[component]
 pub fn AboutMenu() -> impl IntoView {
-    let on_select = Box::new(|value: &str| leptos::logging::warn!("{}", value)); 
+    let ShowAboutMenu(show_about_menu) = use_context::<ShowAboutMenu>().expect("ShowAboutMenu should be provided");
     view! {
-        <ConfigProvider>
-            <Menu on_select trigger_type=MenuTriggerType::Hover position=MenuPosition::Top>
-                <MenuTrigger slot>
-                    <Button shape=ButtonShape::Square icon=icondata::AiCopyrightOutlined>"About"</Button>
-                </MenuTrigger>
-                <Button>"MIT License © 2014-2019"</Button>
-                <Caption1Strong>"WebVOWL Developers:"</Caption1Strong>
-                <Caption1Strong>"Vincent Link, Steffen Lohmann,
-                                Eduard Marbach, Stefan Negru, Vitalis Wiens"
-                </Caption1Strong>
-                <Button>"MIT License © 2025"</Button>
-                <Caption1Strong>"WebVOWL-Reimagined Developers:"</Caption1Strong>
-                <Caption1Strong>"Kneckerino, KristianEmilWN, nikarnik,TheRealMorgenfrue"</Caption1Strong>
-                <Button>"Version 1.3.9 (release history)"</Button>
-                <Button>"VOWL Specification »"</Button>
-            </Menu>
-        </ConfigProvider>
+        <div class=move || {
+        if show_about_menu.get() {
+            "workbench-menu"
+        } else {
+            "workbench-menu menu-hidden"
+        }
+        }>
+            <div class="workbench-menu-header">
+                <h3>"About"</h3>
+            </div>
+            <div class="workbench-menu-content">
+            <p class="workbench-menu-text">
+                "WebVOWL-Reimagined is an open-source ontology visualization tool developed to provide an enhanced user experience and improved performance over the original WebVOWL. It leverages modern web technologies to offer a more intuitive interface for exploring ontologies."
+            </p>
+            </div>
+        </div>
     }
+
 }

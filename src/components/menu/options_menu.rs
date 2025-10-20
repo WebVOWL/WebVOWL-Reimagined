@@ -1,37 +1,48 @@
 use leptos::prelude::*;
 use thaw::*;
+use crate::pages::home::*;
 
 
+
+use leptos::prelude::*;
+use thaw::*;
+use crate::pages::home::*;
 
 #[component]
 pub fn OptionsMenu() -> impl IntoView {
-    let zoomcheck = RwSignal::new(false);
-    let classdistancevalue = RwSignal::new(0.0);
-    let datatypedistancevalue = RwSignal::new(0.0);
-    let dynamiclabelcheck = RwSignal::new(false);
-    let maxlabelwidthvalue = RwSignal::new(0.0);
-    let nodescalingcheck = RwSignal::new(false);
-    let compactnotationcheck = RwSignal::new(false);
-    let colorexternalscheck = RwSignal::new(false);
-    let on_select = Box::new(|value: &str| leptos::logging::warn!("{}", value)); 
+    let ShowOptionsMenu(show_options_menu) = use_context::<ShowOptionsMenu>().expect("ShowOptionsMenu should be provided");
+    let search_query = RwSignal::new(String::new());
+    let class_distance_value = RwSignal::new(0.0);
+    let datatype_distance_value = RwSignal::new(0.0);
+    let dynamic_label_check = RwSignal::new(false);
+    let label_width_value = RwSignal::new(0.0);
+    let node_scaling_check = RwSignal::new(false);
+    let compact_notation_check = RwSignal::new(false);
+    let color_externals_check = RwSignal::new(false);
     view! {
-        <ConfigProvider>
-            <Menu on_select trigger_type=MenuTriggerType::Hover position=MenuPosition::Top>
-                <MenuTrigger slot>
-                    <Button shape=ButtonShape::Square icon=icondata::IoOptions>"Options"</Button>
-                </MenuTrigger>
-                <Checkbox checked=zoomcheck label="Zoom controls" />
-                <Slider value=classdistancevalue max=600.0 step=10.0 show_stops=false />
-                <Label>"Class Distance"</Label>
-                <Slider value=datatypedistancevalue max=600.0 step=10.0 show_stops=false />
-                <Label>"Datatype Distance"</Label>
-                <Checkbox checked=dynamiclabelcheck label="Dynamic labels" />
-                <Slider value=maxlabelwidthvalue max=600.0 step=10.0 show_stops=false />
-                <Label>"Max label width"</Label>
-                <Checkbox checked=nodescalingcheck label="Node scaling" />
-                <Checkbox checked=compactnotationcheck label= "Compact notation" />
-                <Checkbox checked=colorexternalscheck label="Color externals" />
-            </Menu>
-        </ConfigProvider>
+        <div class=move || {
+        if show_options_menu.get() {
+            "workbench-menu"
+        } else {
+            "workbench-menu menu-hidden"
+        }
+        }>
+            <div class="workbench-menu-header">
+                <h3>"Options"</h3>
+            </div>
+            <div class="workbench-menu-content">
+                <p class="workbench-menu-text">"Class Distance"</p>
+                <Slider class="workbench-slider" value=class_distance_value max=600.0 step=10.0 show_stops=false />
+                <p class="workbench-menu-text">"Datatype Distance"</p>
+                <Slider class="workbench-slider" value=datatype_distance_value max=600.0 step=10.0 show_stops=false />
+                <Checkbox class="workbench-checkbox" checked=dynamic_label_check label="Dynamic labels" />
+                <p class="workbench-menu-text">"Max label width"</p>
+                <Slider class="workbench-slider" value=label_width_value max=600.0 step=10.0 show_stops=false />
+                <Checkbox class="workbench-checkbox" checked=node_scaling_check label="Node scaling" />
+                <Checkbox class="workbench-checkbox" checked=compact_notation_check label="Compact notation" />
+                <Checkbox class="workbench-checkbox" checked=color_externals_check label="Color externals" />
+
+            </div>
+        </div>
     }
 }

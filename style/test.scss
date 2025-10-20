@@ -59,7 +59,7 @@
     left: 0.5rem;
 }
 
-.ontology-menu {
+.workbench-menu {
     position: fixed;
     top: 0;
     left: 3%;
@@ -70,9 +70,10 @@
     padding: 1rem;
     z-index: 15;
     overflow-y: auto;
+    transition: width 0.4s ease, opacity 0.4s ease;
 }
 
-.ontology-menu-header {
+.workbench-menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -81,61 +82,93 @@
     border-bottom: 1px solid #34495e;
 }
 
-.ontology-menu-header h3 {
+.workbench-menu-header h3 {
     margin: 0;
     font-size: 1.2rem;
     color: #ecf0f1;
 }
 
-.ontology-menu-content .thaw-config-provider {
+.workbench-menu-content .thaw-config-provider {
     display: flex;
     background-color: rgb(24, 32, 42);
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.search-menu {
-    position: fixed;
-    top: 0;
-    left: 3%;
-    width: 15%;
-    height: 100vh;
-    background-color: rgb(24, 32, 42);
-    color: #ecf0f1;
-    padding: 1rem;
-    z-index: 15;
-    overflow-y: auto;
-}
-
-.search-menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #34495e;
-}
-
-.search-menu-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #ecf0f1;
-}
-
-.search-menu-content .thaw-config-provider {
-    display: flex;
-    background-color: rgb(24, 32, 42);
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.search-url-input {
+.workbench-url-input {
     margin: 0;
     border: 1px solid #34495e;
     height: 1.5rem;
     width: 100%;
 }
-.ontology-menu-item {
+
+.workbench-sparql-input {
+    margin: 0;
+    border: 1px solid #34495e;
+    height: 15rem;
+    resize: vertical;
+    width: 100%;
+}
+
+.workbench-input-label {
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 500;
+}
+
+.workbench-menu-text {
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 500;
+}
+
+@keyframes workbench-menu-expand {
+    0% {
+        width: 0%;
+        opacity: 0;
+    }
+    100% {
+        width: 15%;
+        opacity: 1;
+    }
+}
+@keyframes workbench-menu-collapse {
+    0% {
+        width: 15%;
+        opacity: 1;
+    }
+    100% {
+        width: 0%;
+        opacity: 0;
+    }
+}
+.workbench-menu-expand {
+    animation: workbench-menu-expand 0.4s forwards;
+}
+.workbench-menu-collapse {
+    animation: workbench-menu-collapse 0.4s forwards;
+}
+
+.ontology-dropdown {
+    width: 100%;
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: 1px solid #34495e;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.ontology-dropdown select {
+    background-color: rgb(30, 39, 51);
+    color: #ecf0f1;
+    border: none;
+    width: 100%;
+}
+
+.ontology-upload-button {
     width: 100%;
     background-color: rgb(24, 32, 42);
     color: #ecf0f1;
@@ -160,54 +193,51 @@
     color: #ecf0f1;
 }
 
-.ontology-url-input {
-    margin: 0;
+.export-button {
+    width: 100%;
+    background-color: rgb(24, 32, 42);
+    color: #ecf0f1;
     border: 1px solid #34495e;
-    height: 1.5rem;
+    padding: 0.75rem;
+    text-align: left;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.workbench-slider {
+    margin: 0.5rem 0 1rem 0;
     width: 100%;
 }
 
-.ontology-sparql-input {
-    margin: 0;
-    border: 1px solid #34495e;
-    height: 15rem;
-    resize: vertical;
-    width: 100%;
-}
-.custom-ontology-section input {
-    margin: 0;
-    border: 1px solid #34495e;
-    height: 1.5rem;
+.workbench-slider .thaw-slider__rail {
+    background-color: #34495e !important;
+    height: 4px !important;
 }
 
-.custom-ontology-section button {
-    margin: 0;
-    border: 1px solid #34495e;
-    height: 2rem;
+.workbench-slider .thaw-slider__thumb {
+    background-color: #ecf0f1;
+    border: 3px solid #34495e;
+    border-radius: 50%;
 }
 
-.ontology-input-label {
-    margin: 0.5rem 0 0.5rem 0;
+.workbench-checkbox {
+    margin: 0.5rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.9rem;
     color: #bdc3c7;
     font-weight: 500;
 }
 
-.ontology-dropdown {
-    width: 100%;
-    background-color: rgb(30, 39, 51);
-    color: #ecf0f1;
+.workbench-checkbox .thaw-checkbox__input {
+    width: 18px;
+    height: 18px;
+    background-color: #34495e;
     border: 1px solid #34495e;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-
-.ontology-dropdown select {
-    background-color: rgb(30, 39, 51);
-    color: #ecf0f1;
-    border: none;
-    width: 100%;
+    border-radius: 50%;
+    cursor: pointer;
 }
 /* End of cursed css */
 .locateButton {
@@ -340,12 +370,6 @@
     100% {
         width: 78%;
     }
-}
-.bottombar-expand {
-    animation: bottombar-expand 0.5s forwards;
-}
-.bottombar-collapse {
-    animation: bottombar-collapse 0.5s forwards;
 }
 
 .toggle-sidebar-btn {
