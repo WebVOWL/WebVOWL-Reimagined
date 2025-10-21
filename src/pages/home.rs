@@ -7,6 +7,7 @@ use crate::components::menu::options_menu::*;
 use crate::components::menu::about_menu::*;
 use crate::components::menu::side_bar::*;
 use crate::components::zoom_slider::*;
+use crate::components::buttons::center_graph_button::*;
 use leptos::prelude::*;
 use leptos_meta::*;
 
@@ -83,6 +84,8 @@ pub fn Home() -> impl IntoView {
                     <SearchButton />
                     <FilterButton />
                     <ExportButton />
+                    <PauseButton />
+                    <ResetButton />
                     <OptionsButton />
                     <AboutButton />
                 </div>            
@@ -120,6 +123,7 @@ pub fn Home() -> impl IntoView {
                     </div>
                 </div>
                 <ZoomSlider />
+                <CenterGraphButton />
             </div>
         </main>
     }
