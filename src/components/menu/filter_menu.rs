@@ -20,5 +20,4 @@ pub fn FilterMenu() -> impl IntoView {
             </div>
         </div>
     }
-
 }

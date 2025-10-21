@@ -2,12 +2,6 @@ use leptos::prelude::*;
 use thaw::*;
 use crate::pages::home::*;
 
-
-
-use leptos::prelude::*;
-use thaw::*;
-use crate::pages::home::*;
-
 #[component]
 pub fn OptionsMenu() -> impl IntoView {
     let ShowOptionsMenu(show_options_menu) = use_context::<ShowOptionsMenu>().expect("ShowOptionsMenu should be provided");
