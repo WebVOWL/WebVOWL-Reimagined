@@ -1,4 +1,6 @@
 #canvas {
     width: 100% !important;
+    position: fixed;
     height: 100% !important;
+    z-index: 1;
 }
