@@ -1,6 +1,5 @@
 use leptos::prelude::*;
 use thaw::*;
-use leptos::logging::log;
 use crate::pages::home::*;
 
 #[component]
@@ -31,6 +30,7 @@ pub fn OntologyButton() -> impl IntoView {
     }
 }
 
+#[component]
 pub fn SearchButton() -> impl IntoView {
     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
     let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
@@ -58,6 +58,7 @@ pub fn SearchButton() -> impl IntoView {
     }
 }
 
+#[component]
 pub fn FilterButton() -> impl IntoView {
     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
     let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
@@ -86,6 +87,7 @@ pub fn FilterButton() -> impl IntoView {
     }
 }
 
+#[component]
 pub fn ExportButton() -> impl IntoView {
     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
     let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
@@ -113,6 +115,27 @@ pub fn ExportButton() -> impl IntoView {
     }
 }
 
+#[component]
+pub fn PauseButton() -> impl IntoView {
+    view! {     
+        <ConfigProvider>
+            <Button class="work-bench-button"
+            shape=ButtonShape::Square 
+            icon=icondata::AiPauseOutlined></Button>
+        </ConfigProvider>
+    }
+}
+
+#[component]
+pub fn ResetButton() -> impl IntoView {
+    view! {      
+        <ConfigProvider>
+            <Button class="work-bench-button" shape=ButtonShape::Square icon=icondata::VsDebugRestart></Button>
+        </ConfigProvider>
+    }
+}
+
+#[component]
 pub fn OptionsButton() -> impl IntoView {
     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
     let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
@@ -140,6 +163,7 @@ pub fn OptionsButton() -> impl IntoView {
     }
 }
 
+#[component]
 pub fn AboutButton() -> impl IntoView {
     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
     let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
