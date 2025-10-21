@@ -6,6 +6,7 @@ use crate::components::menu::export_menu::*;
 use crate::components::menu::options_menu::*;
 use crate::components::menu::about_menu::*;
 use crate::components::menu::side_bar::*;
+use crate::components::zoom_slider::*;
 use leptos::prelude::*;
 use leptos_meta::*;
 
@@ -27,6 +28,12 @@ pub struct ShowOptionsMenu(pub RwSignal<bool>);
 #[derive(Clone, Copy)]
 pub struct ShowAboutMenu(pub RwSignal<bool>);
 
+#[derive(Clone, Copy)]
+pub struct SidebarOpen(pub RwSignal<bool>);
+
+#[derive(Clone, Copy)]
+pub struct IsFirstLoad(pub RwSignal<bool>);
+
 #[component]
 pub fn Home() -> impl IntoView {
     let ontologytitle = RwSignal::new("Friend of a Friend (FOAF) vocabulary".to_string());
@@ -36,6 +43,9 @@ pub fn Home() -> impl IntoView {
     let show_export_menu = ShowExportMenu(RwSignal::new(false));
     let show_options_menu = ShowOptionsMenu(RwSignal::new(false));
     let show_about_menu = ShowAboutMenu(RwSignal::new(false));
+    let displayed_title = move || ontologytitle.get();
+    let sidebar_open = SidebarOpen(RwSignal::new(true));
+    let is_first_load = IsFirstLoad(RwSignal::new(false));
     provide_context(show_ontology_menu);
     provide_context(show_search_menu);
     provide_context(show_filter_menu);
@@ -43,31 +53,30 @@ pub fn Home() -> impl IntoView {
     provide_context(show_options_menu);
     provide_context(show_about_menu);
     provide_context(ontologytitle);
-    let displayed_title = move || ontologytitle.get();
-    let sidebar_open = RwSignal::new(true);
-    let is_first_load = RwSignal::new(false);
+    provide_context(sidebar_open);
+    provide_context(is_first_load);
 
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
-            //<canvas id="canvas" width=800 height=600 />
+            <canvas id="canvas"/>
             <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
                 <button
                     class=move || {
-                        if sidebar_open.get() {
+                        if sidebar_open.0.get() {
                             "toggle-sidebar-btn"
                         } else {
                             "toggle-sidebar-btn toggle-sidebar-btn-collapsed"
                         }
                     }
                     on:click=move |_| {
-                        sidebar_open.update(|open| *open = !*open);
-                        if !is_first_load.get() {
-                            is_first_load.set(true);
+                        sidebar_open.0.update(|open| *open = !*open);
+                        if !is_first_load.0.get() {
+                            is_first_load.0.set(true);
                         }
                     }
                 >
-                    {move || if sidebar_open.get() { ">" } else { "<" }}
+                    {move || if sidebar_open.0.get() { ">" } else { "<" }}
                 </button>
                 <div class="work-bench">
                     <OntologyButton />
@@ -84,14 +93,14 @@ pub fn Home() -> impl IntoView {
                 <OptionsMenu />
                 <AboutMenu />
                 <div class=move || {
-                    if is_first_load.get() {
-                        if sidebar_open.get() {
+                    if is_first_load.0.get() {
+                        if sidebar_open.0.get() {
                             "sidebar sidebar-expand"
                         } else {
                             "sidebar sidebar-collapse sidebar-collapsed"
                         }
                     } else {
-                        if sidebar_open.get() {
+                        if sidebar_open.0.get() {
                             "sidebar"
                         } else {
                             "sidebar sidebar-collapsed"
@@ -110,6 +119,7 @@ pub fn Home() -> impl IntoView {
                         <SelectionDetails />
                     </div>
                 </div>
+                <ZoomSlider />
             </div>
         </main>
     }

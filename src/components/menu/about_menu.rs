@@ -23,5 +23,4 @@ pub fn AboutMenu() -> impl IntoView {
             </div>
         </div>
     }
-
 }
