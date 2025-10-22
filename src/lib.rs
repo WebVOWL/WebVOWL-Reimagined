@@ -19,6 +19,9 @@ pub mod pages;
 #[cfg(feature = "server")]
 pub mod session_handler;
 
+#[cfg(feature = "server")]
+pub mod cookie_handler;
+
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]

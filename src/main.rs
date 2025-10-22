@@ -1,7 +1,8 @@
 use actix_files::Files;
+use actix_session::config::{CookieContentSecurity, BrowserSession};
 use actix_session::{SessionMiddleware, storage::RedisSessionStore};
 use actix_web::*;
-use actix_web::cookie::Key;
+use actix_web::cookie::{Key, SameSite};
 use env_logger::Env;
 use leptos::prelude::*;
 use leptos_actix::{LeptosRoutes, generate_route_list};
@@ -41,14 +42,22 @@ async fn main() -> std::io::Result<()> {
         
 
         App::new()
+            .wrap_fn(cookie_handler)
             // Add session management to your application using Redis for session state storage
             .wrap(
-                SessionMiddleware::new(
+                SessionMiddleware::builder(
                     redis_store.clone(),
                     secret_key.clone(),
                 )
+                .cookie_name("session_id".into())
+                .cookie_secure(true)
+                .cookie_same_site(SameSite::Strict) // can also be lax
+                .cookie_path("/".into())
+                .session_lifecycle(BrowserSession::default())
+                .cookie_content_security(CookieContentSecurity::Private) //encryption
+                .cookie_http_only(true)
+                .build()
             )
-            .route("/counter", web::get().to(index))
             .leptos_routes(routes, {
                 let leptos_options = leptos_options.clone();
                 move || {
@@ -76,6 +85,7 @@ async fn main() -> std::io::Result<()> {
                     }
                 }
             })
+            .route("/counter", web::get().to(index))
             .service(Files::new("/", site_root.as_ref()))
             .wrap(middleware::Compress::default())
             .wrap(
