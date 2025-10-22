@@ -1,8 +1,14 @@
 #!/bin/bash
 #cargo update &&
-modes=("fastdev" "dev" "preview" "release" "binary")
+modes=(
+    "fastdev"
+    "dev"
+    "preview"
+    "release"
+    "binary"
+)
 commands=(
-    "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=fastdev --precompress -v"
+    "RUST_LOG=info cargo leptos watch -v"
     "RUST_LOG=info cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --release --precompress -v"
