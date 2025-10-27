@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
         
 
         App::new()
-            .wrap_fn(cookie_handler)
+            
             // Add session management to your application using Redis for session state storage
             .wrap(
                 SessionMiddleware::builder(
@@ -50,8 +50,8 @@ async fn main() -> std::io::Result<()> {
                     secret_key.clone(),
                 )
                 .cookie_name("session_id".into())
-                .cookie_secure(true)
-                .cookie_same_site(SameSite::Strict) // can also be lax
+                .cookie_secure(false) // After development: change to true!
+                .cookie_same_site(SameSite::Lax) // After development: change to Strict!
                 .cookie_path("/".into())
                 .session_lifecycle(BrowserSession::default())
                 .cookie_content_security(CookieContentSecurity::Private) //encryption
