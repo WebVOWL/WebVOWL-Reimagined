@@ -1,7 +1,7 @@
-use actix_web::Error;
 use actix_session::Session;
+use actix_web::Error;
 
-fn index(session: Session) -> Result<&'static str, Error> {
+pub async fn index(session: Session) -> Result<&'static str, Error> {
     // access the session state
     if let Some(count) = session.get::<i32>("counter")? {
         println!("SESSION value: {}", count);
