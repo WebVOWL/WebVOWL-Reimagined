@@ -9,6 +9,8 @@ use crate::components::menu::side_bar::*;
 use crate::components::zoom_slider::*;
 use crate::components::buttons::center_graph_button::*;
 use crate::components::buttons::zoom_buttons::*;
+use crate::components::buttons::reset_button::*;
+use crate::components::buttons::pause_button::*;
 use leptos::prelude::*;
 use leptos_meta::*;
 
@@ -124,6 +126,8 @@ pub fn Home() -> impl IntoView {
                 <CenterGraphButton />
                 <ZoomInButton />
                 <ZoomOutButton />
+                <ResetButton />
+                <PauseButton />
             </div>
         </main>
     }

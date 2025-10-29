@@ -1,0 +1,57 @@
+.pause-button {
+    position: absolute;
+    bottom: 5%;
+    right: 25.1%;
+    transition: right 0.5s;
+    z-index: 101;
+}
+
+.pause-button Button {
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    height: 35px;
+    min-width: 35px;
+    max-width: 35px;
+    width: 35px;
+}
+
+.pause-button Button:hover {
+    background-color: #d90;
+}
+
+
+.pause-button-collapsed {
+    right: 3.1%;
+}
+
+@keyframes pause-button-expand {
+    0% {
+        right: 3.1%;
+    }
+    100% {
+        right: 25.1%;
+    }
+}
+
+@keyframes pause-button-collapse {
+    0% {
+        right: 25.1%;
+    }
+    100% {
+        right: 3.1%;
+    }
+}
+
+.pause-button-expand {
+    animation: pause-button-expand 0.5s forwards;
+}
+
+.pause-button-collapse {
+    animation: pause-button-collapse 0.5s forwards;
+}

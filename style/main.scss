@@ -5,6 +5,8 @@
 @use "centergraph";
 @use "filtermenu";
 @use "zoombuttons";
+@use "resetbutton";
+@use "pausebutton";
 body {
     background: rgba(201, 196, 196, 1);
     font-size: 14px;
