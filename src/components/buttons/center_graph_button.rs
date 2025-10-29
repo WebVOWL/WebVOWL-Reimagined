@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use thaw::*;
 use crate::pages::home::*;
 
 #[component]
@@ -21,7 +22,7 @@ pub fn CenterGraphButton() -> impl IntoView {
                 }
             }
         }>    
-            <button>"⌖"</button>
+            <Button>"⌖"</Button>
         </div>
     }
 }
