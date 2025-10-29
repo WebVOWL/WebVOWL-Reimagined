@@ -43,7 +43,6 @@
     [dependencies.grapher]
         features=["webgl"]
         git="https://github.com/WebVOWL/RustGrapher"
-        branch = "node_types"
         optional=true
         version="0.3"
 
