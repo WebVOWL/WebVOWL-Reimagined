@@ -9,7 +9,7 @@ pub struct NetworkModule {
 }
 
 
-// Represents the different endpoints needed
+/// Represents the different endpoints needed
 #[derive(Debug, Clone)]
 pub enum NetworkEndpoint {
     Local(String), // path
@@ -30,7 +30,7 @@ pub enum DataType {
 
 
 impl DataType {
-    // Map file extensions to datatypes
+    /// Map file extensions to datatypes
     pub fn from_extension(ext: &str) -> Self {
         match ext.to_lowercase().as_str() {
             "owl" => Self::OWL,
@@ -42,8 +42,9 @@ impl DataType {
     }
 
 
-    // labels the data
+    
     // Fixed string literals called by reference as to not allocate new memory each time the function is called
+    /// labels the data extension type
     pub fn mime_type(&self) -> &'static str { 
         match self {
             Self::OWL => "application/owl+xml",
@@ -65,8 +66,8 @@ impl NetworkModule {
         }
     }
 
-    // Determines what datatype the given data at the endpoint is 
     // example: is it OWL, TTL, RDF, etc. the local endpoint is given?
+    /// Determines what datatype the given data at the endpoint is 
     fn find_data_type(path: &str) -> Option<DataType> {
         Path::new(path)
             .extension()
@@ -77,7 +78,7 @@ impl NetworkModule {
     pub async fn retrieval_response(&self, source: NetworkEndpoint) -> HttpResponse {
         // 1: retrieves the data
         let result = match source { 
-            // Local reads file and calls for the datatype label and returns (label, data content)
+            /// Local reads file and calls for the datatype label and returns (label, data content)
             NetworkEndpoint::Local(path) => { 
                 match fs::read_to_string(&path) {
                     Ok(content) => Ok((Self::find_data_type(&path).unwrap_or(DataType::RDF), content)),
@@ -86,7 +87,7 @@ impl NetworkModule {
             }
 
 
-            // Remote requests an URL waits for an answer and calls for the datatype label and returns (label, data content)
+            /// Remote requests an URL waits for an answer and calls for the datatype label and returns (label, data content)
             NetworkEndpoint::Remote(url) => { 
                 match self.client.get(&url).send().await {
                     Ok(resp) => match resp.text().await {
@@ -98,7 +99,7 @@ impl NetworkModule {
             }
 
 
-            // SPARQL requests the URL and puts the query itself in the request body and calls for the datatype label and returns (label, query)
+            /// SPARQL requests the URL and puts the query itself in the request body and calls for the datatype label and returns (label, query)
             NetworkEndpoint::SPARQL { endpoint, query } => { 
                 let accept_type = DataType::SPARQLJSON.mime_type(); //default
 
@@ -125,8 +126,8 @@ impl NetworkModule {
         match result {
             Ok((dtype, content)) => {
 
-                // ADD PARSER HERE!
-
+                // TODO ADD PARSER HERE!
+                
                 HttpResponse::Ok()
                     .content_type(dtype.mime_type())
                     .body(content)
