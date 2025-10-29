@@ -12,8 +12,11 @@ pub struct NetworkModule {
 /// Represents the different endpoints needed
 #[derive(Debug, Clone)]
 pub enum NetworkEndpoint {
-    Local(String), // path
-    Remote(String), // url 
+    /// path
+    Local(String), 
+    /// url
+    Remote(String),  
+    /// url and query
     SPARQL {endpoint: String, query: String},
 }
 
@@ -25,7 +28,8 @@ pub enum DataType {
     RDF,
     SPARQLJSON,
     SPARQLXML,
-    UNKNOWN, // fallback when type cant be determined
+    /// fallback when type cant be determined
+    UNKNOWN, 
 }
 
 
@@ -78,7 +82,7 @@ impl NetworkModule {
     pub async fn retrieval_response(&self, source: NetworkEndpoint) -> HttpResponse {
         // 1: retrieves the data
         let result = match source { 
-            /// Local reads file and calls for the datatype label and returns (label, data content)
+            // Local reads file and calls for the datatype label and returns (label, data content)
             NetworkEndpoint::Local(path) => { 
                 match fs::read_to_string(&path) {
                     Ok(content) => Ok((Self::find_data_type(&path).unwrap_or(DataType::RDF), content)),
@@ -87,7 +91,7 @@ impl NetworkModule {
             }
 
 
-            /// Remote requests an URL waits for an answer and calls for the datatype label and returns (label, data content)
+            // Remote requests an URL waits for an answer and calls for the datatype label and returns (label, data content)
             NetworkEndpoint::Remote(url) => { 
                 match self.client.get(&url).send().await {
                     Ok(resp) => match resp.text().await {
@@ -99,7 +103,7 @@ impl NetworkModule {
             }
 
 
-            /// SPARQL requests the URL and puts the query itself in the request body and calls for the datatype label and returns (label, query)
+            // SPARQL requests the URL and puts the query itself in the request body and calls for the datatype label and returns (label, query)
             NetworkEndpoint::SPARQL { endpoint, query } => { 
                 let accept_type = DataType::SPARQLJSON.mime_type(); //default
 
