@@ -1,3 +1,5 @@
+#![recursion_limit = "4096"]
+
 use actix_files::Files;
 use actix_session::config::{CookieContentSecurity, BrowserSession};
 use actix_session::{SessionMiddleware, storage::RedisSessionStore};

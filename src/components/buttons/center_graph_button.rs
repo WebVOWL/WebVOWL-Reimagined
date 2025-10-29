@@ -3,29 +3,26 @@ use thaw::*;
 use crate::pages::home::*;
 
 #[component]
-pub fn PauseButton() -> impl IntoView {
+pub fn CenterGraphButton() -> impl IntoView {
     let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().expect("SidebarOpen should be provided");
     let IsFirstLoad(is_first_load) = use_context::<IsFirstLoad>().expect("IsFirstLoad should be provided");
     view! {
         <div class=move || {
             if is_first_load.get() {
                 if sidebar_open.get() {
-                    "pause-button pause-button-expand"
+                    "center-graph-button center-graph-button-expand"
                 } else {
-                    "pause-button pause-button-collapse pause-button-collapsed"
+                    "center-graph-button center-graph-button-collapse center-graph-button-collapsed"
                 }
             } else {
                 if sidebar_open.get() {
-                    "pause-button"
+                    "center-graph-button"
                 } else {
-                    "pause-button pause-button-collapsed"
+                    "center-graph-button center-graph-button-collapsed"
                 }
             }
         }>    
-            <Button 
-                shape=ButtonShape::Square
-                icon=icondata::AiPauseCircleOutlined>
-            </Button>
+            <Button>"⌖"</Button>
         </div>
     }
 }

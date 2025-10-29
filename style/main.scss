@@ -1,8 +1,14 @@
 @use "canvas";
-@use "test";
-
+@use "workbench";
+@use "sidebar";
+@use "zoomslider";
+@use "centergraph";
+@use "filtermenu";
+@use "zoombuttons";
+@use "resetbutton";
+@use "pausebutton";
 body {
-    background: rgb(24, 32, 42);
+    background: rgba(201, 196, 196, 1);
     font-size: 14px;
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
     // line-height: 1;

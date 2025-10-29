@@ -1,0 +1,108 @@
+.zoom-in-button {
+    position: absolute;
+    bottom: 5%;
+    right: 23%;
+    transition: right 0.5s;
+    z-index: 101;
+}
+
+.zoom-in-button Button {
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    height: 35px;
+    max-width: 35px;
+    min-width: 35px;
+    width: 35px;
+}
+
+.zoom-in-button Button:hover {
+    background-color: #d90;
+}
+
+
+.zoom-in-button-collapsed {
+    right: 1%;
+}
+
+@keyframes zoom-in-button-expand {
+    0% {
+        right: 1%;
+    }
+    100% {
+        right: 23%;
+    }
+}
+
+@keyframes zoom-in-button-collapse {
+    0% {
+        right: 23%;
+    }
+    100% {
+        right: 1%;
+    }
+}
+
+.zoom-in-button-expand {
+    animation: zoom-in-button-expand 0.5s forwards;
+}
+
+.zoom-in-button-collapse {
+    animation: zoom-in-button-collapse 0.5s forwards;
+}
+
+
+.zoom-out-button {
+    position: absolute;
+    bottom: 1%;
+    right: 23%;
+    transition: right 0.5s;
+    z-index: 101;
+}
+.zoom-out-button Button {
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    height: 35px;
+    max-width: 35px;
+    min-width: 35px;
+    width: 35px;
+}
+.zoom-out-button Button:hover {
+    background-color: #d90;
+}
+.zoom-out-button-collapsed {
+    right: 1%;
+}
+@keyframes zoom-out-button-expand {
+    0% {
+        right: 1%;
+    }
+    100% {
+        right: 23%;
+    }
+}
+@keyframes zoom-out-button-collapse {
+    0% {
+        right: 23%;
+    }
+    100% {
+        right: 1%;
+    }
+}
+.zoom-out-button-expand {
+    animation: zoom-out-button-expand 0.5s forwards;
+}
+.zoom-out-button-collapse {
+    animation: zoom-out-button-collapse 0.5s forwards;
+}

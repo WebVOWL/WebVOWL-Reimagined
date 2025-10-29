@@ -1,0 +1,57 @@
+.reset-button {
+    position: absolute;
+    bottom: 1%;
+    right: 25.1%;
+    transition: right 0.5s;
+    z-index: 101;
+}
+
+.reset-button Button {
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+    height: 35px;
+    min-width: 35px;
+    max-width: 35px;
+    width: 35px;
+}
+
+.reset-button Button:hover {
+    background-color: #d90;
+}
+
+
+.reset-button-collapsed {
+    right: 3.1%;
+}
+
+@keyframes reset-button-expand {
+    0% {
+        right: 3.1%;
+    }
+    100% {
+        right: 25.1%;
+    }
+}
+
+@keyframes reset-button-collapse {
+    0% {
+        right: 25.1%;
+    }
+    100% {
+        right: 3.1%;
+    }
+}
+
+.reset-button-expand {
+    animation: reset-button-expand 0.5s forwards;
+}
+
+.reset-button-collapse {
+    animation: reset-button-collapse 0.5s forwards;
+}

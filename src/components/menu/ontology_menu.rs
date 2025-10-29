@@ -1,31 +1,31 @@
 use leptos::prelude::*;
 use thaw::*;
+use crate::pages::home::*;
 
 #[component]
 pub fn OntologyMenu() -> impl IntoView {
     let ontologytitle =
         use_context::<RwSignal<String>>().expect("ontologytitle should be provided");
-    let show_ontology_menu =
-        use_context::<RwSignal<bool>>().expect("show_ontology_menu should be provided");
-
-    // Create a signal to track the selected ontology
+    let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
     let selected_ontology = RwSignal::new("Friend of a Friend (FOAF) vocabulary".to_string());
-
-    // Watch for changes in selected_ontology and update the title
     Effect::new(move |_| {
         let selected = selected_ontology.get();
         ontologytitle.set(selected);
     });
-
     view! {
-        <Show when=move || show_ontology_menu.get()>
-            <div class="ontology-menu">
-                <div class="ontology-menu-header">
-                    <h3>"Select Ontology"</h3>
-                </div>
-                <div class="ontology-menu-content">
+        <div class=move || {
+            if show_ontology_menu.get() {
+                "workbench-menu"
+            } else {
+                "workbench-menu menu-hidden"
+            }
+        }>
+            <div class="workbench-menu-header">
+                <h3>"Select Ontology"</h3>
+            </div>
+                <div class="workbench-menu-content">
                     <ConfigProvider>
-                        <p class="ontology-section">"Select Ontology:"</p>
+                        <p class="workbench-input-label">"Select Ontology:"</p>
                         <Select class="ontology-dropdown" value=selected_ontology>
                             {move || {
                                 vec![
@@ -46,20 +46,20 @@ pub fn OntologyMenu() -> impl IntoView {
                             }}
                         </Select>
                     </ConfigProvider>
-
                     <div class="custom-ontology-section">
                         <h4>"Custom Ontology:"</h4>
-                        <p class="ontology-input-label">"From URL:"</p>
-                        <Input placeholder="Enter ontology IRI" />
-                        <p class="ontology-input-label">"From File:"</p>
+                        <p class="workbench-input-label">"From URL:"</p>
+                        <Input class="workbench-url-input" placeholder="Enter ontology IRI" />
+                        <p class="workbench-input-label">"From File:"</p>
                         <Upload>
-                            <Button class="ontology-menu-item">
+                            <Button class="ontology-upload-button">
                                 "Select ontology file"
                             </Button>
                         </Upload>
+                        <p class="workbench-input-label">"SPARQL Query:"</p>
+                        <Textarea class="workbench-sparql-input" placeholder="Enter SPARQL query"/>
                     </div>
                 </div>
             </div>
-        </Show>
     }
 }
