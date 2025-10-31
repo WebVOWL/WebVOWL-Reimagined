@@ -1,4 +1,4 @@
-#![recursion_limit = "4096"]
+#![allow(non_snake_case)]
 
 use actix_files::Files;
 use actix_web::*;

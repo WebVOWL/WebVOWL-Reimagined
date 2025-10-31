@@ -1,4 +1,4 @@
-#![recursion_limit = "4096"]
+#![allow(non_snake_case)]
 
 #[cfg(feature = "wasm")]
 pub use grapher::web::init_render;
@@ -13,6 +13,7 @@ pub mod app;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
+pub mod signals;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
