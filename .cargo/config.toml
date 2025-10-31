@@ -1,10 +1,9 @@
 # This config uses (unstable) features to improve compile times.
 #
-# "-fuse-ld=lld"
-# One of the slowest aspects of compiling large Rust programs is the linking time. This file configures LLD as
-# an alternate linker that may improve build times. LLD is a linker from the LLVM project that supports
-# Linux, Windows, macOS, and Wasm.
-# https://lld.llvm.org/
+# "-fuse-ld=mold"
+# One of the slowest aspects of compiling large Rust programs is the linking time.
+# This file configures mold as a faster drop-in replacement for existing Unix linkers.
+# It is several times quicker than the LLVM lld linker, the second-fastest open-source linker.
 #
 # "-Zshare-generics=y"
 # Unstable. Make the current crate share its generic instantiations
@@ -36,23 +35,26 @@
 # Enables a statically linked runtime. Useful for running in e.g. "stratch" Docker containers.
 
 
-[build]
+# [build]
+#     rustflags=["-Zshare-generics=y", "-Zthreads=0"]
+
+# Workaround for rustflags not being cumulative
+# https://github.com/rust-lang/cargo/issues/5376#issuecomment-2163350032
+[target.'cfg(all())']
     rustflags=["-Zshare-generics=y", "-Zthreads=0"]
+
+[target.'cfg(target_os = "linux")']
+    linker="clang"
+    rustflags=["-Clink-arg=-fuse-ld=mold"]
 
 # Docker
 [target.x86_64-unknown-linux-musl]
-    linker="clang"
     rustflags=[
         "-Ctarget-feature=+crt-static",
         "-Clinker-plugin-lto",
-        "-Clink-arg=-fuse-ld=lld",
         "-Clink-arg=-flto",
+        "-Clink-arg=mimalloc.o",
     ]
-
-# Local dev server
-[target.x86_64-unknown-linux-gnu]
-    linker="clang"
-    rustflags=["-Clink-arg=-fuse-ld=lld"]
 
 # Frontend of program
 [target.wasm32-unknown-unknown]
