@@ -1,27 +1,20 @@
-use leptos::prelude::*;
 use crate::pages::home::*;
+use crate::signals::menu_signals::SidebarOpen;
+use leptos::prelude::*;
 
 #[component]
 pub fn CenterGraphButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().expect("SidebarOpen should be provided");
-    let IsFirstLoad(is_first_load) = use_context::<IsFirstLoad>().expect("IsFirstLoad should be provided");
+    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+
     view! {
-        <div class=move || {
-            if is_first_load.get() {
-                if sidebar_open.get() {
-                    "center-graph-button center-graph-button-expand"
-                } else {
-                    "center-graph-button center-graph-button-collapse center-graph-button-collapsed"
-                }
-            } else {
-                if sidebar_open.get() {
-                    "center-graph-button"
-                } else {
-                    "center-graph-button center-graph-button-collapsed"
-                }
-            }
-        }>    
-            <button>"⌖"</button>
-        </div>
+        <button
+            class:center-graph-button
+            class=(
+                "center-graph-button-collapsed",
+                move || *sidebar_open.read() == false,
+            )
+        >
+            "⌖"
+        </button>
     }
 }
