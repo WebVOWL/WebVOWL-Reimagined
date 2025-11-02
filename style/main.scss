@@ -1,11 +1,9 @@
 @use "canvas";
 @use "workbench";
 @use "sidebar";
-@use "centergraph";
+@use "graph_interact_buttons.scss";
 @use "filter_menu";
-@use "zoom_buttons";
-@use "reset_button";
-@use "pause_button";
+
 body {
     background: rgba(201, 196, 196, 1);
     font-size: 14px;

@@ -1,0 +1,120 @@
+.common {
+    color: none;
+    border: none;
+    background: none;
+    position: absolute;
+    transition: right 0.5s;
+    z-index: 101;
+    height: 35px;
+    min-width: 35px;
+    max-width: 35px;
+    width: 35px;
+}
+
+.button {
+    position: absolute;
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    border: 1px solid #000000;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #d90;
+}
+
+// Matrix layout:
+// 0-0 is the bottom-right corner
+// 1-0 is +1 left (column)
+// 0-1 is +1 up (row)
+.interact-0-0 {
+    @extend .common;
+    bottom: 1%;
+    right: 23%;
+}
+
+.interact-0-1 {
+    @extend .common;
+    bottom: 5%;
+    right: 23%;
+}
+
+.interact-0-2 {
+    @extend .common;
+    bottom: 9%;
+    right: 23%;
+}
+
+.interact-1-0 {
+    @extend .common;
+    bottom: 1%;
+    right: 25.1%;
+}
+
+.interact-1-1 {
+    @extend .common;
+    bottom: 5%;
+    right: 25.1%;
+}
+
+.column0-collapsed {
+    right: 1%;
+}
+
+.column1-collapsed {
+    right: 3.1%;
+}
+
+@keyframes column0-expand {
+    0% {
+        right: 1%;
+    }
+    100% {
+        right: 23.3%;
+    }
+}
+
+@keyframes column0-collapse {
+    0% {
+        right: 23.3%;
+    }
+    100% {
+        right: 1%;
+    }
+}
+
+@keyframes column1-expand {
+    0% {
+        right: 3.1%;
+    }
+    100% {
+        right: 25.1%;
+    }
+}
+
+@keyframes column1-collapse {
+    0% {
+        right: 25.1%;
+    }
+    100% {
+        right: 3.1%;
+    }
+}
+
+.column0-expand {
+    animation: column0-expand 0.5s forwards;
+}
+.column0-collapse {
+    animation: column0-collapse 0.5s forwards;
+}
+
+.column1-expand {
+    animation: column1-expand 0.5s forwards;
+}
+
+.column1-collapse {
+    animation: column1-collapse 0.5s forwards;
+}

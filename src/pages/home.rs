@@ -4,10 +4,8 @@
 // use crate::components::menu::filter_menu::*;
 // use crate::components::menu::ontology_menu::*;
 // use crate::components::menu::options_menu::*;
-use crate::components::buttons::{
-    center_graph_button::CenterGraphButton, graph_interaction_buttons::GraphInteractionButtons,
-};
-use crate::components::menu::right_side_bar::{RightSidebar, ToggleRightSidebarButton};
+use crate::components::buttons::graph_interaction_buttons::GraphInteractionButtons;
+use crate::components::menu::right_side_bar::RightSidebar;
 // use crate::components::menu::search_menu::*;
 use crate::signals::menu_signals::SidebarOpen;
 use leptos::prelude::*;
@@ -22,7 +20,6 @@ pub fn Home() -> impl IntoView {
     // let show_options_menu = ShowOptionsMenu(RwSignal::new(false));
     // let show_about_menu = ShowAboutMenu(RwSignal::new(false));
     let sidebar_open = SidebarOpen(RwSignal::new(true));
-    // let is_first_load = IsFirstLoad(RwSignal::new(false));
 
     // provide_context(show_ontology_menu);
     // provide_context(show_search_menu);
@@ -32,16 +29,13 @@ pub fn Home() -> impl IntoView {
     // provide_context(show_about_menu);
     // provide_context(ontologytitle);
     provide_context(sidebar_open);
-    // provide_context(is_first_load);
 
     view! {
         <Title text="Leptos + Tailwindcss" />
         <main>
             <canvas id="canvas" />
             <div class="min-h-screen bg-[rgba(201, 196, 196, 1)]">
-                <ToggleRightSidebarButton />
                 <RightSidebar />
-                <CenterGraphButton />
                 <GraphInteractionButtons />
             </div>
         </main>

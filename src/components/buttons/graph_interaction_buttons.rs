@@ -1,7 +1,7 @@
 use crate::signals::menu_signals::SidebarOpen;
-use floating_ui_leptos::{UseFloatingOptions, UseFloatingReturn, use_floating};
 use leptos::prelude::*;
-use thaw::{Button, ButtonShape};
+use log::info;
+use thaw::{Button, ButtonAppearance, ButtonShape, ButtonType, ConfigProvider, Tooltip};
 
 #[component]
 pub fn PauseButton() -> impl IntoView {
@@ -9,16 +9,19 @@ pub fn PauseButton() -> impl IntoView {
 
     view! {
         <div
-            class:pause-button
-            class=(
-                "pause-button-collapsed",
-                move || *sidebar_open.read() == false,
-            )
+            class="interact-0-1"
+            class=("column0-collapsed", move || *sidebar_open.read() == false)
         >
-            <Button
-                shape=ButtonShape::Square
-                icon=icondata::AiPauseCircleOutlined
-            ></Button>
+            <ConfigProvider>
+                <Tooltip content="Pause simulation">
+                    <Button
+                        class="button"
+                        appearance=ButtonAppearance::Secondary
+                        shape=ButtonShape::Rounded
+                        icon=icondata::AiPauseCircleOutlined
+                    ></Button>
+                </Tooltip>
+            </ConfigProvider>
         </div>
     }
 }
@@ -29,16 +32,19 @@ pub fn ResetButton() -> impl IntoView {
 
     view! {
         <div
-            class:reset-button
-            class=(
-                "reset-button-collapsed",
-                move || *sidebar_open.read() == false,
-            )
+            class="interact-0-0"
+            class=("column0-collapsed", move || *sidebar_open.read() == false)
         >
-            <Button
-                shape=ButtonShape::Square
-                icon=icondata::BiResetRegular
-            ></Button>
+            <ConfigProvider>
+                <Tooltip content="Reset graph">
+                    <Button
+                        class="button"
+                        appearance=ButtonAppearance::Secondary
+                        shape=ButtonShape::Rounded
+                        icon=icondata::BiResetRegular
+                    ></Button>
+                </Tooltip>
+            </ConfigProvider>
         </div>
     }
 }
@@ -49,17 +55,19 @@ pub fn ZoomInButton() -> impl IntoView {
 
     view! {
         <div
-            class:zoom-in-button
-            class=(
-                "zoom-in-button-collapsed",
-                move || *sidebar_open.read() == false,
-            )
+            class="interact-1-1"
+            class=("column1-collapsed", move || *sidebar_open.read() == false)
         >
-            <Button
-                shape=ButtonShape::Square
-                class="zoom-in-button-Bob"
-                icon=icondata::AiZoomInOutlined
-            ></Button>
+            <ConfigProvider>
+                <Tooltip content="Zoom in">
+                    <Button
+                        class="button"
+                        appearance=ButtonAppearance::Secondary
+                        shape=ButtonShape::Rounded
+                        icon=icondata::AiZoomInOutlined
+                    ></Button>
+                </Tooltip>
+            </ConfigProvider>
         </div>
     }
 }
@@ -68,25 +76,44 @@ pub fn ZoomInButton() -> impl IntoView {
 pub fn ZoomOutButton() -> impl IntoView {
     let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
 
-    let reference_ref = NodeRef::new();
-    let floating_ref = NodeRef::new();
-
-    let UseFloatingReturn { floating_styles } =
-        use_floating(reference_ref, floating_ref, UseFloatingOptions::default());
-
-    // TODO: https://floating-ui.rustforweb.org/frameworks/leptos.html#usage
     view! {
         <div
-            class:zoom-out-button
-            class=(
-                "zoom-out-button-collapsed",
-                move || *sidebar_open.read() == false,
-            )
+            class="interact-1-0"
+            class=("column1-collapsed", move || *sidebar_open.read() == false)
         >
-            <Button
-                shape=ButtonShape::Square
-                icon=icondata::AiZoomOutOutlined
-            ></Button>
+            <ConfigProvider>
+                <Tooltip content="Zoom out">
+                    <Button
+                        class="button"
+                        appearance=ButtonAppearance::Secondary
+                        shape=ButtonShape::Rounded
+                        icon=icondata::AiZoomOutOutlined
+                    ></Button>
+                </Tooltip>
+            </ConfigProvider>
+        </div>
+    }
+}
+
+#[component]
+pub fn CenterGraphButton() -> impl IntoView {
+    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+
+    view! {
+        <div
+            class="interact-0-2"
+            class=("column0-collapsed", move || *sidebar_open.read() == false)
+        >
+            <ConfigProvider>
+                <Tooltip content="Fit graph to screen">
+                    <Button
+                        class="button"
+                        appearance=ButtonAppearance::Secondary
+                        shape=ButtonShape::Rounded
+                        icon=icondata::MdiImageFilterCenterFocus
+                    ></Button>
+                </Tooltip>
+            </ConfigProvider>
         </div>
     }
 }
@@ -94,6 +121,7 @@ pub fn ZoomOutButton() -> impl IntoView {
 #[component]
 pub fn GraphInteractionButtons() -> impl IntoView {
     view! {
+        <CenterGraphButton />
         <ZoomInButton />
         <ZoomOutButton />
         <ResetButton />
