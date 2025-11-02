@@ -121,10 +121,31 @@ pub fn SelectionDetails() -> impl IntoView {
 }
 
 #[component]
+pub fn ToggleRightSidebarButton() -> impl IntoView {
+    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+
+    view! {
+        <button
+            class="toggle-sidebar-btn"
+            class=(
+                "toggle-sidebar-btn-collapsed",
+                move || *sidebar_open.read() == false,
+            )
+            on:click=move |_| {
+                sidebar_open.update(|open| *open = !*open);
+            }
+        >
+            {move || if *sidebar_open.read() { ">" } else { "<" }}
+        </button>
+    }
+}
+
+#[component]
 pub fn RightSidebar() -> impl IntoView {
     let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
 
     view! {
+        <ToggleRightSidebarButton />
         <div
             class:sidebar
             class=("sidebar-collapse", move || *sidebar_open.read() == false)
@@ -143,25 +164,5 @@ pub fn RightSidebar() -> impl IntoView {
                 <SelectionDetails />
             </div>
         </div>
-    }
-}
-
-#[component]
-pub fn ToggleRightSidebarButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
-
-    view! {
-        <button
-            class="toggle-sidebar-btn"
-            class=(
-                "toggle-sidebar-btn-collapsed",
-                move || *sidebar_open.read() == false,
-            )
-            on:click=move |_| {
-                sidebar_open.update(|open| *open = !*open);
-            }
-        >
-            {move || if *sidebar_open.read() { ">" } else { "<" }}
-        </button>
     }
 }
