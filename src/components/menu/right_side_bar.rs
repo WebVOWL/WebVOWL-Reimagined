@@ -1,4 +1,4 @@
-use crate::signals::menu_signals::SidebarOpen;
+use crate::components::buttons::graph_interaction_buttons::GraphInteractionButtons;
 use leptos::prelude::*;
 use log::info;
 use thaw::*;
@@ -122,34 +122,35 @@ pub fn SelectionDetails() -> impl IntoView {
 
 #[component]
 pub fn ToggleRightSidebarButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <button
             class="toggle-sidebar-btn"
             class=(
                 "toggle-sidebar-btn-collapsed",
-                move || *sidebar_open.read() == false,
+                move || *open.read() == false,
             )
             on:click=move |_| {
-                sidebar_open.update(|open| *open = !*open);
+                open.update(|value| *value = !*value);
             }
         >
-            {move || if *sidebar_open.read() { ">" } else { "<" }}
+            {move || if *open.read() { ">" } else { "<" }}
         </button>
     }
 }
 
 #[component]
 pub fn RightSidebar() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = RwSignal::new(true);
+    provide_context(open);
 
     view! {
         <ToggleRightSidebarButton />
         <div
             class:sidebar
-            class=("sidebar-collapse", move || *sidebar_open.read() == false)
-            class=("sidebar-expand", move || *sidebar_open.read())
+            class=("sidebar-collapse", move || *open.read() == false)
+            class=("sidebar-expand", move || *open.read() )
         >
             <div class="sidebar-content">
                 <p class="ontology-title">
@@ -164,5 +165,6 @@ pub fn RightSidebar() -> impl IntoView {
                 <SelectionDetails />
             </div>
         </div>
+        <GraphInteractionButtons />
     }
 }

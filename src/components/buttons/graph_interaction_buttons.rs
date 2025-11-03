@@ -1,16 +1,15 @@
-use crate::signals::menu_signals::SidebarOpen;
 use leptos::prelude::*;
 use log::info;
 use thaw::{Button, ButtonAppearance, ButtonShape, ButtonType, ConfigProvider, Tooltip};
 
 #[component]
 pub fn PauseButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <div
             class="interact-0-1"
-            class=("column0-collapsed", move || *sidebar_open.read() == false)
+            class=("column0-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
                 <Tooltip content="Pause simulation">
@@ -28,12 +27,12 @@ pub fn PauseButton() -> impl IntoView {
 
 #[component]
 pub fn ResetButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <div
             class="interact-0-0"
-            class=("column0-collapsed", move || *sidebar_open.read() == false)
+            class=("column0-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
                 <Tooltip content="Reset graph">
@@ -51,12 +50,12 @@ pub fn ResetButton() -> impl IntoView {
 
 #[component]
 pub fn ZoomInButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <div
             class="interact-1-1"
-            class=("column1-collapsed", move || *sidebar_open.read() == false)
+            class=("column1-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
                 <Tooltip content="Zoom in">
@@ -74,12 +73,12 @@ pub fn ZoomInButton() -> impl IntoView {
 
 #[component]
 pub fn ZoomOutButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <div
             class="interact-1-0"
-            class=("column1-collapsed", move || *sidebar_open.read() == false)
+            class=("column1-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
                 <Tooltip content="Zoom out">
@@ -97,12 +96,12 @@ pub fn ZoomOutButton() -> impl IntoView {
 
 #[component]
 pub fn CenterGraphButton() -> impl IntoView {
-    let SidebarOpen(sidebar_open) = use_context::<SidebarOpen>().unwrap();
+    let open = use_context::<RwSignal<bool>>().unwrap();
 
     view! {
         <div
             class="interact-0-2"
-            class=("column0-collapsed", move || *sidebar_open.read() == false)
+            class=("column0-collapsed",move || *open.read() == false)
         >
             <ConfigProvider>
                 <Tooltip content="Fit graph to screen">
