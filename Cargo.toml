@@ -55,7 +55,7 @@
         version="0.5.0-beta"
 
     [dependencies.grapher]
-        branch="render_test"
+        branch="master"
         features=["webgl"]
         git="https://github.com/WebVOWL/RustGrapher"
         optional=true
