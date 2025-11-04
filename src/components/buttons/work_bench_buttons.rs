@@ -1,17 +1,6 @@
 use leptos::prelude::*;
 use thaw::{Button, ButtonAppearance, ButtonShape, ConfigProvider};
 
-#[component]
-pub fn OntologyButton() -> impl IntoView {
-    view! {
-        <Button
-            class="work-bench-button"
-            shape=ButtonShape::Square
-            icon=icondata::BiMenuRegular
-        ></Button>
-    }
-}
-
 // #[component]
 // pub fn SearchButton() -> impl IntoView {
 //     let ShowSearchMenu(show_search_menu) = use_context::<ShowSearchMenu>().expect("ShowSearchMenu should be provided");
