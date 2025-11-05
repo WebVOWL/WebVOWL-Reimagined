@@ -1,3 +1,4 @@
+use super::{WorkBenchButton, WorkbenchMenuItems};
 use leptos::prelude::*;
 use thaw::*;
 
@@ -23,12 +24,8 @@ fn SelectStaticInput() -> impl IntoView {
     };
 
     view! {
-        <Field label="Select Ontology:">
-            <Select
-                // class="ontology-dropdown"
-                value=selected_ontology
-                size=SelectSize::Large
-            >
+        <Field label="Premade Ontology:">
+            <Select value=selected_ontology size=SelectSize::Large>
                 {ontologies}
             </Select>
         </Field>
@@ -59,10 +56,8 @@ fn UploadInput() -> impl IntoView {
 
     // TODO: Make accept formats a pointer to somewhere in network module as it should have definitions for accepted input.
     view! {
-        // <div class="custom-ontology-section">
-        // <h4>"Custom Ontology:"</h4>
         <Field label="From URL:">
-            <Input placeholder="Enter ontology IRI" />
+            <Input placeholder="Enter input URL" />
         </Field>
         <Field label="From File:">
             <Upload
@@ -71,10 +66,7 @@ fn UploadInput() -> impl IntoView {
                 name="upload_file"
                 custom_request
             >
-                <Button>
-                    // class="ontology-upload-button"
-                    "Select ontology file"
-                </Button>
+                <Button>"Select ontology file"</Button>
             </Upload>
         </Field>
     }
@@ -82,40 +74,21 @@ fn UploadInput() -> impl IntoView {
 
 fn Sparql() -> impl IntoView {
     view! {
-        <Field label="SPARQL Query:">
-            <Textarea // class="workbench-sparql-input"
-            placeholder="Enter SPARQL query" />
-        </Field>
-    }
-}
-
-#[component]
-fn OntologyMenuPart() -> impl IntoView {
-    view! {
-        <div>
-            // class="workbench-menu"
-            <div>
-                // class="workbench-menu-header"
-                <h3>"Select Ontology"</h3>
-            </div>
-            <div>
-                // class="workbench-menu-content"
-                <SelectStaticInput />
-                <UploadInput />
-                <Sparql />
-            </div>
-        </div>
-    }
-}
-
-#[component]
-pub fn OntologyButton() -> impl IntoView {
-    view! {
-        <Button
-            // class="work-bench-button"
-            shape=ButtonShape::Square
-            icon=icondata::BiMenuRegular
-        ></Button>
+        <fieldset>
+            <legend>"SPARQL Query"</legend>
+            <Flex gap=FlexGap::Size(20) vertical=true>
+                <Field label="Query Endpoint">
+                    <Input placeholder="Enter query endpoint" />
+                </Field>
+                <Field label="Query">
+                    <Textarea
+                        resize=TextareaResize::Vertical
+                        size=TextareaSize::Large
+                        placeholder="Enter SPARQL query"
+                    />
+                </Field>
+            </Flex>
+        </fieldset>
     }
 }
 
@@ -127,9 +100,16 @@ pub fn OntologyMenu() -> impl IntoView {
             position=PopoverPosition::RightStart
         >
             <PopoverTrigger slot>
-                <OntologyButton />
+                <WorkBenchButton
+                    text="Load"
+                    icon=icondata::BiMenuRegular
+                ></WorkBenchButton>
             </PopoverTrigger>
-            <OntologyMenuPart />
+            <WorkbenchMenuItems title="Load Ontology">
+                <SelectStaticInput />
+                <UploadInput />
+                <Sparql />
+            </WorkbenchMenuItems>
         </Popover>
     }
 }
