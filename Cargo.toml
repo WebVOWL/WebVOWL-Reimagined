@@ -15,7 +15,6 @@
 
 [dependencies]
     actix-files={version="=0.6.6", optional=true}
-    actix-session={ version = "0.11.0", optional = true, features = ["redis-session"]}
     actix-web={version="=4.11.0", optional=true, features=[
         "macros",
         "compress-brotli",
@@ -58,6 +57,7 @@
             # "Node",
             "Window",
             # "console",
+            "Storage",
         ]
 
 
@@ -65,7 +65,7 @@
     csr=["leptos/csr"]
     hydrate=["leptos/hydrate", "thaw/hydrate", "nonce"]
     nonce=["leptos/nonce"]
-    server=["dep:env_logger", "dep:reqwest", "dep:tokio", "dep:actix-session"]
+    server=["dep:env_logger", "dep:reqwest", "dep:tokio"]
     ssr=[
         "dep:actix-files",
         "dep:actix-web",

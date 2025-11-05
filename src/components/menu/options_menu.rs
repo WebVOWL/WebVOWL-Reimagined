@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 use thaw::*;
 use crate::pages::home::*;
+use crate::extractor::LocalCookies;
 
 #[component]
 pub fn OptionsMenu() -> impl IntoView {
@@ -36,6 +37,7 @@ pub fn OptionsMenu() -> impl IntoView {
                 <Checkbox class="workbench-checkbox" checked=compact_notation_check label="Compact notation" />
                 <Checkbox class="workbench-checkbox" checked=color_externals_check label="Color externals" />
 
+                <LocalCookies />
             </div>
         </div>
     }

@@ -16,9 +16,7 @@ pub mod app;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
-
-#[cfg(feature = "server")]
-pub mod session_handler;
+pub mod extractor;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
