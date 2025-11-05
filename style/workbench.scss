@@ -1,122 +1,25 @@
-.work-bench {
-    position: fixed;
+.workbench {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 3%;
+    width: fit-content;
     height: 100vh;
-    // background-color: rgb(24, 32, 42);
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* A lot of cursed css that needs to be fixed later */
-.work-bench-button {
-    // width: 100%;
-    // height: 50px;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
-    border: none;
-    // margin: 0;
-    // padding: 0;
-    // box-sizing: border-box;
-    // display: flex;
-    // justify-content: center;
-    // align-items: center;
-    // cursor: pointer;
-    // transition: background-color 0.3s, transform 0.2s;
-}
-
-.work-bench-button-bottom-1 {
-    width: 100%;
-    height: 50px;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
-    border: none;
-    transition: background-color 0.3s, transform 0.2s;
-    position: absolute;
-    bottom: 3rem;
-    left: 1rem;
-}
-.work-bench-button-bottom-2 {
-    width: 100%;
-    height: 50px;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
-    border: none;
-    transition: background-color 0.3s, transform 0.2s;
-    position: absolute;
-    bottom: 0.5rem;
-    left: 1rem;
-}
-
-.workbench-menu {
-    position: fixed;
-    top: 0;
-    left: 3%;
-    // width: 15%;
-    // height: 100vh;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
     padding: 1rem;
-    z-index: 15;
-    overflow-y: auto;
-    transition: width 0.4s ease, opacity 0.4s ease;
+    background-color: rgb(24, 32, 42);
 }
 
 .workbench-menu-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    // border-bottom: 1px solid #34495e;
+    border-bottom: 1px solid #34495e;
 }
 
 .workbench-menu-header h3 {
     margin: 0;
     font-size: 1.2rem;
-    // color: #ecf0f1;
 }
-
-.workbench-menu-content {
-    display: flex;
-    // background-color: rgb(24, 32, 42);
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-// .workbench-url-input {
-//     margin: 0;
-//     border: 1px solid #34495e;
-//     height: 1.5rem;
-//     width: 100%;
-// }
-
-// .workbench-sparql-input {
-//     margin: 0;
-//     border: 1px solid #34495e;
-//     height: 15rem;
-//     resize: vertical;
-//     width: 100%;
-// }
-
-// .workbench-input-label {
-//     margin: 0.5rem 0 0.5rem 0;
-//     font-size: 0.9rem;
-//     color: #bdc3c7;
-//     font-weight: 500;
-// }
-
-// .workbench-menu-text {
-//     margin: 0.5rem 0 0.5rem 0;
-//     font-size: 0.9rem;
-//     color: #bdc3c7;
-//     font-weight: 500;
-// }
 
 @keyframes workbench-menu-expand {
     0% {
@@ -143,48 +46,6 @@
 }
 .workbench-menu-collapse {
     animation: workbench-menu-collapse 0.4s forwards;
-}
-
-.ontology-dropdown {
-    width: 100%;
-    // background-color: rgb(30, 39, 51);
-    // color: #ecf0f1;
-    // border: 1px solid #34495e;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-
-// .ontology-dropdown select {
-//     background-color: rgb(30, 39, 51);
-//     color: #ecf0f1;
-//     border: none;
-//     width: 100%;
-// }
-
-.ontology-upload-button {
-    width: 100%;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
-    // border: 1px solid #34495e;
-    padding: 0.75rem;
-    text-align: left;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.custom-ontology-section {
-    margin-top: 1rem;
-    padding-bottom: 1rem;
-    padding-top: 1rem;
-    // border-top: 1px solid #34495e;
-    // border-bottom: 1px solid #34495e;
-}
-
-.custom-ontology-section h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
-    // color: #ecf0f1;
 }
 
 .export-button {
