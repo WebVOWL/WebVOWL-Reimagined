@@ -11,14 +11,14 @@ pub fn PauseButton() -> impl IntoView {
             class=("column0-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
-                <Tooltip content="Pause simulation">
+                <Tooltip<_, String> content="Pause simulation">
                     <Button
                         class="button"
                         appearance=ButtonAppearance::Secondary
                         shape=ButtonShape::Rounded
                         icon=icondata::AiPauseCircleOutlined
                     ></Button>
-                </Tooltip>
+                </Tooltip<_, String>>
             </ConfigProvider>
         </div>
     }
@@ -34,14 +34,14 @@ pub fn ResetButton() -> impl IntoView {
             class=("column0-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
-                <Tooltip content="Reset graph">
+                <Tooltip<_, String> content="Reset graph">
                     <Button
                         class="button"
                         appearance=ButtonAppearance::Secondary
                         shape=ButtonShape::Rounded
                         icon=icondata::BiResetRegular
                     ></Button>
-                </Tooltip>
+                </Tooltip<_, String>>
             </ConfigProvider>
         </div>
     }
@@ -57,14 +57,14 @@ pub fn ZoomInButton() -> impl IntoView {
             class=("column1-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
-                <Tooltip content="Zoom in">
+                <Tooltip<_, String> content="Zoom in">
                     <Button
                         class="button"
                         appearance=ButtonAppearance::Secondary
                         shape=ButtonShape::Rounded
                         icon=icondata::AiZoomInOutlined
                     ></Button>
-                </Tooltip>
+                </Tooltip<_, String>>
             </ConfigProvider>
         </div>
     }
@@ -80,14 +80,14 @@ pub fn ZoomOutButton() -> impl IntoView {
             class=("column1-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
-                <Tooltip content="Zoom out">
+                <Tooltip<_, String> content="Zoom out">
                     <Button
                         class="button"
                         appearance=ButtonAppearance::Secondary
                         shape=ButtonShape::Rounded
                         icon=icondata::AiZoomOutOutlined
                     ></Button>
-                </Tooltip>
+                </Tooltip<_, String>>
             </ConfigProvider>
         </div>
     }
@@ -100,17 +100,17 @@ pub fn CenterGraphButton() -> impl IntoView {
     view! {
         <div
             class="interact-0-2"
-            class=("column0-collapsed",move || *open.read() == false)
+            class=("column0-collapsed", move || *open.read() == false)
         >
             <ConfigProvider>
-                <Tooltip content="Fit graph to screen">
+                <Tooltip<_, String> content="Fit graph to screen">
                     <Button
                         class="button"
                         appearance=ButtonAppearance::Secondary
                         shape=ButtonShape::Rounded
                         icon=icondata::MdiImageFilterCenterFocus
                     ></Button>
-                </Tooltip>
+                </Tooltip<_, String>>
             </ConfigProvider>
         </div>
     }
