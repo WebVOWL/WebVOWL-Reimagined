@@ -1,6 +1,5 @@
 use crate::components::buttons::graph_interaction_buttons::GraphInteractionButtons;
 use leptos::prelude::*;
-use log::info;
 use thaw::*;
 
 #[component]
@@ -150,7 +149,7 @@ pub fn RightSidebar() -> impl IntoView {
         <div
             class:sidebar
             class=("sidebar-collapse", move || *open.read() == false)
-            class=("sidebar-expand", move || *open.read() )
+            class=("sidebar-expand", move || *open.read())
         >
             <div class="sidebar-content">
                 <p class="ontology-title">

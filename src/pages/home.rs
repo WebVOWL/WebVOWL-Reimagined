@@ -3,7 +3,6 @@ use crate::components::menu::workbench::Workbench;
 
 use leptos::prelude::*;
 use leptos_meta::*;
-use thaw::{ConfigProvider, Layout};
 
 #[component]
 pub fn Home() -> impl IntoView {

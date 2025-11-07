@@ -1,6 +1,5 @@
 use leptos::prelude::*;
-use log::info;
-use thaw::{Button, ButtonAppearance, ButtonShape, ButtonType, ConfigProvider, Tooltip};
+use thaw::{Button, ButtonAppearance, ButtonShape, ConfigProvider, Tooltip};
 
 #[component]
 pub fn PauseButton() -> impl IntoView {

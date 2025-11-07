@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use std::collections::HashMap;
-use thaw::{Button, ButtonAppearance, ButtonShape, ConfigProvider, Theme};
+use thaw::{Button, Theme};
 
 pub fn ThemeSelection() -> impl IntoView {
     // WebVOWL brand colors
