@@ -1,8 +1,2 @@
-pub mod ontology_menu;
-pub mod search_menu;
-pub mod filter_menu;
-pub mod export_menu;
-pub mod options_menu;
-pub mod modes_menu;
-pub mod about_menu;
-pub mod side_bar;
+pub mod right_side_bar;
+pub mod workbench;
