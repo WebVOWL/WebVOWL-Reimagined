@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use thaw::*;
 use crate::pages::home::*;
-use crate::extractor::LocalCookies;
+use crate::cookie_handler::LocalCookies;
 
 #[component]
 pub fn OptionsMenu() -> impl IntoView {

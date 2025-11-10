@@ -131,10 +131,11 @@ impl NetworkModule {
             Ok((dtype, content)) => {
 
                 // TODO ADD PARSER HERE!
+                let parsed = parse_content(&dtype, &content);
                 
                 HttpResponse::Ok()
                     .content_type(dtype.mime_type())
-                    .body(content)
+                    .body(parsed)
             }
             Err(e) => HttpResponse::InternalServerError().body(e),
         }
