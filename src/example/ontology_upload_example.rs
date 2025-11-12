@@ -28,14 +28,6 @@ pub async fn file_length(
 }
 #[component]
 pub fn OntologyMenu() -> impl IntoView {
-    let ontologytitle =
-        use_context::<RwSignal<String>>().expect("ontologytitle should be provided");
-    let ShowOntologyMenu(show_ontology_menu) = use_context::<ShowOntologyMenu>().expect("ShowOntologyMenu should be provided");
-    let selected_ontology = RwSignal::new("Friend of a Friend (FOAF) vocabulary".to_string());
-    Effect::new(move |_| {
-        let selected = selected_ontology.get();
-        ontologytitle.set(selected);
-    });
     let upload_action = Action::new_local(|data: &FormData| {
     file_length(data.clone().into())
     });
@@ -53,7 +45,6 @@ pub fn OntologyMenu() -> impl IntoView {
                 <div class="workbench-menu-content">
                     <div class="custom-ontology-section">
                         <h4>"Custom Ontology:"</h4>
-                        <p class="workbench-input-label">"From URL:"</p>
                         <p class="workbench-input-label">"From File:"</p>
                         <form on:submit=move |ev: SubmitEvent| {
                             ev.prevent_default();
@@ -83,3 +74,4 @@ pub fn OntologyMenu() -> impl IntoView {
             </div>
     }
 }
+
