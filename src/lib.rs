@@ -17,7 +17,7 @@ pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
 pub mod cookie_handler;
-pub mod extractor;
+
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
