@@ -164,45 +164,43 @@ pub fn Upload() -> impl IntoView {
 #[component]
 pub fn NewWorkbench() -> impl IntoView {
     view! {
-    <div class="flex h-screen flex-col justify-between w-fit border-e border-gray-100 bg-white">
-      <div class="px-4 py-6">
-        <ul class="mt-6 space-y-1">
-            <ListElement
-                title="Load Ontology"
-                icon=icondata::BiMenuRegular>
-            </ListElement>
+        <div class="flex flex-col justify-between h-screen bg-white border-gray-100 w-fit border-e">
+            <div class="py-6 px-4">
+                <ul class="mt-6 space-y-1">
+                    <ListElement
+                        title="Load Ontology"
+                        icon=icondata::BiMenuRegular
+                    ></ListElement>
 
-            <ListElement
-                title="Search"
-                icon=icondata::BiMenuRegular>
-            </ListElement>
+                    <ListElement
+                        title="Search"
+                        icon=icondata::BiMenuRegular
+                    ></ListElement>
 
-            <ListElement
-                title="Filter"
-                icon=icondata::BiMenuRegular>
-            </ListElement>
+                    <ListElement
+                        title="Filter"
+                        icon=icondata::BiMenuRegular
+                    ></ListElement>
 
-            <ListElement
-                title="Export"
-                icon=icondata::BiMenuRegular>
-            </ListElement>
+                    <ListElement
+                        title="Export"
+                        icon=icondata::BiMenuRegular
+                    ></ListElement>
 
-            <ListDetails
-                title="Settings"
-                icon=icondata::IoSettingsOutline
-                >
-                <ListChild title="Simulator"></ListChild>
-                <>
+                    <ListDetails
+                        title="Settings"
+                        icon=icondata::IoSettingsOutline
+                    >
+                        <ListChild title="Simulator"></ListChild>
 
+                    </ListDetails>
 
-            </ListDetails>
-
-            <ListElement
-                title="About"
-                icon=icondata::BiMenuRegular>
-            </ListElement>
-        </ul>
-      </div>
-    </div>
-        }
+                    <ListElement
+                        title="About"
+                        icon=icondata::BiMenuRegular
+                    ></ListElement>
+                </ul>
+            </div>
+        </div>
+    }
 }
