@@ -1,3 +1,5 @@
+//! Individual components like menus, navbars, progressbars, spinners etc.
+
 pub mod buttons;
 pub mod icon;
 pub mod lists;

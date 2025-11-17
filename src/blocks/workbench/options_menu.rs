@@ -167,19 +167,19 @@ pub fn SimulatorSettings() -> impl IntoView {
 #[component]
 pub fn OptionsMenu() -> impl IntoView {
     view! {
-        <Popover
-            trigger_type=PopoverTriggerType::Click
-            position=PopoverPosition::RightEnd
-        >
-            <PopoverTrigger slot>
-                <WorkBenchButton
-                    text="Settings"
-                    icon=icondata::BiMenuRegular
-                ></WorkBenchButton>
-            </PopoverTrigger>
+        // <Popover
+        //     trigger_type=PopoverTriggerType::Click
+        //     position=PopoverPosition::RightEnd
+        // >
+        //     <PopoverTrigger slot>
+        //         <WorkBenchButton
+        //             text="Settings"
+        //             icon=icondata::BiMenuRegular
+        //         ></WorkBenchButton>
+        //     </PopoverTrigger>
             <WorkbenchMenuItems title="Settings">
                 <SimulatorSettings />
             </WorkbenchMenuItems>
-        </Popover>
+        // </Popover>
     }
 }
