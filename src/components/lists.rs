@@ -9,9 +9,12 @@ pub fn ListElement(
 ) -> impl IntoView {
     view! {
         <li>
-            <a href="#" class="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-            <MaybeShowIcon icon=icon></MaybeShowIcon>
-            <span class="text-sm font-medium"> {title} </span>
+            <a
+                href="#"
+                class="flex gap-2 items-center py-2 px-4 text-gray-500 rounded-lg hover:text-gray-700 hover:bg-gray-100"
+            >
+                <MaybeShowIcon icon=icon></MaybeShowIcon>
+                <span class="text-sm font-medium">{title}</span>
             </a>
         </li>
     }
@@ -25,22 +28,22 @@ pub fn ListDetails(
     children: Children,
 ) -> impl IntoView {
     view! {
-      <li>
-        <details class="group [&amp;_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-            <MaybeShowIcon icon=icon></MaybeShowIcon>
-            <span class="text-sm font-medium"> {title} </span>
+        <li>
+            <details class="group [&amp;_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center py-2 px-4 text-gray-500 rounded-lg cursor-pointer hover:text-gray-700 hover:bg-gray-100">
+                    <div class="flex gap-2 items-center">
+                        <MaybeShowIcon icon=icon></MaybeShowIcon>
+                        <span class="text-sm font-medium">{title}</span>
+                    </div>
 
-            <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                <MaybeShowIcon icon=icondata::BiChevronDownRegular></MaybeShowIcon>
-            </span>
-          </summary>
+                    <span class="transition duration-300 shrink-0 group-open:-rotate-180">
+                        <MaybeShowIcon icon=icondata::BiChevronDownRegular></MaybeShowIcon>
+                    </span>
+                </summary>
 
-          <ul class="mt-2 space-y-1 px-4">
-            {children()}
-          </ul>
-        </details>
-      </li>
+                <ul class="px-4 mt-2 space-y-1">{children()}</ul>
+            </details>
+        </li>
     }
 }
 
@@ -49,8 +52,11 @@ pub fn ListDetails(
 pub fn ListChild(#[prop(into)] title: String) -> impl IntoView {
     view! {
         <li>
-            <a href="#" class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-            {title}
+            <a
+                href="#"
+                class="block py-2 px-4 text-sm font-medium text-gray-500 rounded-lg hover:text-gray-700 hover:bg-gray-100"
+            >
+                {title}
             </a>
         </li>
     }
