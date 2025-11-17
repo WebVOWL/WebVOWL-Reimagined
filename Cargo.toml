@@ -66,7 +66,17 @@
     [dependencies.web-sys]
         version="0.3.77"
         # https://docs.rs/web-sys/latest/web_sys/#modules
-        features=["Document", "Element", "Window", "FormData", "SubmitEvent"]
+        features=[
+            "Document",
+            "Element",
+            "Window",
+            "FormData",
+            "SubmitEvent",
+            "FileList",
+            "HtmlInputElement",
+            "HtmlCollection",
+            "Blob",
+        ]
 
 
 [features]
