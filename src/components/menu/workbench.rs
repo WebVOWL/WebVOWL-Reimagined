@@ -1,13 +1,13 @@
 mod about_menu;
 mod export_menu;
-//mod filter_menu;
+mod filter_menu;
 // mod modes_menu;
 mod ontology_menu;
 mod options_menu;
 mod search_menu;
 use about_menu::AboutMenu;
 use export_menu::ExportMenu;
-//use filter_menu::FilterMenu;
+use filter_menu::FilterMenu;
 use leptos::prelude::*;
 use thaw::*;
 use web_sys::wasm_bindgen::JsCast;
@@ -26,7 +26,7 @@ use crate::network::handle_local;
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum MenuType {
     Export,
-    //Filter,
+    Filter,
     Search,
 }
 
@@ -109,7 +109,6 @@ pub fn NewWorkbench() -> impl IntoView {
 
     view! {
         <div class="flex fixed inset-0 z-50 pointer-events-none">
-            {}
             <div class="flex flex-col flex-shrink-0 justify-between bg-white border-gray-100 pointer-events-auto w-fit border-e">
                 <div class="py-6 px-4">
                     <ul class="mt-6 space-y-1">
@@ -134,7 +133,16 @@ pub fn NewWorkbench() -> impl IntoView {
                             ></ListElement>
                         </div>
 
-                        <div>
+                        <div on:click=move |_| {
+                            set_active_menu
+                                .set(
+                                    if active_menu.get() == Some(MenuType::Filter) {
+                                        None
+                                    } else {
+                                        Some(MenuType::Filter)
+                                    },
+                                )
+                        }>
                             <ListElement
                                 title="Filter"
                                 icon=icondata::BiMenuRegular
@@ -192,15 +200,15 @@ pub fn NewWorkbench() -> impl IntoView {
                     }>
                         <ExportMenu />
                     </div>
-                    // <div style=move || {
-                    //     if active_menu.get() == Some(MenuType::Filter) {
-                    //         "display: block;"
-                    //     } else {
-                    //         "display: none;"
-                    //     }
-                    // }>
-                    //     <FilterMenu />
-                    // </div>
+                    <div style=move || {
+                        if active_menu.get() == Some(MenuType::Filter) {
+                            "display: block;"
+                        } else {
+                            "display: none;"
+                        }
+                    }>
+                        <FilterMenu />
+                    </div>
                     <div style=move || {
                         if active_menu.get() == Some(MenuType::Search) {
                             "display: block;"
