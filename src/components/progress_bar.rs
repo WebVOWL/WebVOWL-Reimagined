@@ -1,10 +1,29 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn ProgressBar() -> impl IntoView {
+pub fn ProgressBar(
+    #[prop(into)] progress: Signal<u64>,
+    #[prop(into)] total: Signal<u64>,
+) -> impl IntoView {
+    let pro = move || {
+        let t = *total.read();
+        let p = if t != 0 {
+            (*progress.read() / t).clamp(0, 1) * 100
+        } else {
+            0
+        };
+        p
+    };
+
     view! {
-    <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-       <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 45%"> 45%</div>
-     </div>
-       }
+        <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+            <div
+                class="p-0.5 text-xs font-medium leading-none text-center text-blue-100 bg-blue-600 rounded-full"
+                style=move || { format!("width: {}%", pro()) }
+            >
+                {move || pro()}
+                %
+            </div>
+        </div>
+    }
 }
