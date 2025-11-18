@@ -2,6 +2,22 @@ use leptos::prelude::*;
 use std::collections::HashMap;
 use thaw::{Button, Theme};
 
+pub enum Themes {
+    Light,
+    Dark,
+    System,
+}
+
+impl Into<String> for Themes {
+    fn into(self) -> String {
+        match self {
+            Themes::Light => "light".to_string(),
+            Themes::Dark => "dark".to_string(),
+            Themes::System => "system".to_string(),
+        }
+    }
+}
+
 pub fn ThemeSelection() -> impl IntoView {
     // WebVOWL brand colors
     // Designed with: https://storybooks.fluentui.dev/react/?path=/docs/theme-theme-designer--docs
