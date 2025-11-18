@@ -2,7 +2,13 @@
     authors=["TheRealMorgenfrue"]
     description="WebVOWL rebuilt from stratch with a strong focus on performance and scalability."
     edition="2024"
-    keywords=["force-directed-graph", "graph", "ontology", "vowl", "web"]
+    keywords=[
+        "force-directed-graph",
+        "graph",
+        "ontology",
+        "visualization",
+        "web",
+    ]
     license-file="LICENSE"
     name="webvowl-reimagined"
     readme="README.md"
@@ -26,11 +32,11 @@
     getrandom={version="0.3", features=["wasm_js"]}
     http={version="1.3.1", optional=true}
     leptos={version="0.8.8", features=["nightly", "multipart"]}
-    leptos-use={version="0.16.3", features=["on_click_outside"]}
     leptos_actix={version="0.8.5", optional=true}
     leptos_meta={version="0.8.5"}
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
+    num="0.4.3"
     rayon="1.10"
     reqwest={version="0.12.24", optional=true}
     tokio={version="1.47.1", optional=true}
@@ -48,6 +54,11 @@
             "ionicons",
         ]
         version="0.6.0"
+
+    [dependencies.leptos-use]
+        features=["on_click_outside", "use_preferred_dark", "actix"]
+        version="0.16.3"
+
 
     [dependencies.thaw]
         features=["nightly"]
