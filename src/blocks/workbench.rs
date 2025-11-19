@@ -31,7 +31,7 @@ fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl I
         <div class="workbench-menu-header">
             <h3>{title}</h3>
         </div>
-        <Flex vertical=true gap=FlexGap::Size(30)>
+        <div>
             {children()}
         </Flex>
     }
