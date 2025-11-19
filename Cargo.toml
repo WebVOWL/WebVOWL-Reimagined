@@ -56,7 +56,7 @@
         version="0.6.0"
 
     [dependencies.leptos-use]
-        features=["on_click_outside", "use_preferred_dark", "actix"]
+        features=["on_click_outside", "use_preferred_dark"]
         version="0.16.3"
 
 
@@ -95,7 +95,7 @@
     csr=["leptos/csr"]
     hydrate=["leptos/hydrate", "thaw/hydrate", "nonce"]
     nonce=["leptos/nonce"]
-    server=["dep:env_logger", "dep:reqwest", "dep:tokio"]
+    server=["dep:env_logger", "dep:reqwest", "dep:tokio", "leptos-use/actix"]
     ssr=[
         "dep:actix-files",
         "dep:actix-web",
