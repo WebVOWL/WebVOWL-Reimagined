@@ -1,47 +1,57 @@
-use std::fmt::Display;
-
 use leptos::prelude::*;
-use num::Num;
+use web_sys::HtmlInputElement;
+use web_sys::wasm_bindgen::JsCast;
 
 /// Sliding range of values.
-///
-/// # Panics
-/// - If the value of `max` exceeds the size of T.
-/// - If the value of `min` is less than the size of T.
-///
-/// ## Examples
-/// - `max` fits into u16, but T = u8.
-/// - `min` fits into i32, but T = u32
 #[component]
-pub fn Slider<T>(
+pub fn Slider(
     #[prop(into)] label: String,
-    /// The value of the slider.
-    /// V is implemented by all primitive number types
-    /// in the standard library, e.g. f64, i128, isize, usize etc.
-    #[prop(into)]
-    value: RwSignal<T>,
+    #[prop(into)] value: RwSignal<f64>,
     #[prop(into)] min: String,
     #[prop(into)] max: String,
     #[prop(into, default = "1.0".to_string())] step: String,
 ) -> impl IntoView
 where
-    T: Num + Display + Send + Sync + Clone + 'static,
 {
     let name = label.replace(" ", "-");
+    let slider_class = format!(
+        "
+        mt-3 \
+        w-full \
+        h-3.5 \
+        bg-gray-300 \
+        rounded-full \
+        appearance-none \
+        [-webkit-slider-thumb]:bg-pink-500 \
+        [::-webkit-slider-thumb]:appearance-none \
+        [::-webkit-slider-thumb]:w-5 \
+        [::-webkit-slider-thumb]:h-5 \
+        [::-webkit-slider-thumb]:rounded-full \
+        [::-webkit-moz-range-thumb]:bg-pink-500 \
+        [::-webkit-moz-range-thumb]:appearance-none \
+        [::-webkit-moz-range-thumb]:w-5 \
+        [::-webkit-moz-range-thumb]:h-5 \
+        [::-webkit-moz-range-thumb]:rounded-full
+        "
+    );
 
     view! {
-        <label for=name>
-            <span class="block text-sm font-medium text-gray-900">{label}</span>
+        <div class="flex justify-center w-70 h-fit">
+            <label class="block w-fit text-sm font-medium text-gray-900" for=name.clone()>
+                {label}
+            </label>
             <input
-                on:input= move |event| {value.set(event.target().unwrap().as_f64().unwrap().into())}
+                on:input= move |event| {
+                    let t =  event.target().unwrap().unchecked_into::<HtmlInputElement>();
+                    value.set(t.value().parse::<f64>().unwrap());}
                 type="range"
-                id=name.clone()
+                id=name
                 min=min
                 max=max
                 step=step
                 value=value.get().to_string()
-                class="mt-3 w-full h-3.5 bg-gray-300 rounded-full appearance-none [&amp;::-webkit-slider-thumb]:size-7 [&amp;::-webkit-slider-thumb]:cursor-pointer [&amp;::-webkit-slider-thumb]:appearance-none [&amp;::-webkit-slider-thumb]:rounded-full [&amp;::-webkit-slider-thumb]:border-[6px] [&amp;::-webkit-slider-thumb]:border-gray-500 [&amp;::-webkit-slider-thumb]:bg-gray-200"
+                class=slider_class
             />
-        </label>
+        </div>
     }
 }
