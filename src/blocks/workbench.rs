@@ -67,48 +67,30 @@ fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl I
 pub fn NewWorkbench() -> impl IntoView {
     view! {
         <VerticalMenu>
-            <ListElement
-                title="Load Ontology"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Load Ontology" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
-            <ListElement
-                title="Search"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Search" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
-            <ListElement
-                title="Filter"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Filter" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
-            <ListElement
-                title="Export"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Export" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
-            <ListDetails
-                title="Settings"
-                icon=icondata::IoSettingsOutline
-            >
+            <ListDetails title="Settings" icon=icondata::IoSettingsOutline>
                 <ListElement title="Simulator">
-                    <button/>
+                    <OptionsMenu />
                 </ListElement>
             </ListDetails>
 
-            <ListElement
-                title="About"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="About" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
         </VerticalMenu>
     }
