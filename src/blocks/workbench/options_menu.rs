@@ -1,7 +1,8 @@
-use super::{WorkBenchButton, WorkbenchMenuItems};
+use super::WorkbenchMenuItems;
+use crate::components::tooltip::{ToolTip, ToolTipPosition};
+use crate::components::user_input::range_select::Slider;
 use grapher::web::prelude::*;
 use leptos::prelude::*;
-use thaw::*;
 
 #[component]
 pub fn SimulatorSettings() -> impl IntoView {
@@ -13,14 +14,13 @@ pub fn SimulatorSettings() -> impl IntoView {
     // let compact_notation_check = RwSignal::new(false);
     // let color_externals_check = RwSignal::new(false);
     let repel_force: RwSignal<f64> = RwSignal::new(RepelForce::default().0.into());
-    let spring_stiffness: RwSignal<f64> = RwSignal::new(SpringStiffness::default().0.into());
-    let spring_neutral_length: RwSignal<f64> =
-        RwSignal::new(SpringNeutralLength::default().0.into());
+    let spring_stiffness = RwSignal::new(SpringStiffness::default().0.into());
+    let spring_neutral_length = RwSignal::new(SpringNeutralLength::default().0.into());
     let gravity_force = RwSignal::new(GravityForce::default().0.into());
-    let delta_time: RwSignal<f64> = RwSignal::new(DeltaTime::default().0.into());
+    let delta_time = RwSignal::new(DeltaTime::default().0.into());
     let damping = RwSignal::new(Damping::default().0.into());
-    let quadtree_theta: RwSignal<f64> = RwSignal::new(QuadTreeTheta::default().0.into());
-    let freeze_thresh: RwSignal<f64> = RwSignal::new(FreezeThreshold::default().0.into());
+    let quadtree_theta = RwSignal::new(QuadTreeTheta::default().0.into());
+    let freeze_thresh = RwSignal::new(FreezeThreshold::default().0.into());
 
     Effect::new(move |_| {
         let mut sim_chan = EVENT_DISPATCHER.sim_chan.write().unwrap();
@@ -36,93 +36,154 @@ pub fn SimulatorSettings() -> impl IntoView {
         ]);
     });
 
-    view! {}
-
     view! {
         <fieldset>
             <legend>"Graph Simulation"</legend>
-            <Flex gap=FlexGap::Size(20) vertical=true>
-                <Field label="Node Distance">
-                    // <Tooltip<_, f64> content=repel_force>
-                        <Slider
-                            value=repel_force
-                            max=10e8
-                            min=10e6
-                            step=10e3
-                            show_stops=false
-                        />
-                    // </Tooltip<_, f64>>
+            <div class="flex flex-col content-around w-fit h-fit m-4">
+            <ToolTip<f64> content=repel_force position=ToolTipPosition::Top>
+                <Slider
+                    label="Node Distance"
+                    value=repel_force
+                    min=10e6.to_string()
+                    max=10e8.to_string()
+                    step=10e3.to_string()
+                ></Slider>
+            </ToolTip<f64>>
 
-                </Field>
-                <Field label="Edge Stiffness">
-                    <Slider
-                        value=spring_stiffness
-                        max=600.0
-                        min=100.0
-                        step=100.0
-                        show_stops=false
-                    />
-                </Field>
-                <Field label="Edge Length">
-                    <Slider
-                        value=spring_neutral_length
-                        max=120.0
-                        min=20.0
-                        step=10.0
-                        show_stops=false
-                    />
-                </Field>
-                <Field label="Center Gravity Strength">
-                    <Slider
-                        value=gravity_force
-                        max=40.0
-                        min=5.0
-                        step=5.0
-                        show_stops=false
-                    />
-                </Field>
-                <Field label="Simulation Speed">
-                    <Slider
-                        value=delta_time
-                        max=0.01
-                        min=0.001
-                        step=0.0005
-                        show_stops=false
-                    />
-                </Field>
-                <Field label="Damping">
-                    <Slider
-                        value=damping
-                        max=0.9
-                        min=0.1
-                        step=0.1
-                        show_stops=false
-                    />
-                </Field>
-                <Field label="Simulation Accuracy">
-                    <Slider
-                        value=quadtree_theta
-                        max=1.0
-                        min=0.1
-                        step=0.1
-                        show_stops=false
-                    />
-                </Field>
-                // FIXME: The slider of this field does not work.
-                // However, it does work if you swap this field with the field above it
-                //      (though the field above it stops working)
-                // Apparently, thaw sliders stop working when there are more than 7 sliders in one place.
-                // <Field label="Movement Threshold">
-                //     <Slider
-                //         value=freeze_thresh
-                //         max=40.0
-                //         min=5.0
-                //         step=5.0
-                //         show_stops=false
-                //     />
-                // </Field>
+            <Slider
+                label="Edge Stiffness"
+                value=spring_stiffness
+                min="100.0"
+                max="600.0"
+                step="100.0"
+            ></Slider>
 
+            <Slider
+                label="Edge Length"
+                value=spring_neutral_length
+                min="20.0"
+                max="120.0"
+                step="10.0"
+            ></Slider>
 
+            <Slider
+                label="Center Gravity Strength"
+                value=gravity_force
+                min="5.0"
+                max="40.0"
+                step="5.0"
+            ></Slider>
+
+            <Slider
+                label="Simulation Speed"
+                value=delta_time
+                min="0.001"
+                max="0.01"
+                step="0.0005"
+            ></Slider>
+
+            <Slider
+                label="Damping"
+                value=damping
+                min="0.1"
+                max="0.9"
+                step="0.1"
+            ></Slider>
+
+            <Slider
+                label="Simulation Accuracy"
+                value=quadtree_theta
+                min="0.1"
+                max="1.0"
+                step="0.1"
+            ></Slider>
+
+            <Slider
+                label="Freeze Threshold"
+                value=freeze_thresh
+                min="5.0"
+                max="40.0"
+                step="5.0"
+            ></Slider>
+            // <Flex gap=FlexGap::Size(20) vertical=true>
+            //     <Field label="Node Distance">
+            //         // <Tooltip<_, f64> content=repel_force>
+            //         <Slider
+            //             value=repel_force
+            //             max=10e8
+            //             min=10e6
+            //             step=10e3
+            //             show_stops=false
+            //         />
+            //     // </Tooltip<_, f64>>
+            //     </Field>
+            //     <Field label="Edge Stiffness">
+            //         <Slider
+            //             value=spring_stiffness
+            //             max=600.0
+            //             min=100.0
+            //             step=100.0
+            //             show_stops=false
+            //         />
+            //     </Field>
+            //     <Field label="Edge Length">
+            //         <Slider
+            //             value=spring_neutral_length
+            //             max=120.0
+            //             min=20.0
+            //             step=10.0
+            //             show_stops=false
+            //         />
+            //     </Field>
+            //     <Field label="Center Gravity Strength">
+            //         <Slider
+            //             value=gravity_force
+            //             max=40.0
+            //             min=5.0
+            //             step=5.0
+            //             show_stops=false
+            //         />
+            //     </Field>
+            //     <Field label="Simulation Speed">
+            //         <Slider
+            //             value=delta_time
+            //             max=0.01
+            //             min=0.001
+            //             step=0.0005
+            //             show_stops=false
+            //         />
+            //     </Field>
+            //     <Field label="Damping">
+            //         <Slider
+            //             value=damping
+            //             max=0.9
+            //             min=0.1
+            //             step=0.1
+            //             show_stops=false
+            //         />
+            //     </Field>
+            //     <Field label="Simulation Accuracy">
+            //         <Slider
+            //             value=quadtree_theta
+            //             max=1.0
+            //             min=0.1
+            //             step=0.1
+            //             show_stops=false
+            //         />
+            //     </Field>
+            // FIXME: The slider of this field does not work.
+            // However, it does work if you swap this field with the field above it
+            // (though the field above it stops working)
+            // Apparently, thaw sliders stop working when there are more than 7 sliders in one place.
+            // <Field label="Movement Threshold">
+            // <Slider
+            // value=freeze_thresh
+            // max=40.0
+            // min=5.0
+            // step=5.0
+            // show_stops=false
+            // />
+            // </Field>
 
             // <Field label="Class Distance">
             // <Slider
@@ -159,7 +220,8 @@ pub fn SimulatorSettings() -> impl IntoView {
             // show_stops=false
             // />
             // </Field>
-            </Flex>
+            // </Flex>
+            </div>
         </fieldset>
     }
 }
@@ -168,18 +230,17 @@ pub fn SimulatorSettings() -> impl IntoView {
 pub fn OptionsMenu() -> impl IntoView {
     view! {
         // <Popover
-        //     trigger_type=PopoverTriggerType::Click
-        //     position=PopoverPosition::RightEnd
+        // trigger_type=PopoverTriggerType::Click
+        // position=PopoverPosition::RightEnd
         // >
-        //     <PopoverTrigger slot>
-        //         <WorkBenchButton
-        //             text="Settings"
-        //             icon=icondata::BiMenuRegular
-        //         ></WorkBenchButton>
-        //     </PopoverTrigger>
-            <WorkbenchMenuItems title="Settings">
-                <SimulatorSettings />
-            </WorkbenchMenuItems>
-        // </Popover>
+        // <PopoverTrigger slot>
+        // <WorkBenchButton
+        // text="Settings"
+        // icon=icondata::BiMenuRegular
+        // ></WorkBenchButton>
+        // </PopoverTrigger>
+        <WorkbenchMenuItems title="Settings">
+            <SimulatorSettings />
+        </WorkbenchMenuItems>
     }
 }
