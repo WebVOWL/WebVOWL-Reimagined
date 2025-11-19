@@ -33,7 +33,7 @@ fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl I
         </div>
         <div>
             {children()}
-        </Flex>
+        </div>
     }
 }
 
