@@ -1,5 +1,6 @@
 // use crate::components::menu::right_side_bar::RightSidebar;
 use crate::components::menu::workbench::NewWorkbench;
+use crate::components::menu::right_side_bar::RightSidebar;
 
 use leptos::prelude::*;
 use leptos_meta::*;
@@ -11,6 +12,7 @@ pub fn Home() -> impl IntoView {
         <main class="-z-99">
             <canvas class="-z-98 size-full fixed" id="canvas" />
             <NewWorkbench />
+            <RightSidebar />
         </main>
     }
 }

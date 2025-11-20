@@ -82,7 +82,6 @@ pub fn SearchMenu() -> impl IntoView {
         }
     }
 
-    // 2. Create a Derived Signal (Memo)
     let filtered_results = Memo::new(move |_| {
         let query = search_query.get().to_lowercase();
         
@@ -156,7 +155,7 @@ pub fn SearchMenu() -> impl IntoView {
                                                 {move || format!("{} matches", stored_instances.with_value(|v| v.len()))}
                                             </span>
                                         </div>
-                                        
+
                                         <Show
                                             when=move || expanded_category.get() == Some(category_name.clone())
                                             fallback=|| view! { <div></div> }
