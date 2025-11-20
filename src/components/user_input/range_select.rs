@@ -16,34 +16,39 @@ where
     let name = label.replace(" ", "-");
     let slider_class = format!(
         "
-        mt-3 \
+        relative \
+        overflow-hidden \
         w-full \
         h-3.5 \
-        bg-gray-300 \
-        rounded-full \
-        appearance-none \
-        [-webkit-slider-thumb]:bg-pink-500 \
-        [::-webkit-slider-thumb]:appearance-none \
-        [::-webkit-slider-thumb]:w-5 \
-        [::-webkit-slider-thumb]:h-5 \
-        [::-webkit-slider-thumb]:rounded-full \
-        [::-webkit-moz-range-thumb]:bg-pink-500 \
-        [::-webkit-moz-range-thumb]:appearance-none \
-        [::-webkit-moz-range-thumb]:w-5 \
-        [::-webkit-moz-range-thumb]:h-5 \
-        [::-webkit-moz-range-thumb]:rounded-full
+        text-blue-500 \
+        bg-black-300 \
+        text-2xl \
+        slider-thumb-h-2 \
+        slider-track-h-0.5 \
+        active:cursor-grabbing \
+        disabled:grayscale \
+        disabled:opacity-30% \
+        disabled:cursor-not-allowed \
         "
     );
+    // rounded-full \
 
     view! {
         <div class="flex justify-center w-70 h-fit">
-            <label class="block w-fit text-sm font-medium text-gray-900" for=name.clone()>
+            <label
+                class="block text-sm font-medium text-gray-900 w-fit"
+                for=name.clone()
+            >
                 {label}
             </label>
             <input
-                on:input= move |event| {
-                    let t =  event.target().unwrap().unchecked_into::<HtmlInputElement>();
-                    value.set(t.value().parse::<f64>().unwrap());}
+                on:input=move |event| {
+                    let t = event
+                        .target()
+                        .unwrap()
+                        .unchecked_into::<HtmlInputElement>();
+                    value.set(t.value().parse::<f64>().unwrap());
+                }
                 type="range"
                 id=name
                 min=min
