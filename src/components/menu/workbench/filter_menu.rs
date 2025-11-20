@@ -233,11 +233,6 @@ pub fn FilterMenu() -> impl IntoView {
     }
     let (checks, set_checks) = signal(initial_checks);
 
-    Effect::new(move |_| {
-        let _ = checks.get();
-        log::info!("Checks state changed!");
-    });
-
     view! {
         <div class="filter-menu">
             <h3 class="mb-2 text-lg font-semibold">"Filter by node type"</h3>
