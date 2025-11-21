@@ -31,7 +31,7 @@ pub fn WorkBenchButton(
 #[component]
 fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl IntoView {
     view! {
-        <div class="flex flex-col w-[250px] p-2">
+        <div class="flex justify-center flex-col w-[250px] p-2">
             <div class="workbench-menu-header">
                 <h3>{title}</h3>
             </div>
@@ -79,18 +79,12 @@ pub fn NewWorkbench() -> impl IntoView {
                 <OntologyMenu/>
             </ListElement>
 
-            <ListElement
-                title="Search"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Search" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
-            <ListElement
-                title="Filter"
-                icon=icondata::BiMenuRegular
-            >
-                <button/>
+            <ListElement title="Filter" icon=icondata::BiMenuRegular>
+                <button />
             </ListElement>
 
             <ListElement
@@ -100,12 +94,9 @@ pub fn NewWorkbench() -> impl IntoView {
                 <ExportMenu/>
             </ListElement>
 
-            <ListDetails
-                title="Settings"
-                icon=icondata::IoSettingsOutline
-            >
+            <ListDetails title="Settings" icon=icondata::IoSettingsOutline>
                 <ListElement title="Simulator">
-                    <button/>
+                    <OptionsMenu />
                 </ListElement>
             </ListDetails>
 
