@@ -1,42 +1,34 @@
-use super::{WorkBenchButton, WorkbenchMenuItems};
+use crate::components::icon::Icon;
+use super::WorkbenchMenuItems;
 use leptos::prelude::*;
-use thaw::*;
+
 
 pub fn NewWebVOWL() -> impl IntoView {
-    // TODO: Maybe write this in a file and includestr!
+    let description = include_str!("../../components/about_description.txt");
     view! {
-        <p>
-            "WebVOWL Reimagined is an open-source ontology
-            visualization tool developed to provide an enhanced
-            user experience and improved performance over the original WebVOWL.
-            "
-        // It leverages modern web technologies to offer a more intuitive interface
-        // for exploring ontologies."
-        </p>
+        <p>{description}</p>
+        <div class="flex gap-4">
+            <a class="text-2xl transition" href="https://github.com/WebVOWL/WebVOWL-Reimagined"> 
+                <Icon icon=icondata::AiGithubFilled/> 
+            </a>
+            <a class="text-2xl transition" href="mailto:cs-25-dat-7-03@student.aau.dk"> 
+                <Icon icon=icondata::IoMail/> 
+            </a> //TODO - Insert the email we can be contacted on.
+        </div>
     }
 }
 
 pub fn Version() -> impl IntoView {
-    view! { <p>"Version pending"</p> }
+    let version = env!("CARGO_PKG_VERSION");
+    view! {<p><b>{format!("Version {} (pending)", version)}</b></p> } //TODO - Remove pending then beta version is ready to be released
 }
 
 #[component]
 pub fn AboutMenu() -> impl IntoView {
     view! {
-        <Popover
-            trigger_type=PopoverTriggerType::Click
-            position=PopoverPosition::RightEnd
-        >
-            <PopoverTrigger slot>
-                <WorkBenchButton
-                    text="About"
-                    icon=icondata::AiCopyrightOutlined
-                ></WorkBenchButton>
-            </PopoverTrigger>
-            <WorkbenchMenuItems title="About">
-                <Version />
-                <NewWebVOWL />
-            </WorkbenchMenuItems>
-        </Popover>
+        <WorkbenchMenuItems title="About">
+            <Version />
+            <NewWebVOWL />
+        </WorkbenchMenuItems>
     }
 }
