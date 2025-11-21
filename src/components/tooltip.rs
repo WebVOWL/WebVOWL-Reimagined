@@ -102,7 +102,7 @@ where
     );
 
     view! {
-        <div class="group relative inline-block">
+        <div class="group relative inline-block m-2">
             {children()}
             <div class=tooltip_class>
                 <span class=content_class></span>
