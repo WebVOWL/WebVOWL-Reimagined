@@ -199,9 +199,8 @@ pub fn FilterMenu() -> impl IntoView {
     let predefined_values = vec![
         2, 4, 1, 20, 7, 3, 5, 11, 13, 17, 4, 2, 6, 8, 9, 10, 12, 14, 15, 16, 18, 19,
     ];
-    for (idx, node_type) in undefined_types.iter().enumerate() {
-        let value = predefined_values[idx % predefined_values.len()];
-        counts.insert(*node_type, value);
+    for (i, node_type) in undefined_types.iter().enumerate() {
+        counts.insert(*node_type, predefined_values[i]);
     }
 
     //Create Misc group if there are undefined types.
