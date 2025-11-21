@@ -59,9 +59,9 @@
     [dependencies.grapher]
         #branch="render_test"
         features=["webgl"]
-        #git="https://github.com/WebVOWL/RustGrapher"
+        git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
-        path="../RustGrapher"
+        # path="../RustGrapher"
         version="0.3"
 
     [dependencies.web-sys]
