@@ -13,17 +13,22 @@
 .button {
     position: absolute;
     font-size: 2em;
+    height: 35px;
+    min-width: 35px;
+    max-width: 35px;
+    width: 35px;
+    background-color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    // color: #000000;
-    // border: 1px solid #000000;
+    color: #000000;
+    border: 1px solid #000000;
     cursor: pointer;
 }
 
-// .button:hover {
-//     background-color: #d90;
-// }
+.button:hover {
+    background-color: #d90;
+}
 
 // Matrix layout:
 // 0-0 is the bottom-right corner
