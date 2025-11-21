@@ -28,12 +28,10 @@ pub fn WorkBenchButton(
 #[component]
 fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl IntoView {
     view! {
-        <div class="workbench-menu-header">
+        <div class="flex justify-center">
             <h3>{title}</h3>
         </div>
-        <div>
-            {children()}
-        </div>
+        <div>{children()}</div>
     }
 }
 
