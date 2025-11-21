@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 
-//Convert a NodeType debug string to a readable display name with spaces between capital letters
+//Convert a NodeType string to a readable display name with spaces between capital letters
 fn format_node_type_name(node_type: &NodeType) -> String {
     let debug_str = format!("{:?}", node_type);
     let mut result = String::new();
