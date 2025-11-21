@@ -1,6 +1,5 @@
 use grapher::web::prelude::NodeType;
 use leptos::prelude::*;
-use strum::IntoEnumIterator;
 
 fn format_node_type_name(node_type_str: &str) -> String {
     let mut result = String::new();

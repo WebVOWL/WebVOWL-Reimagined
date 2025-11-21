@@ -12,21 +12,8 @@ use leptos::prelude::*;
 use options_menu::OptionsMenu;
 use about_menu::AboutMenu;
 use ontology_menu::OntologyMenu;
-use export_menu::ExportMenu;
-use thaw::*;
-
-#[component]
-pub fn WorkBenchButton(
-    #[prop(default=ButtonShape::Rounded)] shape: ButtonShape,
-    icon: icondata::Icon,
-    #[prop(into)] text: String,
-) -> impl IntoView {
-    view! {
-        <Button shape=shape icon=icon>
-            {text}
-        </Button>
-    }
-}
+use options_menu::OptionsMenu;
+use search_menu::SearchMenu;
 
 #[component]
 fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl IntoView {
@@ -41,32 +28,6 @@ fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl I
         </div>
     }
 }
-
-// #[component]
-// pub fn Workbench() -> impl IntoView {
-//     view! {
-//         <Flex
-//             class="workbench"
-//             align=FlexAlign::Center
-//             justify=FlexJustify::SpaceBetween
-//             vertical=true
-//         >
-//             <Flex vertical=true gap=FlexGap::Large>
-//                 <OntologyMenu />
-//                 <OntologyMenu />
-//             </Flex>
-//             <Flex
-//                 style="padding-bottom: 2rem;"
-//                 vertical=true
-//                 gap=FlexGap::Large
-//             >
-//                 <ThemeSelection />
-//                 <OptionsMenu />
-//                 <AboutMenu />
-//             </Flex>
-//         </Flex>
-//     }
-// }
 
 #[component]
 pub fn NewWorkbench() -> impl IntoView {
