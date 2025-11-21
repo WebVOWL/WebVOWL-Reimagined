@@ -74,7 +74,7 @@
         git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
         # path="../RustGrapher"
-        version="0.3"
+        # version="0.3"
 
     [dependencies.web-sys]
         version="0.3.77"
