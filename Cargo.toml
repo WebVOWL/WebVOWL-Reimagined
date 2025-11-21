@@ -2,7 +2,13 @@
     authors=["TheRealMorgenfrue"]
     description="WebVOWL rebuilt from stratch with a strong focus on performance and scalability."
     edition="2024"
-    keywords=["force-directed-graph", "graph", "ontology", "vowl", "web"]
+    keywords=[
+        "force-directed-graph",
+        "graph",
+        "ontology",
+        "visualization",
+        "web",
+    ]
     license-file="LICENSE"
     name="webvowl-reimagined"
     readme="README.md"
@@ -30,6 +36,7 @@
     leptos_meta={version="0.8.5"}
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
+    num="0.4.3"
     rayon="1.10"
     reqwest={version="0.12.24", optional=true}
     strum={version="0.27", features=["derive"]}
@@ -49,6 +56,11 @@
         ]
         version="0.6.0"
 
+    [dependencies.leptos-use]
+        features=["on_click_outside", "use_preferred_dark"]
+        version="0.16.3"
+
+
     [dependencies.thaw]
         features=["nightly"]
         # path="../thaw/thaw"
@@ -62,19 +74,29 @@
         git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
         # path="../RustGrapher"
-        version="0.3"
+        # version="0.3"
 
     [dependencies.web-sys]
         version="0.3.77"
         # https://docs.rs/web-sys/latest/web_sys/#modules
-        features=["Document", "Element", "Window", "FormData", "SubmitEvent"]
+        features=[
+            "Document",
+            "Element",
+            "Window",
+            "FormData",
+            "SubmitEvent",
+            "FileList",
+            "HtmlInputElement",
+            "HtmlCollection",
+            "Blob",
+        ]
 
 
 [features]
     csr=["leptos/csr"]
     hydrate=["leptos/hydrate", "thaw/hydrate", "nonce"]
     nonce=["leptos/nonce"]
-    server=["dep:env_logger", "dep:reqwest", "dep:tokio"]
+    server=["dep:env_logger", "dep:reqwest", "dep:tokio", "leptos-use/actix"]
     ssr=[
         "dep:actix-files",
         "dep:actix-web",
@@ -82,6 +104,7 @@
         "leptos/ssr",
         "leptos_meta/ssr",
         "leptos_router/ssr",
+        "leptos-use/ssr",
         "thaw/ssr",
     ]
     wasm=[

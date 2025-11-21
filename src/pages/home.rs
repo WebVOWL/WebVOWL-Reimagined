@@ -1,7 +1,4 @@
-// use crate::components::menu::right_side_bar::RightSidebar;
-use crate::components::menu::workbench::NewWorkbench;
-use crate::components::menu::right_side_bar::RightSidebar;
-
+use crate::blocks::{right_side_bar::RightSidebar, workbench::NewWorkbench};
 use leptos::prelude::*;
 use leptos_meta::*;
 
@@ -10,7 +7,7 @@ pub fn Home() -> impl IntoView {
     view! {
         <Title text="WebVOWL Reimagined" />
         <main class="-z-99">
-            <canvas class="-z-98 size-full fixed" id="canvas" />
+            <canvas class="fixed -z-98 size-full" id="canvas" />
             <NewWorkbench />
             <RightSidebar />
         </main>

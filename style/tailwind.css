@@ -1,1 +1,38 @@
 @import "tailwindcss";
+
+/* Marker for dark mode support */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Defines custom CSS variables */
+/* @theme static {
+    --thumb-height: 1.125em;
+    --track-height: 0.125em;
+    --track-color: rgba(0, 0, 0, 0.2);
+    --brightness-hover: 180%;
+    --brightness-down: 80%;
+    --clip-edges: 0.125em;
+} */
+
+/* Utilities for sliders */
+/* @utility slider-thumb-h-* {
+    --thumb-height: --value(number);
+    --thumb-height: --value([number]);
+}
+
+@utility slider-track-h-* {
+    --track-height: --value(number);
+    --track-height: --value([number]);
+}
+
+@utility slider-bright-hover-* {
+    --brightness-hover: --value(percentage);
+}
+
+@utility slider-bright-down-* {
+    --brightness-down: --value(percentage);
+}
+
+@utility slider-clip-* {
+    --track-height: --value(integer);
+    --track-height: --value([integer]);
+} */

@@ -8,6 +8,7 @@ use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 use log::info;
 use webvowl_reimagined::app::App;
+use webvowl_reimagined::components::theme::Themes;
 use webvowl_reimagined::hydration_scripts::HydrationScripts as Hydro;
 
 #[actix_web::main]
@@ -33,10 +34,13 @@ async fn main() -> std::io::Result<()> {
                 let leptos_options = leptos_options.clone();
                 move || {
                     use leptos::prelude::*;
+                    use leptos_use::use_preferred_dark;
+
+                    let is_dark = use_preferred_dark();
 
                     view! {
                         <!DOCTYPE html>
-                        <html lang="en">
+                        <html class=("dark", move || { *is_dark.read() }) lang="en">
                             <head>
                                 <meta charset="utf-8" />
                                 <meta description="WebVOWL rebuilt from stratch with a strong focus on performance and scalability" />

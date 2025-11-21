@@ -126,31 +126,6 @@ impl NetworkModule {
     }
 }
 
-/// Local reads file and calls for the datatype label and returns (label, data content)
-#[server(input = MultipartFormData)]
-pub async fn handle_local(data: MultipartData) -> Result<usize, ServerFnError> {
-    let mut data = data.into_inner().unwrap();
-
-    // match fs::read_to_string(&path) {
-    //     Ok(content) => Ok((
-    //         Self::find_data_type(&path).unwrap_or(DataType::RDF),
-    //         content,
-    //     )),
-    //     Err(e) => Err(format!("Error reading local file: {}", e)),
-    // }
-
-    // this will just measure the total number of bytes uploaded
-    let mut count = 0;
-    while let Ok(Some(mut field)) = data.next_field().await {
-        while let Ok(Some(chunk)) = field.chunk().await {
-            let len = chunk.len();
-            count += len;
-        }
-    }
-
-    Ok(count)
-}
-
 pub async fn retrieval_handler(
     query: web::Query<HashMap<String, String>>, // turns URL into query parameters (endpoint, data)
     data: web::Data<NetworkModule>, // shared instance so we only have one NetworkModule with client shared by all users.
