@@ -27,7 +27,7 @@ pub fn ListElement(
                 <span class="text-sm font-medium">{title}</span>
             </a>
             <Show when=move || *show_element.read() fallback=|| () >
-              <div node_ref=target class="absolute top-0 m-4 left-full w-fit max-h-[80vh] overflow-y-scroll bg-white border-gray-100">
+              <div node_ref=target class="absolute top-0 m-4 left-full w-fit max-h-[80vh] min-h-[80vh] overflow-y-scroll bg-white border-gray-100">
                   {children()}
               </div>
             </Show>
