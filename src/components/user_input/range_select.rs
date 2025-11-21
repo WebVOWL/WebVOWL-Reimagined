@@ -23,20 +23,17 @@ where
         text-blue-500 \
         bg-black-300 \
         text-2xl \
-        slider-thumb-h-2 \
-        slider-track-h-0.5 \
         active:cursor-grabbing \
         disabled:grayscale \
         disabled:opacity-30% \
-        disabled:cursor-not-allowed \
+        disabled:cursor-not-allowed
         "
     );
-    // rounded-full \
 
     view! {
-        <div class="flex justify-center w-70 h-fit">
+        <div class="flex flex-col justify-center content-around size-fit">
             <label
-                class="block text-sm font-medium text-gray-900 w-fit"
+                class="text-sm font-medium text-gray-900 w-fit"
                 for=name.clone()
             >
                 {label}
