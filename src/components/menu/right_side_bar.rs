@@ -1,6 +1,39 @@
 use crate::components::buttons::graph_interaction_buttons::GraphInteractionButtons;
 use leptos::prelude::*;
-use thaw::*;
+
+#[component]
+pub fn Accordion(#[prop(into)] title: String, children: Children) -> impl IntoView {
+    let (is_open, set_is_open) = signal(false);
+
+    view! {
+        <div class="border-b border-gray-200">
+            <button
+                class="flex justify-between items-center py-3 px-4 w-full font-medium text-left text-gray-700 transition-colors hover:bg-gray-50"
+                on:click=move |_| set_is_open.update(|v| *v = !*v)
+            >
+                <span>{title.clone()}</span>
+                <span
+                    class="text-gray-500 transition-transform"
+                    class=("rotate-180", move || is_open.get())
+                >
+                    "▼"
+                </span>
+            </button>
+            <div
+                class="overflow-hidden transition-all duration-300"
+                style=move || {
+                    if is_open.get() {
+                        "max-height: 1000px; opacity: 1;"
+                    } else {
+                        "max-height: 0px; opacity: 0;"
+                    }
+                }
+            >
+                <div class="py-3 px-4 text-gray-700 bg-white">{children()}</div>
+            </div>
+        </div>
+    }
+}
 
 #[component]
 pub fn OntologyIri() -> impl IntoView {
@@ -46,20 +79,18 @@ pub fn Language() -> impl IntoView {
         "french".to_string(),
     ]);
     view! {
-        <ConfigProvider>
-            <p class="sidebar-section">
-                "Language(s):"
-                <Select class="language-button">
-                    {move || {
-                        ontologylanguages
-                            .get()
-                            .into_iter()
-                            .map(|lang| view! { <option>{lang}</option> })
-                            .collect_view()
-                    }}
-                </Select>
-            </p>
-        </ConfigProvider>
+        <p class="sidebar-section">
+            "Language(s):"
+            <select class="py-2 px-3 mt-2 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                {move || {
+                    ontologylanguages
+                        .get()
+                        .into_iter()
+                        .map(|lang| view! { <option>{lang}</option> })
+                        .collect_view()
+                }}
+            </select>
+        </p>
     }
 }
 
@@ -67,18 +98,9 @@ pub fn Language() -> impl IntoView {
 pub fn Description() -> impl IntoView {
     let ontologydescription = RwSignal::new("The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.".to_string());
     view! {
-        <ConfigProvider>
-            <Accordion class="accordion" collapsible=true multiple=true>
-                <AccordionItem value="description">
-                    <AccordionHeader slot>
-                        <p class="accordion-header">"Description"</p>
-                    </AccordionHeader>
-                    <p class="accordion-section-content">
-                        {move || ontologydescription.get()}
-                    </p>
-                </AccordionItem>
-            </Accordion>
-        </ConfigProvider>
+        <Accordion title="Description">
+            <p>{move || ontologydescription.get()}</p>
+        </Accordion>
     }
 }
 
@@ -86,84 +108,60 @@ pub fn Description() -> impl IntoView {
 pub fn MetaData() -> impl IntoView {
     let metadata = RwSignal::new("The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.The Friend of a Friend (FOAF) RDF vocabulary, described using W3C RDF Schema and the Web Ontology Language.".to_string());
     view! {
-        <ConfigProvider>
-            <Accordion class="accordion" collapsible=true multiple=true>
-                <AccordionItem value="metadata">
-                    <AccordionHeader slot>
-                        <p class="accordion-header">"Metadata"</p>
-                    </AccordionHeader>
-                    <p class="accordion-section-content">
-                        {move || metadata.get()}
-                    </p>
-                </AccordionItem>
-            </Accordion>
-        </ConfigProvider>
+        <Accordion title="Metadata">
+            <p>{move || metadata.get()}</p>
+        </Accordion>
     }
 }
 
 #[component]
 pub fn SelectionDetails() -> impl IntoView {
+    let selection_details = RwSignal::new("Select an element in the visualization.".to_string());
     view! {
-        <ConfigProvider>
-            <Accordion class="accordion" collapsible=true multiple=true>
-                <AccordionItem value="selection details">
-                    <AccordionHeader slot>
-                        <p class="accordion-header">"Selection Details"</p>
-                    </AccordionHeader>
-                    <p class="accordion-section-content">
-                        "Select an element in the visualization."
-                    </p>
-                </AccordionItem>
-            </Accordion>
-        </ConfigProvider>
+        <Accordion title="Selection Details">
+            <p>{move || selection_details.get()}</p>
+        </Accordion>
     }
 }
 
 #[component]
 pub fn ToggleRightSidebarButton() -> impl IntoView {
-    let open = use_context::<RwSignal<bool>>().unwrap();
-
+    let is_open = RwSignal::new(true);
     view! {
-        <button
-            class="toggle-sidebar-btn"
-            class=(
-                "toggle-sidebar-btn-collapsed",
-                move || *open.read() == false,
-            )
-            on:click=move |_| {
-                open.update(|value| *value = !*value);
-            }
-        >
-            {move || if *open.read() { ">" } else { "<" }}
-        </button>
+        <div data-sidebar-open=move || is_open.get().to_string()>
+            <button
+                class="toggle-sidebar-btn"
+                class=("toggle-sidebar-btn-collapsed", move || !is_open.get())
+                on:click=move |_| {
+                    is_open.update(|value| *value = !*value);
+                }
+            >
+                {move || if is_open.get() { ">" } else { "<" }}
+            </button>
+            <div
+                class="sidebar"
+                class=("sidebar-collapse", move || !is_open.get())
+                class=("sidebar-expand", move || is_open.get())
+            >
+                <div class="sidebar-content">
+                    <p class="ontology-title">
+                        "Friend of a Friend (FOAF) vocabulary"
+                    </p>
+                    <OntologyIri />
+                    <Version />
+                    <Author />
+                    <Language />
+                    <Description />
+                    <MetaData />
+                    <SelectionDetails />
+                </div>
+            </div>
+            <GraphInteractionButtons is_sidebar_open=is_open />
+        </div>
     }
 }
 
 #[component]
 pub fn RightSidebar() -> impl IntoView {
-    let open = RwSignal::new(true);
-    provide_context(open);
-
-    view! {
-        <ToggleRightSidebarButton />
-        <div
-            class:sidebar
-            class=("sidebar-collapse", move || *open.read() == false)
-            class=("sidebar-expand", move || *open.read())
-        >
-            <div class="sidebar-content">
-                <p class="ontology-title">
-                    "Friend of a Friend (FOAF) vocabulary"
-                </p>
-                <OntologyIri />
-                <Version />
-                <Author />
-                <Language />
-                <Description />
-                <MetaData />
-                <SelectionDetails />
-            </div>
-        </div>
-        <GraphInteractionButtons />
-    }
+    view! { <ToggleRightSidebarButton /> }
 }
