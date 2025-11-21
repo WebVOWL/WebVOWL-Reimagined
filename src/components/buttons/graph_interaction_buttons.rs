@@ -1,7 +1,7 @@
+use crate::components::icon::Icon;
 use grapher::web::prelude::EVENT_DISPATCHER;
 use grapher::web::prelude::RenderEvent;
 use leptos::prelude::*;
-use crate::components::icon::MaybeShowIcon as Icon;
 
 #[component]
 pub fn PauseButton(#[prop(into)] is_sidebar_open: RwSignal<bool>) -> impl IntoView {
