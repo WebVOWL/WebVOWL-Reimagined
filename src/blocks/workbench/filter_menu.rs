@@ -1,7 +1,7 @@
+use super::WorkbenchMenuItems;
 use grapher::web::prelude::NodeType;
 use leptos::prelude::*;
 use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
 use strum::IntoEnumIterator;
 
 //Convert a NodeType string to a readable display name with spaces between capital letters
@@ -220,22 +220,22 @@ pub fn FilterMenu() -> impl IntoView {
         });
     }
 
-    let groups = Rc::new(groups);
+    let groups = groups;
     // Signals to track open/closed state of groups and checked state of node types
     let (opens, set_opens) = signal(vec![false; groups.len()]);
     let mut initial_checks: HashMap<NodeType, bool> = HashMap::new();
     // sets all node types to checked by default
-    for g in groups.as_ref().iter() {
+    for g in groups.iter() {
         for child in g.children.iter() {
             initial_checks.insert(child.node_type, true);
         }
     }
     let (checks, set_checks) = signal(initial_checks);
 
-    view! {
-        <div class="filter-menu">
-            <h3 class="mb-2 text-lg font-semibold">"Filter by node type"</h3>
+    let groups_len = groups.len();
 
+    view! {
+        <WorkbenchMenuItems title="Filter by node type">
             <div class="flex gap-2 items-center pb-3 mb-3 border-b">
                 <label class="flex gap-2 items-center cursor-pointer">
                     // checkbox to enable/disable all filters
@@ -287,10 +287,9 @@ pub fn FilterMenu() -> impl IntoView {
                 </label>
             </div>
             // Map each node group and node type to a checkbox with count
-            {(0..groups.len())
+            {(0..groups_len)
                 .map(|groupIndex| {
-                    let groups = groups.clone();
-                    let group = groups.as_ref()[groupIndex].clone();
+                    let group = groups[groupIndex].clone();
                     let opens = opens.clone();
                     let set_opens = set_opens.clone();
                     let checks = checks.clone();
@@ -300,7 +299,6 @@ pub fn FilterMenu() -> impl IntoView {
                         .iter()
                         .map(|node| *counts.get(&node.node_type).unwrap_or(&0))
                         .sum();
-
                     view! {
                         // Group header with toggle and select/deselect all in group
                         <div class="pb-2 mb-2 border-b">
@@ -431,7 +429,7 @@ pub fn FilterMenu() -> impl IntoView {
                         </div>
                     }
                 })
-                .collect::<Vec<_>>()}
-        </div>
+            .collect::<Vec<_>>()}
+        </WorkbenchMenuItems>
     }
 }
