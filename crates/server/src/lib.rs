@@ -1,3 +1,6 @@
+//! This crate contains the client- and server code for the new WebVOWL.
+
+// For JS naming compatibility
 #![allow(non_snake_case)]
 
 #[cfg(feature = "wasm")]
