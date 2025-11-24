@@ -196,69 +196,76 @@ pub fn SearchMenu() -> impl IntoView {
                     when=move || !filtered_results.get().is_empty()
                     fallback=|| view! { <div></div> }
                 >
-                <div class="overflow-y-auto absolute top-12 z-50 w-full bg-white rounded-lg">
-                    <div class="flex flex-col divide-y divide-gray-200">
-                        <For
-                            each=move || filtered_results.get()
-                            key=|(category_name, instances)| {
-                                format!("{}-{}", category_name, instances.join(","))
-                            }
-                            children=move |(category_name, matching_instances)| {
-                                let stored_instances = StoredValue::new(matching_instances);
-                                let cat_name_for_click = category_name.clone();
-
-                                view! {
-                                    <div>
-                                        <div
-                                            class="flex sticky top-0 z-10 justify-between items-center p-3 bg-white border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-100"
-                                            on:click=move |_| {
-                                                let current = expanded_category.get();
-                                                if current == Some(cat_name_for_click.clone()) {
-                                                    expanded_category.set(None);
-                                                } else {
-                                                    expanded_category.set(Some(cat_name_for_click.clone()));
-                                                }
-                                            }
-                                        >
-                                            <h4 class="font-semibold text-gray-700">
-                                                {format_node_type_name(&category_name)}
-                                            </h4>
-                                            <span class="text-xs text-gray-400">
-                                                {move || {
-                                                    format!(
-                                                        "{} matches",
-                                                        stored_instances.with_value(|v| v.len()),
-                                                    )
-                                                }}
-                                            </span>
-                                        </div>
-
-                                        <Show
-                                            when=move || {
-                                                expanded_category.get() == Some(category_name.clone())
-                                            }
-                                            fallback=|| view! { <div></div> }
-                                        >
-                                            <div class="bg-gray-50 border-t border-gray-100">
-                                                <For
-                                                    each=move || stored_instances.get_value()
-                                                    key=|instance| instance.clone()
-                                                    children=move |instance| {
-                                                        view! {
-                                                            <div class="p-2 pl-6 text-sm text-gray-600 cursor-pointer hover:text-blue-600 hover:bg-blue-50">
-                                                                {instance}
-                                                            </div>
-                                                        }
-                                                    }
-                                                />
-                                            </div>
-                                        </Show>
-                                    </div>
+                    <div class="overflow-y-auto absolute top-12 z-50 w-full bg-white rounded-lg">
+                        <div class="flex flex-col divide-y divide-gray-200">
+                            <For
+                                each=move || filtered_results.get()
+                                key=|(category_name, instances)| {
+                                    format!("{}-{}", category_name, instances.join(","))
                                 }
-                            }
-                        />
+                                children=move |(category_name, matching_instances)| {
+                                    let stored_instances = StoredValue::new(matching_instances);
+                                    let cat_name_for_click = category_name.clone();
+
+                                    view! {
+                                        <div>
+                                            <div
+                                                class="flex sticky top-0 z-10 justify-between items-center p-3 bg-white border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-100"
+                                                on:click=move |_| {
+                                                    let current = expanded_category.get();
+                                                    if current == Some(cat_name_for_click.clone()) {
+                                                        expanded_category.set(None);
+                                                    } else {
+                                                        expanded_category.set(Some(cat_name_for_click.clone()));
+                                                    }
+                                                }
+                                            >
+                                                <div class="flex items-center gap-2">
+                                                    <img
+                                                        src=format!("/node_legends/{}.png", category_name)
+                                                        alt={format!("{} icon", category_name)}
+                                                        class="w-8 h-8 object-contain"
+                                                    />
+                                                    <h4 class="font-semibold text-gray-700">
+                                                        {format_node_type_name(&category_name)}
+                                                    </h4>
+                                                </div>
+                                                <span class="text-xs text-gray-400">
+                                                    {move || {
+                                                        format!(
+                                                            "{} matches",
+                                                            stored_instances.with_value(|v| v.len()),
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+
+                                            <Show
+                                                when=move || {
+                                                    expanded_category.get() == Some(category_name.clone())
+                                                }
+                                                fallback=|| view! { <div></div> }
+                                            >
+                                                <div class="bg-gray-50 border-t border-gray-100">
+                                                    <For
+                                                        each=move || stored_instances.get_value()
+                                                        key=|instance| instance.clone()
+                                                        children=move |instance| {
+                                                            view! {
+                                                                <div class="p-2 pl-6 text-sm text-gray-600 cursor-pointer hover:text-blue-600 hover:bg-blue-50">
+                                                                    {instance}
+                                                                </div>
+                                                            }
+                                                        }
+                                                    />
+                                                </div>
+                                            </Show>
+                                        </div>
+                                    }
+                                }
+                            />
+                        </div>
                     </div>
-                </div>
                 </Show>
             </div>
         </WorkbenchMenuItems>

@@ -395,7 +395,12 @@ pub fn FilterMenu() -> impl IntoView {
                                         let set_checks = set_checks.clone();
                                         view! {
                                             <div class="flex justify-between items-center py-1 text-sm text-gray-700">
-                                                <label class="flex gap-2 items-center cursor-pointer">
+                                                <label class="flex gap-3 items-center cursor-pointer">
+                                                    <img
+                                                        src=format!("/node_legends/{:?}.png", child_type)
+                                                        alt={format!("{} icon", child_display)}
+                                                        class="w-8 h-8 object-contain"
+                                                    />
                                                     // Checkbox for individual node type
                                                     <input
                                                         type="checkbox"
