@@ -1,0 +1,18 @@
+[package]
+    authors=["TheRealMorgenfrue"]
+    description="Database code for WebVOWL Reimagined"
+    edition="2024"
+    keywords=["rdf", "graph", "sparql", "datafusion"]
+    license-file="LICENSE"
+    name="webvowl-database"
+    readme="README.md"
+    repository="https://github.com/WebVOWL/WebVOWL-Reimagined"
+    version="0.0.1"
+
+[lib]
+    crate-type=["cdylib", "rlib"]
+
+
+[dependencies]
+    rdf-fusion="0.1.0"
+    webvowl-parser={path="../parser"}
