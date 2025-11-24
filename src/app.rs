@@ -6,7 +6,6 @@ use leptos_router::{
     StaticSegment,
     components::{FlatRoutes, Route, Router},
 };
-
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
@@ -15,7 +14,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="webvowl" href="/pkg/webvowl.css" />
         <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico" />
         <Router>
-            <FlatRoutes fallback=|| "Page not found.">
+            <FlatRoutes fallback=|| "404 - Page not found.">
                 <Route path=StaticSegment("") view=Home />
             </FlatRoutes>
         </Router>

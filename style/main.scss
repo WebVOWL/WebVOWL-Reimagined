@@ -1,19 +1,14 @@
-@use "canvas";
 @use "workbench";
 @use "sidebar";
-@use "zoomslider";
-@use "centergraph";
-@use "filtermenu";
-@use "zoombuttons";
-@use "resetbutton";
-@use "pausebutton";
+@use "graph_interact_buttons";
+@use "filter_menu";
+// @use "webkit/slider.scss";
+
 body {
-    background: rgba(201, 196, 196, 1);
+    // background: rgba(201, 196, 196, 1);
     font-size: 14px;
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
-    // line-height: 1;
     margin: 0;
-    // overflow: hidden;
     padding: 0;
     position: fixed;
     height: 100%;

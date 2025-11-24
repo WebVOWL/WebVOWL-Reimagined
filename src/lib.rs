@@ -1,4 +1,4 @@
-#![recursion_limit = "4096"]
+#![allow(non_snake_case)]
 
 #[cfg(feature = "wasm")]
 pub use grapher::web::init_render;
@@ -13,6 +13,7 @@ pub use wasm_bindgen_rayon::init_thread_pool;
 pub mod network;
 
 pub mod app;
+pub mod blocks;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
@@ -25,7 +26,7 @@ pub fn hydrate() {
     use crate::app::App;
     use log::info;
     console_error_panic_hook::set_once();
-    console_log::init_with_level(log::Level::Info).expect("error initializing logge");
+    console_log::init_with_level(log::Level::Info).expect("error initializing logger");
     leptos::mount::hydrate_body(App);
     info!("Hydration complete");
 }
