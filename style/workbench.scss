@@ -50,9 +50,6 @@
 
 .export-button {
     width: 100%;
-    // background-color: rgb(24, 32, 42);
-    // color: #ecf0f1;
-    // border: 1px solid #34495e;
     padding: 0.75rem;
     text-align: left;
     align-items: center;
@@ -65,32 +62,11 @@
     width: 100%;
 }
 
-// .workbench-slider .thaw-slider__rail {
-//     background-color: #34495e !important;
-//     height: 4px !important;
-// }
-
-// .workbench-slider .thaw-slider__thumb {
-//     background-color: #ecf0f1;
-//     border: 3px solid #34495e;
-//     border-radius: 50%;
-// }
-
 .workbench-checkbox {
     margin: 0.5rem 0 1rem 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.9rem;
-    // color: #bdc3c7;
     font-weight: 500;
 }
-
-// .workbench-checkbox .thaw-checkbox__input {
-//     width: 18px;
-//     height: 18px;
-//     background-color: #34495e;
-//     border: 1px solid #34495e;
-//     border-radius: 50%;
-//     cursor: pointer;
-// }
