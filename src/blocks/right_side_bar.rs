@@ -125,7 +125,7 @@ pub fn SelectionDetails() -> impl IntoView {
 }
 
 #[component]
-pub fn ToggleRightSidebarButton() -> impl IntoView {
+pub fn RightSidebar() -> impl IntoView {
     let is_open = RwSignal::new(true);
     view! {
         <div data-sidebar-open=move || is_open.get().to_string()>
@@ -164,9 +164,4 @@ pub fn ToggleRightSidebarButton() -> impl IntoView {
             <GraphInteractionButtons is_sidebar_open=is_open />
         </div>
     }
-}
-
-#[component]
-pub fn RightSidebar() -> impl IntoView {
-    view! { <ToggleRightSidebarButton /> }
 }
