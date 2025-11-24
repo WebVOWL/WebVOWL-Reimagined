@@ -399,7 +399,7 @@ pub fn FilterMenu() -> impl IntoView {
                                                     <img
                                                         src=format!("/node_legends/{:?}.png", child_type)
                                                         alt={format!("{} icon", child_display)}
-                                                        class="w-7 h-7 object-contain"
+                                                        class="w-8 h-8 object-contain"
                                                     />
                                                     // Checkbox for individual node type
                                                     <input
