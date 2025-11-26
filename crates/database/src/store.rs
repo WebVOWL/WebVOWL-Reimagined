@@ -15,15 +15,15 @@ use std::{
     path::Path,
 };
 
-use crate::horned_oxi::{
-    errors::{HornedOxiError, HornedOxiErrorKind}
+use crate::errors::{
+    errors::{WebVowlStoreError, WebVowlStoreErrorKind}
 };
 
-pub struct HornedOxiStore<A> {
+pub struct WebVOWLStore<A> {
     pub session: Store,
     phantom: PhantomData<A>,
 }
-impl<A: ForIRI> HornedOxiStore<A> {
+impl<A: ForIRI> WebVOWLStore<A> {
     pub fn new(session: Store) -> Self {
         Self {
             session,
@@ -32,7 +32,7 @@ impl<A: ForIRI> HornedOxiStore<A> {
     }
 
     // TTL format -> (oxittl) RDF XML quads -> (horned_owl) Normalize OWL/RDF -> Quads -> Insert into Oxigraph
-    pub async fn insert_file(&self, fs: &Path, lenient: bool) -> Result<(), HornedOxiError> {
+    pub async fn insert_file(&self, fs: &Path, lenient: bool) -> Result<(), WebVowlStoreError> {
         let parser = parser_from_format(fs, lenient)?;
         
         self.session.load_from_reader(parser.parser, parser.input.as_slice()).await?;
@@ -57,10 +57,10 @@ pub enum ParserInput {
     Buffer(Cursor<Vec<u8>>),
 }
 impl ParserInput {
-    fn from_path(path: &Path) -> Result<Self, HornedOxiError> {
+    fn from_path(path: &Path) -> Result<Self, WebVowlStoreError> {
         std::fs::read(path)
             .map(ParserInput::File)
-            .map_err(HornedOxiError::from)
+            .map_err(WebVowlStoreError::from)
     }
 
     fn as_slice(&self) -> &[u8] {
@@ -91,7 +91,7 @@ pub fn path_type(path: &Path) -> Option<ResourceType> {
         _ => None,
     }
 }
-pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, HornedOxiError> {
+pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, WebVowlStoreError> {
     let make_parser = |fmt| {
         let path_str = path.to_str().unwrap();
         // TODO: Handle non default graph
