@@ -15,9 +15,7 @@ use std::{
     path::Path,
 };
 
-use crate::errors::{
-    errors::{WebVowlStoreError, WebVowlStoreErrorKind}
-};
+use crate::errors::{WebVowlStoreError, WebVowlStoreErrorKind};
 
 pub struct WebVOWLStore<A> {
     pub session: Store,
@@ -182,7 +180,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
                 input,
             })
         }
-        _ => Err(HornedOxiErrorKind::InvalidInput(format!(
+        _ => Err(WebVowlStoreErrorKind::InvalidInput(format!(
             "Unsupported parser: {}",
             path.display()
         ))),
