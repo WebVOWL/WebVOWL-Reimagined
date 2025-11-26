@@ -14,5 +14,6 @@
 
 
 [dependencies]
+    grapher={git="https://github.com/WebVOWL/RustGrapher"}
     rdf-fusion="0.1.0"
     webvowl-parser={path="../parser"}
