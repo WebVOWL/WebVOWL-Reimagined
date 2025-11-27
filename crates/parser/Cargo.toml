@@ -15,3 +15,6 @@
 
 [dependencies]
     horned-owl="1.2.0"
+    rdf-fusion="0.1.0"
+    tokio = "1.48.0"
+    futures = "0.3.31"
