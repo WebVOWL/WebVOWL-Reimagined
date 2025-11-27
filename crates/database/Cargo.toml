@@ -14,9 +14,11 @@
 
 
 [dependencies]
+    fluent-uri="0.4.1"
+    futures="0.3.31"
     grapher={git="https://github.com/WebVOWL/RustGrapher"}
-    rdf-fusion="0.1.0"
     horned-owl="1.2.0"
+    memchr="2.7.6"
+    rdf-fusion="0.1.0"
+    tokio="1.48.0"
     webvowl-parser={path="../parser"}
-    tokio = "1.48.0"
-    futures = "0.3.31"
