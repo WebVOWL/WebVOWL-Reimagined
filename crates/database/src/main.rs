@@ -19,8 +19,8 @@ pub async fn main() {
         .expect("Error inserting file");
     println!("Loaded {} quads", webvowl.session.len().await.unwrap());
     webvowl
-        .serialize_to_file(Path::new("data/output.owl"))
+        .serialize_to_file(Path::new("data/Output.owl"))
         .await
         .unwrap();
-    println!("Written to output.owl");
+    println!("Written to Output.owl");
 }
