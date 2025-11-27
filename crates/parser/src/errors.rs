@@ -1,9 +1,7 @@
-use std::{error::Error, panic::Location};
+use std::panic::Location;
 
 use horned_owl::error::HornedError;
-use rdf_fusion::{
-    error::LoaderError, model::IriParseError
-};
+use rdf_fusion::{error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError};
 
 #[derive(Debug)]
 pub enum WebVowlStoreErrorKind {
@@ -12,6 +10,7 @@ pub enum WebVowlStoreErrorKind {
     IOError(std::io::Error),
     IriParseError(IriParseError),
     LoaderError(LoaderError),
+    QueryEvaluationError(QueryEvaluationError),
 }
 
 #[derive(Debug)]
@@ -29,8 +28,6 @@ impl From<HornedError> for WebVowlStoreError {
         }
     }
 }
-
-
 
 impl From<IriParseError> for WebVowlStoreError {
     #[track_caller]
@@ -70,3 +67,13 @@ impl From<std::io::Error> for WebVowlStoreError {
         }
     }
 }
+impl From<QueryEvaluationError> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: QueryEvaluationError) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::QueryEvaluationError(error),
+            location: &Location::caller(),
+        }
+    }
+}
+
