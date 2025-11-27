@@ -1,7 +1,11 @@
 use rdf_fusion::store::Store;
+use std::fs::File;
 use std::path::Path;
 
-use webvowl_parser::{errors::WebVowlStoreError, parser_util::parser_from_format};
+use webvowl_parser::{
+    errors::WebVowlStoreError,
+    parser_util::{ResourceType, parse_stream_to, parser_from_format},
+};
 
 pub struct WebVOWLStore {
     pub session: Store,
@@ -19,6 +23,12 @@ impl WebVOWLStore {
             .load_from_reader(parser.parser, parser.input.as_slice())
             .await?;
 
+        Ok(())
+    }
+    pub async fn serialize_to_file(&self, path: &Path) -> Result<(), WebVowlStoreError> {
+            let mut file = File::create(path)?;
+            let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+            std::io::Write::write_all(&mut file, &results)?;
         Ok(())
     }
 }
