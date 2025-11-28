@@ -1,6 +1,6 @@
 use crate::serializers::formats::graph_display::GraphDisplayData;
 use fluent_uri::Iri;
-use grapher::web::prelude::ElementType;
+// use grapher::web::prelude::ElementType;
 use rdf_fusion::model::{
     BlankNodeRef, TermRef, VariableRef,
     vocab::{rdf, rdfs, xsd},
@@ -21,9 +21,9 @@ impl GraphDisplayDataSolutionSerializer {
 
     fn write_term<'a>(buffer: &mut GraphDisplayData, term: TermRef<'a>) {
         // TODO: Collect errors and show to frontend
-        let iri = Iri::parse(uri.as_str()).unwrap();
-        let path = iri.path();
-        let haystack = path.as_str().as_bytes();
+        // let iri = Iri::parse(value.as_str()).unwrap();
+        // let path = iri.path();
+        // let haystack = path.as_str().as_bytes();
 
         // A prefix determines what namespace the element belongs to
         let prefixes = [
@@ -33,7 +33,7 @@ impl GraphDisplayDataSolutionSerializer {
         ];
 
         // Doesnt work
-        let iri_type = memchr2("rdf", "owl", haystack);
+        // let iri_type = memchr2("rdf", "owl", haystack);
 
         match term {
             TermRef::NamedNode(uri) => {
@@ -89,9 +89,9 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
-    fn find_prefix(iri: Iri<&str>) -> NodeType {
-        let path = iri.path();
+    // fn find_prefix(iri: Iri<&str>) -> NodeType {
+    //     let path = iri.path();
 
-        let iri_type = memchr2("rdf", "owl", haystack);
-    }
+    //     let iri_type = memchr2("rdf", "owl", haystack);
+    // }
 }
