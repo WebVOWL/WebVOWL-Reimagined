@@ -19,6 +19,7 @@
     horned-owl="1.2.0"
     memchr="2.7.6"
     rdf-fusion="0.1.0"
+    tempfile="3.10"
     tokio="1.48.0"
     webvowl-parser={path="../parser"}
 
