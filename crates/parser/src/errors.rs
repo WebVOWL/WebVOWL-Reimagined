@@ -1,7 +1,9 @@
 use std::panic::Location;
 
 use horned_owl::error::HornedError;
-use rdf_fusion::{error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError};
+use rdf_fusion::{
+    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError,
+};
 
 #[derive(Debug)]
 pub enum WebVowlStoreErrorKind {
@@ -77,3 +79,36 @@ impl From<QueryEvaluationError> for WebVowlStoreError {
     }
 }
 
+impl std::fmt::Display for WebVowlStoreErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WebVowlStoreErrorKind::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
+            WebVowlStoreErrorKind::HornedError(e) => write!(f, "Horned error: {}", e),
+            WebVowlStoreErrorKind::IOError(e) => write!(f, "IO error: {}", e),
+            WebVowlStoreErrorKind::IriParseError(e) => write!(f, "IRI parse error: {}", e),
+            WebVowlStoreErrorKind::LoaderError(e) => write!(f, "Loader error: {}", e),
+            WebVowlStoreErrorKind::QueryEvaluationError(e) => {
+                write!(f, "Query evaluation error: {}", e)
+            }
+        }
+    }
+}
+
+impl std::fmt::Display for WebVowlStoreError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} at {}", self.inner, self.location)
+    }
+}
+
+impl std::error::Error for WebVowlStoreError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match &self.inner {
+            WebVowlStoreErrorKind::InvalidInput(_) => None,
+            WebVowlStoreErrorKind::HornedError(e) => Some(e),
+            WebVowlStoreErrorKind::IOError(e) => Some(e),
+            WebVowlStoreErrorKind::IriParseError(e) => Some(e),
+            WebVowlStoreErrorKind::LoaderError(e) => Some(e),
+            WebVowlStoreErrorKind::QueryEvaluationError(e) => Some(e),
+        }
+    }
+}

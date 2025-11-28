@@ -20,3 +20,4 @@
     webvowl-parser={path="../parser"}
     tokio = "1.48.0"
     futures = "0.3.31"
+    tempfile = "3.10"
