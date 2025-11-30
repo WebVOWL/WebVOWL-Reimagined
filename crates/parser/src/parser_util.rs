@@ -1,20 +1,25 @@
 use std::{
     fs::File,
-    io::{BufReader, Cursor},
+    io::{BufReader, Cursor, Write},
     path::Path,
 };
 
-use futures::StreamExt;
+use futures::{StreamExt, stream::{self, BoxStream}};
 use horned_owl::{
     io::{rdf::reader::ConcreteRDFOntology, *},
     model::{RcAnnotatedComponent, RcStr},
     ontology::component_mapped::RcComponentMappedOntology,
 };
 use rdf_fusion::{
-    execution::results::QuadStream, io::{JsonLdProfileSet, RdfFormat, RdfParser, RdfSerializer}, model::{GraphName, NamedNode}
+    execution::results::QuadStream,
+    io::{JsonLdProfileSet, RdfFormat, RdfParser, RdfSerializer},
+    model::{GraphName},
 };
+use tokio::sync::mpsc::{self, UnboundedSender};
+use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::errors::{WebVowlStoreError, WebVowlStoreErrorKind};
+use std::io;
 
 #[derive(Debug)]
 pub enum ResourceType {
@@ -76,62 +81,96 @@ pub fn format_from_resource_type(resource_type: &ResourceType) -> Option<RdfForm
         ResourceType::NTriples => Some(RdfFormat::NTriples),
         ResourceType::NQuads => Some(RdfFormat::NQuads),
         ResourceType::TriG => Some(RdfFormat::TriG),
-        ResourceType::JsonLd => Some(RdfFormat::JsonLd { profile: JsonLdProfileSet::default() }),
+        ResourceType::JsonLd => Some(RdfFormat::JsonLd {
+            profile: JsonLdProfileSet::default(),
+        }),
         ResourceType::N3 => Some(RdfFormat::N3),
         ResourceType::OWL => Some(RdfFormat::RdfXml),
         _ => None,
     }
 }
-pub async fn parse_stream_to(mut stream: QuadStream, output_type: ResourceType) -> Result<Vec<u8>, WebVowlStoreError> {
+pub async fn parse_stream_to(
+    mut stream: QuadStream,
+    output_type: ResourceType,
+) -> Result<BoxStream<'static, Result<Vec<u8>, WebVowlStoreError>>, WebVowlStoreError> {
     match output_type {
         ResourceType::OFN | ResourceType::OWX | ResourceType::OWL => {
+            let (tx, rx) = mpsc::unbounded_channel();
             let mut buf = Vec::new();
-            let mut serializer = RdfSerializer::from_format(
-                format_from_resource_type(&ResourceType::OWL)
-                .ok_or(WebVowlStoreErrorKind::InvalidInput(format!("Unsupported output type: {:?}", output_type)))?)
+            let mut serializer =
+                RdfSerializer::from_format(format_from_resource_type(&ResourceType::OWL).ok_or(
+                    WebVowlStoreErrorKind::InvalidInput(format!(
+                        "Unsupported output type: {:?}",
+                        output_type
+                    )),
+                )?)
                 .for_writer(&mut buf);
             while let Some(quad) = stream.next().await {
                 serializer.serialize_quad(&quad?)?;
             }
             serializer.finish()?;
-            
-            let mut reader = BufReader::new(Cursor::new(buf));
-            let mut writer = Vec::new();
-            let buf =match output_type {
-                ResourceType::OFN => {
-                    let (ont, prefix): (RcComponentMappedOntology, _) = 
-                    ofn::reader::read(&mut reader, ParserConfiguration::default())?;
-                    ofn::writer::write(&mut writer, &ont, Some(&prefix))?;
-                    writer
-                },
-                ResourceType::OWX => {
-                    let (ont, prefix): (RcComponentMappedOntology, _) = 
-                    owx::reader::read(&mut reader, ParserConfiguration::default())?;
-                    owx::writer::write(&mut writer, &ont, Some(&prefix))?;
-                    writer
-                },
-                ResourceType::OWL => {
-                    let (ont, _): (ConcreteRDFOntology<RcStr, RcAnnotatedComponent>, _) = 
-                    rdf::reader::read(&mut reader, ParserConfiguration::default())?;
-                    rdf::writer::write(&mut writer, &ont.into())?;
-                    writer
-                },
-                _ => return Err(WebVowlStoreErrorKind::InvalidInput(format!("Unsupported output type: {:?}", output_type)).into()),
-            };
 
-            Ok(buf)
+            let mut reader = BufReader::new(Cursor::new(buf));
+            tokio::task::spawn_blocking(move || {
+                let mut writer = ChannelWriter { sender: tx.clone() };
+                let result = (|| match output_type {
+                    ResourceType::OFN => {
+                        let (ont, prefix): (RcComponentMappedOntology, _) =
+                            ofn::reader::read(&mut reader, ParserConfiguration::default())?;
+                        ofn::writer::write(
+                            &mut writer, 
+                            &ont, 
+                            Some(&prefix))?;
+                        let _ = writer.flush();
+                        Ok(writer)
+                    }
+                    ResourceType::OWX => {
+                        let (ont, prefix): (RcComponentMappedOntology, _) =
+                            owx::reader::read(&mut reader, ParserConfiguration::default())?;
+                        owx::writer::write(
+                            &mut writer, 
+                            &ont, 
+                            Some(&prefix))?;
+                        let _ = writer.flush();
+                        Ok(writer)
+                    }
+                    ResourceType::OWL => {
+                        let (ont, _): (ConcreteRDFOntology<RcStr, RcAnnotatedComponent>, _) =
+                            rdf::reader::read(&mut reader, ParserConfiguration::default())?;
+                        rdf::writer::write(&mut writer, &ont.into())?;
+                        let _ = writer.flush();
+                        Ok(writer)
+                    }
+                    _ => Err(WebVowlStoreError::from(
+                        WebVowlStoreErrorKind::InvalidInput(format!(
+                            "Unsupported output type: {:?}",
+                            output_type
+                        )),
+                    )),
+                })();
+
+                if let Err(e) = result {
+                    let _ = tx.send(Err(e.into()));
+                }
+            });
+            Ok(UnboundedReceiverStream::new(rx)
+            .map(|result| result.map_err(WebVowlStoreError::from)).boxed())
         }
         _ => {
             let mut buf = Vec::new();
-            let mut serializer = RdfSerializer::from_format(
-                format_from_resource_type(&output_type)
-                .ok_or(WebVowlStoreErrorKind::InvalidInput(format!("Unsupported output type: {:?}", output_type)))?)
+            let mut serializer =
+                RdfSerializer::from_format(format_from_resource_type(&output_type).ok_or(
+                    WebVowlStoreErrorKind::InvalidInput(format!(
+                        "Unsupported output type: {:?}",
+                        output_type
+                    )),
+                )?)
                 .for_writer(&mut buf);
             while let Some(quad) = stream.next().await {
                 serializer.serialize_quad(&quad?)?;
             }
             serializer.finish()?;
-            Ok(buf)
+            Ok(stream::once(async move { Ok(buf) }).boxed())
         }
     }
 }
@@ -141,7 +180,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
         let path_str = path.to_str().unwrap();
         // TODO: Handle non default graph
         let parser = RdfParser::from_format(fmt).with_default_graph(GraphName::DefaultGraph);
-            //.with_default_graph(NamedNode::new(format!("file:://{}", path_str)).unwrap());
+        //.with_default_graph(NamedNode::new(format!("file:://{}", path_str)).unwrap());
         if lenient { parser.lenient() } else { parser }
     };
     let t_pat = path_type(path);
@@ -170,6 +209,23 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
 
             let mut buf = Vec::new();
             rdf::writer::write(&mut buf, &ontology.0.into())?;
+
+            Ok(PreparedParser {
+                parser: make_parser(RdfFormat::RdfXml),
+                input: ParserInput::Buffer(Cursor::new(buf)),
+            })
+        }
+        Some(ResourceType::OWL) => {
+            let b = horned_owl::model::Build::<RcStr>::new();
+            let iri = horned_owl::resolve::path_to_file_iri(&b, path);
+            let (ontology, _) = rdf::closure_reader::read::<
+                RcStr,
+                RcAnnotatedComponent,
+                ConcreteRDFOntology<RcStr, RcAnnotatedComponent>,
+            >(&iri, ParserConfiguration::default())?;
+
+            let mut buf = Vec::new();
+            rdf::writer::write(&mut buf, &ontology.into())?;
 
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::RdfXml),
@@ -220,19 +276,31 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
                 input,
             })
         }
-        Some(ResourceType::OWL) => {
-            let input = ParserInput::from_path(path)?;
-            Ok(PreparedParser {
-                parser: make_parser(RdfFormat::RdfXml),
-                input,
-            })
-        }
         _ => Err(WebVowlStoreErrorKind::InvalidInput(format!(
             "Unsupported parser: {}",
             path.display()
         ))),
     };
     Ok(prepared?)
+}
+struct ChannelWriter {
+    sender: UnboundedSender<Result<Vec<u8>, io::Error>>,
+}
+
+impl Write for ChannelWriter {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        let data = buf.to_vec();
+
+        self.sender
+            .send(Ok(data))
+            .map_err(|_| io::Error::new(io::ErrorKind::BrokenPipe, "Stream receiver dropped"))?;
+
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(()) // No internal buffering to flush
+    }
 }
 
 #[cfg(test)]
@@ -246,7 +314,9 @@ mod test {
         let session = Store::default();
         for resource in resources {
             let parser = parser_from_format(Path::new(&resource), false).unwrap();
-            let _ = session.load_from_reader(parser.parser, parser.input.as_slice()).await;
+            let _ = session
+                .load_from_reader(parser.parser, parser.input.as_slice())
+                .await;
             assert_ne!(
                 session.len().await.unwrap(),
                 0,
@@ -254,7 +324,6 @@ mod test {
                 resource
             );
         }
-        
     }
 
     #[tokio::test]
@@ -264,7 +333,9 @@ mod test {
         let resources = resources_with_suffix("data/owl-rdf", "owl");
         for resource in resources {
             let parser = parser_from_format(Path::new(&resource), false).unwrap();
-            let _ = session.load_from_reader(parser.parser, parser.input.as_slice()).await;
+            let _ = session
+                .load_from_reader(parser.parser, parser.input.as_slice())
+                .await;
             assert_ne!(
                 session.len().await.unwrap(),
                 0,
@@ -280,7 +351,9 @@ mod test {
         let resources = resources_with_suffix("data/owl-ttl", "ttl");
         for resource in resources {
             let parser = parser_from_format(Path::new(&resource), false).unwrap();
-            let _ = session.load_from_reader(parser.parser, parser.input.as_slice()).await;
+            let _ = session
+                .load_from_reader(parser.parser, parser.input.as_slice())
+                .await;
             assert_ne!(
                 session.len().await.unwrap(),
                 0,
