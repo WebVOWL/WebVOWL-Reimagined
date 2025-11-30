@@ -57,10 +57,15 @@ impl WebVOWLStore {
             "Store size before export: {}",
             self.session.len().await.unwrap_or(0)
         );
-        let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
-        String::from_utf8(results)
-            .map_err(|e| WebVowlStoreErrorKind::InvalidInput(e.to_string()).into())
+        let mut results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        let mut out = vec![];
+        while let Some(result) = results.next().await {
+            let result = result.unwrap();
+            out.extend(result);
+        }
+        Ok(String::from_utf8(out).unwrap())
     }
+
     pub async fn start_upload(&mut self, filename: &str) -> Result<(), WebVowlStoreError> {
         let extension = Path::new(filename)
             .extension()
