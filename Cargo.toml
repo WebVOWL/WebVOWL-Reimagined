@@ -163,8 +163,7 @@
                 "ssr",
                 "hydrate",
             ],
-            [
-            ],
+            [],
         ]
 
 # Default profile for devs, fast to compile, okay enough to run.
@@ -331,3 +330,5 @@
         #
         # Optional. Defaults to "/api". Env: SERVER_FN_PREFIX
         server-fn-prefix="/api"
+
+
