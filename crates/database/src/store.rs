@@ -1,3 +1,4 @@
+use futures::StreamExt;
 use rdf_fusion::store::Store;
 use std::fs::File;
 use std::path::Path;
@@ -26,9 +27,13 @@ impl WebVOWLStore {
         Ok(())
     }
     pub async fn serialize_to_file(&self, path: &Path) -> Result<(), WebVowlStoreError> {
-            let mut file = File::create(path)?;
-            let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
-            std::io::Write::write_all(&mut file, &results)?;
+        let mut file = File::create(path)?;
+        let mut results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            let result = result.unwrap();
+            std::io::Write::write_all(&mut file, &result)?;
+        }
+
         Ok(())
     }
 }
