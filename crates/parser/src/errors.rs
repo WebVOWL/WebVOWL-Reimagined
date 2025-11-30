@@ -1,7 +1,14 @@
-use std::panic::Location;
+use std::{
+    fmt::{Display, Formatter},
+    io::{Error, ErrorKind},
+    panic::Location,
+};
 
 use horned_owl::error::HornedError;
-use rdf_fusion::{error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError};
+use rdf_fusion::{
+    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError,
+};
+use tokio::task::JoinError;
 
 #[derive(Debug)]
 pub enum WebVowlStoreErrorKind {
@@ -11,12 +18,25 @@ pub enum WebVowlStoreErrorKind {
     IriParseError(IriParseError),
     LoaderError(LoaderError),
     QueryEvaluationError(QueryEvaluationError),
+    JoinError(JoinError),
 }
 
 #[derive(Debug)]
 pub struct WebVowlStoreError {
     inner: WebVowlStoreErrorKind,
     location: &'static Location<'static>,
+}
+
+impl Display for WebVowlStoreError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "WebVowlStoreError: {:?}", self.inner)
+    }
+}
+
+impl Into<Error> for WebVowlStoreError {
+    fn into(self) -> Error {
+        Error::new(ErrorKind::Other, self.to_string())
+    }
 }
 
 impl From<HornedError> for WebVowlStoreError {
@@ -76,4 +96,12 @@ impl From<QueryEvaluationError> for WebVowlStoreError {
         }
     }
 }
-
+impl From<JoinError> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: JoinError) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::JoinError(error),
+            location: &Location::caller(),
+        }
+    }
+}
