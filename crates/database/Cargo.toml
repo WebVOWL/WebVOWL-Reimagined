@@ -16,7 +16,7 @@
 [dependencies]
     grapher={git="https://github.com/WebVOWL/RustGrapher"}
     rdf-fusion="0.1.0"
-    horned-owl="1.2.0"
+    horned-owl={git="https://github.com/phillord/horned-owl", rev="c4f7835ecae70b5e7281dc23b9b7fc6daa497f1d"}
     webvowl-parser={path="../parser"}
     tokio = "1.48.0"
     futures = "0.3.31"
