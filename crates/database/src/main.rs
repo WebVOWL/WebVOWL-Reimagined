@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use futures::StreamExt;
 use rdf_fusion::store::Store;
 use webvowl_database::store::WebVOWLStore;
 use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
@@ -18,9 +19,14 @@ pub async fn main() {
         .await
         .expect("Error inserting file");
     println!("Loaded {} quads", webvowl.session.len().await.unwrap());
-    webvowl
-        .serialize_to_file(Path::new("data/Output.owl"))
+
+    let mut stream = parse_stream_to(webvowl.session.stream().await.unwrap(), ResourceType::OWL)
         .await
         .unwrap();
+    let mut out = vec![];
+    while let Some(result) = stream.next().await {
+        out.extend(result.unwrap());
+    }
+    println!("{}", String::from_utf8_lossy(&out));
     println!("Written to Output.owl");
 }
