@@ -4,7 +4,6 @@ use futures::StreamExt;
 use rdf_fusion::store::Store;
 use webvowl_database::store::WebVOWLStore;
 use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
-
 mod store;
 
 #[tokio::main]
