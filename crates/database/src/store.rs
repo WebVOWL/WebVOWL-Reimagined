@@ -41,6 +41,7 @@ impl WebVOWLStore {
 
         Ok(())
     }
+
     pub async fn serialize_to_file(&self, path: &Path) -> Result<(), WebVowlStoreError> {
         let mut file = File::create(path)?;
         let mut results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
@@ -100,5 +101,19 @@ impl WebVOWLStore {
         }
         self.upload_handle = None;
         Ok(())
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_insert_file() {
+        let session = Store::default();
+        let webvowl = WebVOWLStore::new(session);
+        let path = Path::new("data/test.ttl");
+        let _ = webvowl.insert_file(path, false).await;
     }
 }

@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use futures::{StreamExt, stream::{self, BoxStream}};
+use futures::{StreamExt, stream::BoxStream};
 use horned_owl::{
     io::{rdf::reader::ConcreteRDFOntology, *},
     model::{RcAnnotatedComponent, RcStr},
@@ -115,13 +115,14 @@ pub async fn parse_stream_to(
                 let mut writer = ChannelWriter { sender: tx.clone() };
                 let result = (|| match output_type {
                     ResourceType::OFN => {
-                        let (ont, prefix): (RcComponentMappedOntology, _) =
-                            ofn::reader::read(&mut reader, ParserConfiguration::default())?;
+                        let (ont, prefix)
+                        : (RcComponentMappedOntology, _) = ofn::reader::read(
+                                &mut reader, ParserConfiguration::default())?;
                         ofn::writer::write(
                             &mut writer, 
                             &ont, 
                             Some(&prefix))?;
-                        let _ = writer.flush();
+                        writer.flush()?;
                         Ok(writer)
                     }
                     ResourceType::OWX => {
@@ -131,14 +132,14 @@ pub async fn parse_stream_to(
                             &mut writer, 
                             &ont, 
                             Some(&prefix))?;
-                        let _ = writer.flush();
+                        writer.flush()?;
                         Ok(writer)
                     }
                     ResourceType::OWL => {
                         let (ont, _): (ConcreteRDFOntology<RcStr, RcAnnotatedComponent>, _) =
                             rdf::reader::read(&mut reader, ParserConfiguration::default())?;
                         rdf::writer::write(&mut writer, &ont.into())?;
-                        let _ = writer.flush();
+                        writer.flush()?;
                         Ok(writer)
                     }
                     _ => Err(WebVowlStoreError::from(
@@ -157,20 +158,31 @@ pub async fn parse_stream_to(
             .map(|result| result.map_err(WebVowlStoreError::from)).boxed())
         }
         _ => {
-            let mut buf = Vec::new();
-            let mut serializer =
-                RdfSerializer::from_format(format_from_resource_type(&output_type).ok_or(
-                    WebVowlStoreErrorKind::InvalidInput(format!(
-                        "Unsupported output type: {:?}",
-                        output_type
-                    )),
-                )?)
-                .for_writer(&mut buf);
-            while let Some(quad) = stream.next().await {
-                serializer.serialize_quad(&quad?)?;
-            }
-            serializer.finish()?;
-            Ok(stream::once(async move { Ok(buf) }).boxed())
+            let (tx, rx) = mpsc::unbounded_channel();
+            tokio::task::spawn(async move {
+                let mut writer = ChannelWriter { sender: tx.clone() };
+                let result = (|| async {
+                    let mut serializer =
+                    RdfSerializer::from_format(format_from_resource_type(&output_type).ok_or(
+                        WebVowlStoreErrorKind::InvalidInput(format!(
+                            "Unsupported output type: {:?}",
+                            output_type
+                        )),
+                    )?)
+                    .for_writer(&mut writer);
+                    while let Some(quad) = stream.next().await {
+                        serializer.serialize_quad(&quad?)?;
+                    }
+                    serializer.finish()?;
+                    Ok::<ChannelWriter, WebVowlStoreError>(writer)
+                })();
+
+                if let Err(e) = result.await {
+                    let _ = tx.send(Err(e.into()));
+                }
+            });
+            Ok(UnboundedReceiverStream::new(rx)
+            .map(|result| result.map_err(WebVowlStoreError::from)).boxed())
         }
     }
 }

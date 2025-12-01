@@ -11,7 +11,7 @@ pub async fn main() {
     //let session = Store::open("oxigraph.db").unwrap();
     let session = Store::default();
     println!("Loaded {} quads", session.len().await.unwrap());
-    let path = Path::new("data/ONTOAD.owl");
+    let path = Path::new("data/test.ttl");
     let webvowl = WebVOWLStore::new(session);
     webvowl
         .insert_file(&path, false)

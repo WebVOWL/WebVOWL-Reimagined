@@ -118,8 +118,8 @@
         "dep:env_logger",
         "dep:reqwest",
         "dep:tokio",
-        "dep:webvowl-database",
-        "dep:webvowl-parser",
+        # "dep:webvowl-database",
+        # "dep:webvowl-parser",
         "leptos-use/actix",
     ]
     ssr=[
@@ -330,5 +330,3 @@
         #
         # Optional. Defaults to "/api". Env: SERVER_FN_PREFIX
         server-fn-prefix="/api"
-
-
