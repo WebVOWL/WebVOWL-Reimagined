@@ -29,6 +29,8 @@ async fn main() -> std::io::Result<()> {
 
 
         App::new()
+            .app_data(web::PayloadConfig::new(1024 * 1024 * 1024))
+            .app_data(web::FormConfig::default().limit(1024 * 1024 * 1024))
             .leptos_routes(routes, {
                 let leptos_options = leptos_options.clone();
                 move || {
@@ -60,7 +62,7 @@ async fn main() -> std::io::Result<()> {
                 }
             })
             .service(Files::new("/", site_root.as_ref()))
-            .wrap(middleware::Compress::default())
+            //.wrap(middleware::Compress::default())
             .wrap(
                 middleware::DefaultHeaders::new()
                     .add(("Cross-Origin-Opener-Policy", "same-origin"))
