@@ -1,4 +1,4 @@
-use futures::StreamExt;
+use futures::{StreamExt, stream::BoxStream};
 use rdf_fusion::store::Store;
 use std::fs::File;
 use std::path::Path;
@@ -53,18 +53,15 @@ impl WebVOWLStore {
         Ok(())
     }
 
-    pub async fn serialize_to_string(&self) -> Result<String, WebVowlStoreError> {
+    pub async fn serialize_stream(
+        &self,
+    ) -> Result<BoxStream<'static, Result<Vec<u8>, WebVowlStoreError>>, WebVowlStoreError> {
         println!(
             "Store size before export: {}",
             self.session.len().await.unwrap_or(0)
         );
-        let mut results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
-        let mut out = vec![];
-        while let Some(result) = results.next().await {
-            let result = result.unwrap();
-            out.extend(result);
-        }
-        Ok(String::from_utf8(out).unwrap())
+        let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        Ok(results)
     }
 
     pub async fn start_upload(&mut self, filename: &str) -> Result<(), WebVowlStoreError> {
@@ -103,7 +100,6 @@ impl WebVOWLStore {
         Ok(())
     }
 }
-
 
 #[cfg(test)]
 mod test {
