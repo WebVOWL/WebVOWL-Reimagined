@@ -1,3 +1,4 @@
+use crate::network::DataType;
 use leptos::prelude::*;
 use leptos::server_fn::ServerFnError;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData};
@@ -6,10 +7,9 @@ use reqwest::Client;
 #[cfg(feature = "server")]
 use std::path::Path;
 use web_sys::FormData;
-use crate::network::DataType;
 
 async fn extract_bytes(
-    mut data: MultipartData,
+    data: MultipartData,
 ) -> Result<(Vec<u8>, Option<String>), ServerFnError> {
     let mut bytes = Vec::new();
     let mut filename = None;
