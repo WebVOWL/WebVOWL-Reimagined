@@ -105,15 +105,140 @@ impl WebVOWLStore {
 }
 
 
+
 #[cfg(test)]
+#[allow(unused_must_use)]
 mod test {
     use super::*;
+    use test_generator::test_resources;
 
-    #[tokio::test]
-    async fn test_insert_file() {
-        let session = Store::default();
-        let webvowl = WebVOWLStore::new(session);
-        let path = Path::new("data/test.ttl");
-        let _ = webvowl.insert_file(path, false).await;
+    #[test_resources("crates/database/data/owl-functional/*.ofn")]
+    async fn test_ofn_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await.unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-rdf/*.owl")]
+    async fn test_owl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await.unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-ttl/*.ttl")]
+    async fn test_ttl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await.unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-xml/*.owx")]
+    async fn test_owx_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await.unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+
+    #[test_resources("crates/database/data/owl-functional/*.ofn")]
+    async fn test_ofn_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+        
+        assert_ne!(
+            out.len(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-rdf/*.owl")]
+    async fn test_owl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+        
+        assert_ne!(
+            out.len(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-ttl/*.ttl")]
+    async fn test_ttl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+        
+        assert_ne!(
+            out.len(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-xml/*.owx")]
+    async fn test_owx_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+        
+        assert_ne!(
+            out.len(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
     }
 }

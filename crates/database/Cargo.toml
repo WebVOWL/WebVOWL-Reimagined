@@ -22,6 +22,7 @@
     tokio="1.48.0"
     horned-owl={git="https://github.com/phillord/horned-owl", rev="c4f7835ecae70b5e7281dc23b9b7fc6daa497f1d"}
     webvowl-parser={path="../parser"}
+    test-generator="^0.3"
 
     [dependencies.grapher]
         #branch="render_test"

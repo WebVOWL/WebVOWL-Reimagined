@@ -6,7 +6,7 @@ use std::{
 
 use horned_owl::error::HornedError;
 use rdf_fusion::{
-    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError,
+    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::{IriParseError, StorageError},
 };
 use tokio::task::JoinError;
 
@@ -19,6 +19,7 @@ pub enum WebVowlStoreErrorKind {
     LoaderError(LoaderError),
     QueryEvaluationError(QueryEvaluationError),
     JoinError(JoinError),
+    StorageError(StorageError),
 }
 
 #[derive(Debug)]
@@ -100,6 +101,16 @@ impl From<JoinError> for WebVowlStoreError {
     }
 }
 
+impl From<StorageError> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: StorageError) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::StorageError(error),
+            location: &Location::caller(),
+        }
+    }
+}
+
 impl std::fmt::Display for WebVowlStoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?} at {}", self.inner, self.location)
@@ -116,6 +127,7 @@ impl std::error::Error for WebVowlStoreError {
             WebVowlStoreErrorKind::LoaderError(e) => Some(e),
             WebVowlStoreErrorKind::QueryEvaluationError(e) => Some(e),
             WebVowlStoreErrorKind::JoinError(e) => Some(e),
+            WebVowlStoreErrorKind::StorageError(e) => Some(e),
         }
     }
 }
