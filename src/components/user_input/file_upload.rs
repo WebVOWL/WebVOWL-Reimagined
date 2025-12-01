@@ -8,6 +8,7 @@ use reqwest::Client;
 use std::path::Path;
 use web_sys::FormData;
 
+
 async fn extract_bytes(
     data: MultipartData,
 ) -> Result<(Vec<u8>, Option<String>), ServerFnError> {
@@ -25,6 +26,7 @@ async fn extract_bytes(
     }
     Ok((bytes, filename))
 }
+
 
 /// Local reads file and calls for the datatype label and returns (label, data content)
 #[server(input = MultipartFormData)]
@@ -45,6 +47,8 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, String), Ser
     Ok((dtype, content))
 }
 
+
+/// Remote reads url and calls for the datatype label and returns (label, data content)
 #[server]
 pub async fn handle_remote(url: String) -> Result<(DataType, String), ServerFnError> {
     let client = Client::new();
@@ -76,6 +80,8 @@ pub async fn handle_remote(url: String) -> Result<(DataType, String), ServerFnEr
     Ok((dtype, text))
 }
 
+
+/// Sparql reads (endpoint + query) and calls for the datatype label and returns (label, data content)
 #[server]
 pub async fn handle_sparql(
     endpoint: String,
@@ -121,6 +127,8 @@ pub async fn handle_sparql(
     Ok((dtype, text))
 }
 
+
+/// handles what server side function to use (local, remote or sparql)
 #[derive(Clone)]
 pub struct FileUpload {
     pub mode: RwSignal<String>,
