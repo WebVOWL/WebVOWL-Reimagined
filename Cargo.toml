@@ -118,8 +118,8 @@
         "dep:env_logger",
         "dep:reqwest",
         "dep:tokio",
-        # "dep:webvowl-database",
-        # "dep:webvowl-parser",
+        "dep:webvowl-database",
+        "dep:webvowl-parser",
         "leptos-use/actix",
     ]
     ssr=[
