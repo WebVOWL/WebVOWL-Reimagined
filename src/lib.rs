@@ -17,7 +17,6 @@ pub mod blocks;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
-pub mod cookie_handler;
 
 
 #[cfg(feature = "hydrate")]
