@@ -1,9 +1,9 @@
-use grapher::web::prelude::NodeType;
+use grapher::web::prelude::ElementType;
 
 /// Struct containing graph data for RustGrapher
 pub struct GraphDisplayData {
     pub labels: Vec<String>,
-    pub nodes: Vec<NodeType>,
+    pub nodes: Vec<ElementType>,
     pub edges: Vec<[usize; 3]>,
 }
 
