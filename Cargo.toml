@@ -163,8 +163,7 @@
                 "ssr",
                 "hydrate",
             ],
-            [
-            ],
+            [],
         ]
 
 # Default profile for devs, fast to compile, okay enough to run.

@@ -1,9 +1,14 @@
-use std::panic::Location;
+use std::{
+    fmt::{Display, Formatter},
+    io::{Error, ErrorKind},
+    panic::Location,
+};
 
 use horned_owl::error::HornedError;
 use rdf_fusion::{
-    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::IriParseError,
+    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::{IriParseError, StorageError},
 };
+use tokio::task::JoinError;
 
 #[derive(Debug)]
 pub enum WebVowlStoreErrorKind {
@@ -13,12 +18,20 @@ pub enum WebVowlStoreErrorKind {
     IriParseError(IriParseError),
     LoaderError(LoaderError),
     QueryEvaluationError(QueryEvaluationError),
+    JoinError(JoinError),
+    StorageError(StorageError),
 }
 
 #[derive(Debug)]
 pub struct WebVowlStoreError {
     inner: WebVowlStoreErrorKind,
     location: &'static Location<'static>,
+}
+
+impl Into<Error> for WebVowlStoreError {
+    fn into(self) -> Error {
+        Error::new(ErrorKind::Other, self.to_string())
+    }
 }
 
 impl From<HornedError> for WebVowlStoreError {
@@ -78,25 +91,29 @@ impl From<QueryEvaluationError> for WebVowlStoreError {
         }
     }
 }
+impl From<JoinError> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: JoinError) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::JoinError(error),
+            location: &Location::caller(),
+        }
+    }
+}
 
-impl std::fmt::Display for WebVowlStoreErrorKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            WebVowlStoreErrorKind::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
-            WebVowlStoreErrorKind::HornedError(e) => write!(f, "Horned error: {}", e),
-            WebVowlStoreErrorKind::IOError(e) => write!(f, "IO error: {}", e),
-            WebVowlStoreErrorKind::IriParseError(e) => write!(f, "IRI parse error: {}", e),
-            WebVowlStoreErrorKind::LoaderError(e) => write!(f, "Loader error: {}", e),
-            WebVowlStoreErrorKind::QueryEvaluationError(e) => {
-                write!(f, "Query evaluation error: {}", e)
-            }
+impl From<StorageError> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: StorageError) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::StorageError(error),
+            location: &Location::caller(),
         }
     }
 }
 
 impl std::fmt::Display for WebVowlStoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} at {}", self.inner, self.location)
+        write!(f, "{:?} at {}", self.inner, self.location)
     }
 }
 
@@ -109,6 +126,8 @@ impl std::error::Error for WebVowlStoreError {
             WebVowlStoreErrorKind::IriParseError(e) => Some(e),
             WebVowlStoreErrorKind::LoaderError(e) => Some(e),
             WebVowlStoreErrorKind::QueryEvaluationError(e) => Some(e),
+            WebVowlStoreErrorKind::JoinError(e) => Some(e),
+            WebVowlStoreErrorKind::StorageError(e) => Some(e),
         }
     }
 }
