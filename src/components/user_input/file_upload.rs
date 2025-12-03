@@ -4,9 +4,17 @@ use leptos::server_fn::ServerFnError;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData};
 #[cfg(feature = "server")]
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use std::path::Path;
 use web_sys::FormData;
+
+// This is beacause some handlers use Vec and others String
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Content {
+    Text(String),
+    Bytes(Vec<u8>),
+}
 
 
 async fn extract_bytes(
@@ -30,13 +38,8 @@ async fn extract_bytes(
 
 /// Local reads file and calls for the datatype label and returns (label, data content)
 #[server(input = MultipartFormData)]
-pub async fn handle_local(data: MultipartData) -> Result<(DataType, String), ServerFnError> {
+pub async fn handle_local(data: MultipartData) -> Result<(DataType, Content), ServerFnError> {
     let (bytes, filename) = extract_bytes(data).await?;
-
-    let content = match String::from_utf8(bytes) {
-        Ok(s) => s,
-        Err(e) => return Err(ServerFnError::ServerError(format!("Invalid UTF-8: {}", e))),
-    };
 
     let dtype = filename
         .as_ref()
@@ -44,13 +47,13 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, String), Ser
         .map(DataType::from_extension)
         .unwrap_or(DataType::UNKNOWN);
 
-    Ok((dtype, content))
+    Ok((dtype, Content::Bytes(bytes)))
 }
 
 
 /// Remote reads url and calls for the datatype label and returns (label, data content)
 #[server]
-pub async fn handle_remote(url: String) -> Result<(DataType, String), ServerFnError> {
+pub async fn handle_remote(url: String) -> Result<(DataType, Content), ServerFnError> {
     let client = Client::new();
 
     let resp = match client.get(&url).send().await {
@@ -77,7 +80,7 @@ pub async fn handle_remote(url: String) -> Result<(DataType, String), ServerFnEr
         .map(DataType::from_extension)
         .unwrap_or(DataType::UNKNOWN);
 
-    Ok((dtype, text))
+    Ok((dtype, Content::Text(text)))
 }
 
 
@@ -87,7 +90,7 @@ pub async fn handle_sparql(
     endpoint: String,
     query: String,
     format: Option<String>,
-) -> Result<(DataType, String), ServerFnError> {
+) -> Result<(DataType, Content), ServerFnError> {
     let client = Client::new();
 
     let accept_type = match format.as_deref() {
@@ -124,7 +127,7 @@ pub async fn handle_sparql(
     } else {
         DataType::SPARQLJSON
     };
-    Ok((dtype, text))
+    Ok((dtype, Content::Text(text)))
 }
 
 
@@ -132,16 +135,16 @@ pub async fn handle_sparql(
 #[derive(Clone)]
 pub struct FileUpload {
     pub mode: RwSignal<String>,
-    pub local_action: Action<FormData, Result<(DataType, String), ServerFnError>>,
-    pub remote_action: Action<String, Result<(DataType, String), ServerFnError>>,
+    pub local_action: Action<FormData, Result<(DataType, Content), ServerFnError>>,
+    pub remote_action: Action<String, Result<(DataType, Content), ServerFnError>>,
     pub sparql_action:
-        Action<(String, String, Option<String>), Result<(DataType, String), ServerFnError>>,
+        Action<(String, String, Option<String>), Result<(DataType, Content), ServerFnError>>,
 }
 impl FileUpload {
     pub fn new() -> Self {
         let mode = RwSignal::new("local".to_string());
 
-        let local_action = Action::<FormData, Result<(DataType, String), ServerFnError>>::new_local(
+        let local_action = Action::<FormData, Result<(DataType, Content), ServerFnError>>::new_local(
             |data: &FormData| {
                 let multipart: MultipartData = data.clone().into();
                 handle_local(multipart)
@@ -164,7 +167,7 @@ impl FileUpload {
         }
     }
 
-    pub fn get_result(&self) -> Option<Result<(DataType, String), ServerFnError>> {
+    pub fn get_result(&self) -> Option<Result<(DataType, Content), ServerFnError>> {
         match self.mode.get().as_str() {
             "local" => self.local_action.value().get(),
             "remote" => self.remote_action.value().get(),

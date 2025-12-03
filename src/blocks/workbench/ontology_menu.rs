@@ -43,7 +43,8 @@ fn SelectStaticInput() -> impl IntoView {
 }
 
 #[component]
-fn UploadInput(upload: FileUpload) -> impl IntoView {
+fn UploadInput() -> impl IntoView {
+    let upload = FileUpload::new();
     let message = RwSignal::new(String::new());
     // TODO: This should be a loading widget until stuff has loaded
     // Maybe, if possible, also make some sort of progress bar or status update.
@@ -113,7 +114,8 @@ fn UploadInput(upload: FileUpload) -> impl IntoView {
 
 
 #[component]
-fn Sparql(upload: FileUpload) -> impl IntoView {
+fn Sparql() -> impl IntoView {
+    let upload = FileUpload::new();
     let endpoint_signal = RwSignal::new(String::new());
     let query_signal = RwSignal::new(String::new());
 
@@ -178,21 +180,11 @@ fn Sparql(upload: FileUpload) -> impl IntoView {
 
 #[component]
 pub fn OntologyMenu() -> impl IntoView {
-    let upload = FileUpload::new();
     view! {
         <WorkbenchMenuItems title="Load Ontology">
             <SelectStaticInput />
-            <UploadInput upload=upload.clone()/>
-            <Sparql upload=upload.clone()/>
-
-            // TEST ONLY
-            // {
-            //     move || {
-            //         upload.get_result().map(|result| {
-            //             view! {<p class="text-xs mt-2">{format!("{:?}", result)}</p>}
-            //         })
-            //     }
-            // }
+            <UploadInput />
+            <Sparql />
         </WorkbenchMenuItems>
     }
 }
