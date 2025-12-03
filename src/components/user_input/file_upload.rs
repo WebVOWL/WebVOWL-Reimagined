@@ -10,7 +10,7 @@ use std::path::Path;
 use web_sys::FormData;
 
 // This is beacause some handlers use Vec and others String
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Content {
     Text(String),
     Bytes(Vec<u8>),
