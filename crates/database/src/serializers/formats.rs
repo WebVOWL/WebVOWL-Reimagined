@@ -1,4 +1,6 @@
 pub mod graph_display {
+    use std::collections::HashMap;
+
     use grapher::web::prelude::ElementType;
 
     /// Struct containing graph data for RustGrapher
@@ -14,6 +16,8 @@ pub mod graph_display {
         ///
         /// The elements of the array are the indices of `elements`.
         pub edges: Vec<[usize; 3]>,
+        pub cardinalities: Vec<(u32, (String, Option<String>))>,
+        pub characteristics: HashMap<usize, String>,
     }
 
     impl GraphDisplayData {
@@ -22,6 +26,8 @@ pub mod graph_display {
                 labels: Vec::new(),
                 elements: Vec::new(),
                 edges: Vec::new(),
+                cardinalities: Vec::new(),
+                characteristics: HashMap::new(),
             }
         }
     }
