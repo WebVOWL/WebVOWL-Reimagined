@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use web_sys::FormData;
 
-// This is beacause some handlers use Vec and others String
+// This enum is created because some handlers use Vec and others String
 #[derive(Clone, Serialize, Deserialize)]
 pub enum Content {
     Text(String),
