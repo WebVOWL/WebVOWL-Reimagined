@@ -14,6 +14,8 @@ pub enum DataType {
     N3,
     SPARQLJSON,
     SPARQLXML,
+    SPARQLCSV,
+    SPARQLTSV,
     /// fallback when type cant be determined
     UNKNOWN,
 }
@@ -32,8 +34,10 @@ impl DataType {
             "trig" => Self::TriG,
             "jsonld" => Self::JsonLd,
             "n3" => Self::N3,
-            "srj" => Self::SPARQLJSON,
-            "srx" => Self::SPARQLXML,
+            "srj" | "json" => Self::SPARQLJSON,
+            "srx" | "xml" => Self::SPARQLXML,
+            "src" | "csv" => Self::SPARQLCSV,
+            "srtsv" | "tsv" => Self::SPARQLTSV,
             _ => Self::UNKNOWN,
         }
     }
@@ -54,6 +58,8 @@ impl DataType {
             Self::N3 => "text/n3",
             Self::SPARQLJSON => "application/sparql-results+json",
             Self::SPARQLXML => "application/sparql-results+xml",
+            Self::SPARQLCSV => "text/csv",
+            Self::SPARQLTSV => "text/tab-separated-values",
             Self::UNKNOWN => "application/octet-stream",
         }
     }

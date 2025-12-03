@@ -90,7 +90,7 @@ fn UploadInput() -> impl IntoView {
                     type="file"
                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     multiple=""
-                    accept=".owl,.owx,.xml,.json,.ttl"
+                    accept=".owl,.ofn,.owx,.xml,.json,.ttl,.rdf,.nt,.nq,.trig,.jsonld,.n3,.srj,.srx,.json,.xml,.csv,.tsv"
                     on:change=move |ev| {
                         let input: HtmlInputElement =event_target::<HtmlInputElement>(&ev);
                         if let Some(files) = input.files() {
