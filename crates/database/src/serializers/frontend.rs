@@ -55,6 +55,7 @@ impl GraphDisplayDataSolutionSerializer {
                     Ok(())
                 } else {
                     // RDFS Named individual
+                    Ok(())
                 }
             }
             TermRef::Literal(literal) => {

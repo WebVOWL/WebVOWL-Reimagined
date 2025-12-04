@@ -1,213 +1,228 @@
-<?xml version="1.0"?>
-<rdf:RDF xmlns="http://www.example.com/owl1#"
-     xml:base="http://www.example.com/owl1"
-     xmlns:o="http://www.example.com/owl1#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:xml="http://www.w3.org/XML/1998/namespace"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
-    <owl:Ontology rdf:about="http://www.example.com/owl1">
-        <owl:versionIRI rdf:resource="http://www.example.com/owl1/v1"/>
-    </owl:Ontology>
-    
+    <?xml version="1.0"?>
+    <rdf:RDF xmlns="http://www.example.com/owl1#"
+        xml:base="http://www.example.com/owl1"
+        xmlns:o="http://www.example.com/owl1#"
+        xmlns:owl="http://www.w3.org/2002/07/owl#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:xml="http://www.w3.org/XML/1998/namespace"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <owl:Ontology rdf:about="http://www.example.com/owl1">
+            <owl:versionIRI rdf:resource="http://www.example.com/owl1/v1"/>
+        </owl:Ontology>
+        
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Object Properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+        <!-- 
+        ///////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Object Properties
+        //
+        ///////////////////////////////////////////////////////////////////////////////////////
+        -->
 
-    
-
-
-    <!-- http://www.example.com/owl1#hasChild -->
-
-    <owl:ObjectProperty rdf:about="http://www.example.com/owl1#hasChild">
-        <rdfs:domain rdf:resource="http://www.example.com/owl1#Person"/>
-        <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
-    </owl:ObjectProperty>
-    
+        
 
 
-    <!-- http://www.example.com/owl1#hasParent -->
+        <!-- http://www.example.com/owl1#hasChild -->
 
-    <owl:ObjectProperty rdf:about="http://www.example.com/owl1#hasParent">
-        <rdfs:domain rdf:resource="http://www.example.com/owl1#Person"/>
-        <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
-        <owl:inverseOf rdf:resource="http://www.example.com/owl1#hasChild"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
+        <owl:ObjectProperty rdf:about="http://www.example.com/owl1#hasChild">
+            <rdfs:domain rdf:resource="http://www.example.com/owl1#Person"/>
+            <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
+        </owl:ObjectProperty>
+        
 
 
-    <!-- http://www.example.com/owl1#Person -->
+        <!-- http://www.example.com/owl1#hasParent -->
 
-    <owl:Class rdf:about="http://www.example.com/owl1#Person"/>
-    
-
-
-    <!-- http://www.example.com/owl1#Parent -->
-
-    <owl:Class rdf:about="http://www.example.com/owl1#Parent">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:intersectionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
-                    <owl:Restriction>
-                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
-                        <owl:someValuesFrom rdf:resource="http://www.example.com/owl1#Person"/>
-                    </owl:Restriction>
-                </owl:intersectionOf>
-            </owl:Class>
-        </owl:equivalentClass>
-    </owl:Class>
-    
+        <owl:ObjectProperty rdf:about="http://www.example.com/owl1#hasParent">
+            <rdfs:domain rdf:resource="http://www.example.com/owl1#Person"/>
+            <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
+            <owl:inverseOf rdf:resource="http://www.example.com/owl1#hasChild"/>
+        </owl:ObjectProperty>
+        
 
 
-    <!-- http://www.example.com/owl1#Woman -->
+        <!-- 
+        ///////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Classes
+        //
+        ///////////////////////////////////////////////////////////////////////////////////////
+        -->
 
-    <owl:Class rdf:about="http://www.example.com/owl1#Woman">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.example.com/owl1#Guardian -->
-
-    <owl:Class rdf:about="http://www.example.com/owl1#Guardian">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
-    </owl:Class>
-    
+        
 
 
-    <!-- http://www.example.com/owl1#ParentalGuardian -->
+        <!-- http://www.example.com/owl1#Person -->
 
-    <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Guardian"/>
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:intersectionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
-                </owl:intersectionOf>
-            </owl:Class>
-        </owl:equivalentClass>
-    </owl:Class>
-    
+        <owl:Class rdf:about="http://www.example.com/owl1#Person"/>
+        
 
 
-    <!-- http://www.example.com/owl1#Caregiver -->
+        <!-- http://www.example.com/owl1#Parent -->
 
-    <owl:Class rdf:about="http://www.example.com/owl1#Caregiver">
-        <owl:equivalentClass>
-            <owl:Class rdf:about="http://www.example.com/owl1#Parent"/>
-        </owl:equivalentClass>
-        <owl:equivalentClass>
-            <owl:Class rdf:about="http://www.example.com/owl1#Guardian"/>
-        </owl:equivalentClass>
-        <owl:equivalentClass>
-            <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian"/>
-        </owl:equivalentClass>
-    </owl:Class>
-    
-
-
-    <!-- http://www.example.com/owl1#Mother -->
-
-    <owl:Class rdf:about="http://www.example.com/owl1#Mother">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:intersectionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Woman"/>
-                    <owl:Restriction>
-                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
-                        <owl:someValuesFrom rdf:resource="http://www.example.com/owl1#Person"/>
-                    </owl:Restriction>
-                </owl:intersectionOf>
-            </owl:Class>
-        </owl:equivalentClass>
-    </owl:Class>
-    
+        <owl:Class rdf:about="http://www.example.com/owl1#Parent">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                            <owl:someValuesFrom rdf:resource="http://www.example.com/owl1#Person"/>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
 
 
-    <!-- http://www.example.com/owl1#OnlyChild -->
+        <!-- http://www.example.com/owl1#Woman -->
 
-    <owl:Class rdf:about="http://www.example.com/owl1#OnlyChild">
-        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:intersectionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
-                    <owl:Restriction>
-                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasParent"/>
-                        <owl:allValuesFrom>
-                            <owl:Class>
-                                <owl:intersectionOf rdf:parseType="Collection">
-                                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
-                                    <owl:Restriction>
-                                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
-                                        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
-                                    </owl:Restriction>
-                                </owl:intersectionOf>
-                            </owl:Class>
-                        </owl:allValuesFrom>
-                    </owl:Restriction>
-                </owl:intersectionOf>
-            </owl:Class>
-        </owl:equivalentClass>
-    </owl:Class>
-    
+        <owl:Class rdf:about="http://www.example.com/owl1#Woman">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
+        </owl:Class>
+        
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Individuals
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+        <!-- http://www.example.com/owl1#Guardian -->
 
-    
+        <owl:Class rdf:about="http://www.example.com/owl1#Guardian">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
+        </owl:Class>
+        
 
 
-    <!-- http://www.example.com/owl1#alice -->
+        <!-- http://www.example.com/owl1#ParentalGuardian -->
 
-    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#alice">
-        <rdf:type rdf:resource="http://www.example.com/owl1#Woman"/>
-        <rdf:type rdf:resource="http://www.example.com/owl1#Parent"/>
-        <o:hasChild rdf:resource="http://www.example.com/owl1#bob"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.example.com/owl1#bob -->
-
-    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#bob">
-        <rdf:type rdf:resource="http://www.example.com/owl1#OnlyChild"/>
-        <o:hasParent rdf:resource="http://www.example.com/owl1#alice"/>
-    </owl:NamedIndividual>
-</rdf:RDF>
-
+        <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Guardian"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
 
 
-<!-- Generated by the OWL API (version 4.5.26) https://github.com/owlcs/owlapi -->
+        <!-- http://www.example.com/owl1#Caregiver -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#Caregiver">
+            <owl:equivalentClass>
+                <owl:Class rdf:about="http://www.example.com/owl1#Parent"/>
+            </owl:equivalentClass>
+            <owl:equivalentClass>
+                <owl:Class rdf:about="http://www.example.com/owl1#Guardian"/>
+            </owl:equivalentClass>
+            <owl:equivalentClass>
+                <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian"/>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+
+        <!-- http://www.example.com/owl1#ParentOrGuardian -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#ParentOrGuardian">
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:unionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                    </owl:unionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+
+        <!-- http://www.example.com/owl1#Mother -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#Mother">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Woman"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                            <owl:someValuesFrom rdf:resource="http://www.example.com/owl1#Person"/>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+
+        <!-- http://www.example.com/owl1#OnlyChild -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#OnlyChild">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Person"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasParent"/>
+                            <owl:allValuesFrom>
+                                <owl:Class>
+                                    <owl:intersectionOf rdf:parseType="Collection">
+                                        <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                                        <owl:Restriction>
+                                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                                            <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+                                        </owl:Restriction>
+                                    </owl:intersectionOf>
+                                </owl:Class>
+                            </owl:allValuesFrom>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+
+        <!-- 
+        ///////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Individuals
+        //
+        ///////////////////////////////////////////////////////////////////////////////////////
+        -->
+
+        
+
+
+        <!-- http://www.example.com/owl1#alice -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#alice">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Woman"/>
+            <rdf:type rdf:resource="http://www.example.com/owl1#Parent"/>
+            <o:hasChild rdf:resource="http://www.example.com/owl1#bob"/>
+        </owl:NamedIndividual>
+        
+
+
+        <!-- http://www.example.com/owl1#bob -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#bob">
+            <rdf:type rdf:resource="http://www.example.com/owl1#OnlyChild"/>
+            <o:hasParent rdf:resource="http://www.example.com/owl1#alice"/>
+        </owl:NamedIndividual>
+    </rdf:RDF>
+
+
+
+    <!-- Generated by the OWL API (version 4.5.26) https://github.com/owlcs/owlapi -->
 
 

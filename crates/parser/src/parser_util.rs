@@ -195,7 +195,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
         //.with_default_graph(NamedNode::new(format!("file:://{}", path_str)).unwrap());
         if lenient { parser.lenient() } else { parser }
     };
-    let t_pat = path_type(path);
+    let t_pat: Option<ResourceType> = path_type(path);
     let prepared = match t_pat {
         Some(ResourceType::OFN) => {
             let file = File::open(path)?;
