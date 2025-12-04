@@ -8,7 +8,6 @@ use leptos_actix::{LeptosRoutes, generate_route_list};
 use leptos_meta::MetaTags;
 use log::info;
 use webvowl_reimagined::app::App;
-use webvowl_reimagined::components::theme::Themes;
 use webvowl_reimagined::hydration_scripts::HydrationScripts as Hydro;
 
 #[actix_web::main]
@@ -21,7 +20,6 @@ async fn main() -> std::io::Result<()> {
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
-
 
     HttpServer::new(move || {
         // Generate the list of routes in your Leptos App
