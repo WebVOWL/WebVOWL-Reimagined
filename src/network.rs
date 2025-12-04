@@ -37,7 +37,7 @@ impl DataType {
             "srj" | "json" => Self::SPARQLJSON,
             "srx" | "xml" => Self::SPARQLXML,
             "src" | "csv" => Self::SPARQLCSV,
-            "srtsv" | "tsv" => Self::SPARQLTSV, //Could not find proper SPARQL Result TSV extension.
+            "tsv" => Self::SPARQLTSV, //Could not find proper SPARQL Result TSV extension.
             _ => Self::UNKNOWN,
         }
     }
