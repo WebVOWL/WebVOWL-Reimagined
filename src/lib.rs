@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 #![allow(non_snake_case)]
 
 #[cfg(feature = "wasm")]
