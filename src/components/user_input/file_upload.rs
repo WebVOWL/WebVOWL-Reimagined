@@ -1,91 +1,178 @@
+use crate::network::DataType;
 use leptos::prelude::*;
+use leptos::server_fn::ServerFnError;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData};
-use log::info;
-use web_sys::wasm_bindgen::JsCast;
-use web_sys::{FormData, HtmlFormElement, SubmitEvent};
+#[cfg(feature = "server")]
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "server")]
+use std::path::Path;
+use web_sys::FormData;
+
+// This enum is created because some handlers use Vec and others String
+#[derive(Clone, Serialize, Deserialize)]
+pub enum Content {
+    Text(String),
+    Bytes(Vec<u8>),
+}
+
+
+async fn extract_bytes(
+    data: MultipartData,
+) -> Result<(Vec<u8>, Option<String>), ServerFnError> {
+    let mut bytes = Vec::new();
+    let mut filename = None;
+    let mut inner = data.into_inner().unwrap();
+
+    while let Ok(Some(mut field)) = inner.next_field().await {
+        if filename.is_none() {
+            filename = field.file_name().map(|f| f.to_string());
+        }
+        while let Ok(Some(chunk)) = field.chunk().await {
+            bytes.extend_from_slice(&chunk);
+        }
+    }
+    Ok((bytes, filename))
+}
+
 
 /// Local reads file and calls for the datatype label and returns (label, data content)
 #[server(input = MultipartFormData)]
-pub async fn handle_local(data: MultipartData) -> Result<usize, ServerFnError> {
-    // match fs::read_to_string(&path) {
-    //     Ok(content) => Ok((
-    //         Self::find_data_type(&path).unwrap_or(DataType::RDF),
-    //         content,
-    //     )),
-    //     Err(e) => Err(format!("Error reading local file: {}", e)),
-    // }
+pub async fn handle_local(data: MultipartData) -> Result<(DataType, Content), ServerFnError> {
+    let (bytes, filename) = extract_bytes(data).await?;
 
-    // this will just measure the total number of bytes uploaded
-    let mut data = data.into_inner().unwrap();
-    let mut count = 0;
-    while let Ok(Some(mut field)) = data.next_field().await {
-        info!("\n[NEXT FIELD]\n");
-        let name = field.name().unwrap_or_default().to_string();
-        info!("  [NAME] {name}");
-        while let Ok(Some(chunk)) = field.chunk().await {
-            let len = chunk.len();
-            count += len;
-            info!("      [CHUNK] {len}");
-            // in a real server function, you'd do something like saving the file here
-        }
-    }
-    Ok(count)
+    let dtype = filename
+        .as_ref()
+        .and_then(|name| Path::new(name).extension()?.to_str())
+        .map(DataType::from_extension)
+        .unwrap_or(DataType::UNKNOWN);
+
+    Ok((dtype, Content::Bytes(bytes)))
 }
 
-#[component]
-pub fn FileUpload() -> impl IntoView {
-    let upload_action = Action::new_local(|data: &FormData| handle_local(data.clone().into()));
-    // let status_msg = RwSignal::new(String::new());
-    // let total = RwSignal::new(0 as u64);
-    // let progress = RwSignal::new(0);
-    // let progress = Memo::new(move |_| match upload_action.value().get() {
-    //     Some(Ok(value)) => {
-    //         info!("Test {}", value);
-    //         value as u64
-    //     }
-    //     _ => 0,
-    // });
 
-    view! {
-        <p>
-            {move || {
-                if upload_action.input().read().is_none()
-                    && upload_action.value().read().is_none()
-                {
-                    "Upload a file.".to_string()
-                } else if upload_action.pending().get() {
-                    "Uploading...".to_string()
-                } else if let Some(Ok(value)) = upload_action.value().get() {
-                    value.to_string()
-                } else {
-                    format!("{:?}", upload_action.value().get())
-                }
-            }}
-        </p>
+/// Remote reads url and calls for the datatype label and returns (label, data content)
+#[server]
+pub async fn handle_remote(url: String) -> Result<(DataType, Content), ServerFnError> {
+    let client = Client::new();
 
-        <form on:submit=move |e: SubmitEvent| {
-            e.prevent_default();
-            let target = e
-                .target()
-                .unwrap()
-                .unchecked_into::<HtmlFormElement>();
-            let form_data = FormData::new_with_form(&target).unwrap();
-            upload_action.dispatch_local(form_data);
-        }>
-            <input type="file" name="file_to_upload" />
-            // on:input:target=move |e| {
-            // if let Some(file_list) = e.target().files() {
-            // let mut size = 0;
-            // for i in 0..file_list.length() {
-            // let item = file_list.item(i).unwrap();
-            // size += item.size() as u64;
-            // }
-            // info!("File size: {}", size);
-            // total.set(size);
-            // }
-            // }
-            <input type="submit" />
+    let resp = match client.get(&url).send().await {
+        Ok(r) => r,
+        Err(e) => {
+            return Err(ServerFnError::ServerError(format!(
+                "Error fetching URL: {e}"
+            )));
+        }
+    };
 
-        </form>
+    let text = match resp.text().await {
+        Ok(t) => t,
+        Err(e) => {
+            return Err(ServerFnError::ServerError(format!(
+                "Error reading response: {e}"
+            )));
+        }
+    };
+
+    let dtype = Path::new(&url)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(DataType::from_extension)
+        .unwrap_or(DataType::UNKNOWN);
+
+    Ok((dtype, Content::Text(text)))
+}
+
+
+/// Sparql reads (endpoint + query) and calls for the datatype label and returns (label, data content)
+#[server]
+pub async fn handle_sparql(
+    endpoint: String,
+    query: String,
+    format: Option<String>,
+) -> Result<(DataType, Content), ServerFnError> {
+    let client = Client::new();
+
+    let accept_type = match format.as_deref() {
+        Some("xml") => DataType::SPARQLXML.mime_type(),
+        _ => DataType::SPARQLJSON.mime_type(),
+    };
+
+    let resp = match client
+        .post(&endpoint)
+        .header("Accept", accept_type)
+        .form(&[("query", query)])
+        .send()
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => {
+            return Err(ServerFnError::ServerError(format!(
+                "Error querying SPARQL endpoint: {e}"
+            )));
+        }
+    };
+
+    let text = match resp.text().await {
+        Ok(r) => r,
+        Err(e) => {
+            return Err(ServerFnError::ServerError(format!(
+                "Error reading SPARQL response: {e}"
+            )));
+        }
+    };
+
+    let dtype = if accept_type.contains("xml") {
+        DataType::SPARQLXML
+    } else {
+        DataType::SPARQLJSON
+    };
+    Ok((dtype, Content::Text(text)))
+}
+
+
+/// handles what server side function to use (local, remote or sparql)
+#[derive(Clone)]
+pub struct FileUpload {
+    pub mode: RwSignal<String>,
+    pub local_action: Action<FormData, Result<(DataType, Content), ServerFnError>>,
+    pub remote_action: Action<String, Result<(DataType, Content), ServerFnError>>,
+    pub sparql_action:
+        Action<(String, String, Option<String>), Result<(DataType, Content), ServerFnError>>,
+}
+impl FileUpload {
+    pub fn new() -> Self {
+        let mode = RwSignal::new("local".to_string());
+
+        let local_action = Action::<FormData, Result<(DataType, Content), ServerFnError>>::new_local(
+            |data: &FormData| {
+                let multipart: MultipartData = data.clone().into();
+                handle_local(multipart)
+            },
+        );
+
+        let remote_action = Action::new(|url: &String| handle_remote(url.clone()));
+
+        let sparql_action = Action::new(
+            |(endpoint, query, format): &(String, String, Option<String>)| {
+                handle_sparql(endpoint.clone(), query.clone(), format.clone())
+            },
+        );
+
+        Self {
+            mode,
+            local_action,
+            remote_action,
+            sparql_action,
+        }
+    }
+
+    pub fn get_result(&self) -> Option<Result<(DataType, Content), ServerFnError>> {
+        match self.mode.get().as_str() {
+            "local" => self.local_action.value().get(),
+            "remote" => self.remote_action.value().get(),
+            "sparql" => self.sparql_action.value().get(),
+            _ => None,
+        }
     }
 }
