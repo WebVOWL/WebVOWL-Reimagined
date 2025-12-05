@@ -33,6 +33,15 @@ impl Into<Error> for WebVowlStoreError {
         Error::new(ErrorKind::Other, self.to_string())
     }
 }
+impl From<String> for WebVowlStoreError {
+    #[track_caller]
+    fn from(error: String) -> Self {
+        WebVowlStoreError {
+            inner: WebVowlStoreErrorKind::InvalidInput(error),
+            location: &Location::caller(),
+        }
+    }
+}
 
 impl From<HornedError> for WebVowlStoreError {
     #[track_caller]

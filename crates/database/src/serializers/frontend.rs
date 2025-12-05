@@ -137,6 +137,7 @@ impl GraphDisplayDataSolutionSerializer {
                     )
                 } else {
                     // RDFS Named individual
+                    Ok(())
                 }
             }
             TermRef::Literal(literal) => {
