@@ -1,19 +1,19 @@
 mod about_menu;
 mod export_menu;
-mod filter_menu;
+// mod filter_menu;
 mod ontology_menu;
 mod options_menu;
-mod search_menu;
+// mod search_menu;
 
 use crate::components::lists::{ListDetails, ListElement};
 use crate::components::menu::vertical_menu::VerticalMenu;
 use about_menu::AboutMenu;
 use export_menu::ExportMenu;
-use filter_menu::FilterMenu;
+// use filter_menu::FilterMenu;
 use leptos::prelude::*;
 use ontology_menu::OntologyMenu;
 use options_menu::OptionsMenu;
-use search_menu::SearchMenu;
+// use search_menu::SearchMenu;
 
 #[component]
 fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl IntoView {
@@ -35,13 +35,13 @@ pub fn NewWorkbench() -> impl IntoView {
                 <OntologyMenu />
             </ListElement>
 
-            <ListElement title="Search" icon=icondata::BiMenuRegular>
-                <SearchMenu />
-            </ListElement>
+            // <ListElement title="Search" icon=icondata::BiMenuRegular>
+            //     <SearchMenu />
+            // </ListElement>
 
-            <ListElement title="Filter" icon=icondata::BiMenuRegular>
-                <FilterMenu />
-            </ListElement>
+            // <ListElement title="Filter" icon=icondata::BiMenuRegular>
+            //     <FilterMenu />
+            // </ListElement>
 
             <ListElement title="Export" icon=icondata::BiMenuRegular>
                 <ExportMenu />
