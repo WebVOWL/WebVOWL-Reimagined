@@ -5,7 +5,6 @@ use std::path::Path;
 
 use webvowl_parser::{
     errors::WebVowlStoreError,
-    errors::WebVowlStoreErrorKind,
     parser_util::{ResourceType, parse_stream_to, parser_from_format},
 };
 
@@ -104,8 +103,6 @@ impl WebVOWLStore {
     }
 }
 
-
-
 #[cfg(test)]
 #[allow(unused_must_use)]
 mod test {
@@ -115,7 +112,10 @@ mod test {
     #[test_resources("crates/database/data/owl-functional/*.ofn")]
     async fn test_ofn_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
         let store = WebVOWLStore::default();
-        store.insert_file(Path::new(&resource), false).await.unwrap();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
         assert_ne!(
             store.session.len().await.unwrap(),
             0,
@@ -128,7 +128,10 @@ mod test {
     #[test_resources("crates/database/data/owl-rdf/*.owl")]
     async fn test_owl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
         let store = WebVOWLStore::default();
-        store.insert_file(Path::new(&resource), false).await.unwrap();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
         assert_ne!(
             store.session.len().await.unwrap(),
             0,
@@ -141,7 +144,10 @@ mod test {
     #[test_resources("crates/database/data/owl-ttl/*.ttl")]
     async fn test_ttl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
         let store = WebVOWLStore::default();
-        store.insert_file(Path::new(&resource), false).await.unwrap();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
         assert_ne!(
             store.session.len().await.unwrap(),
             0,
@@ -154,7 +160,10 @@ mod test {
     #[test_resources("crates/database/data/owl-xml/*.owx")]
     async fn test_owx_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
         let store = WebVOWLStore::default();
-        store.insert_file(Path::new(&resource), false).await.unwrap();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
         assert_ne!(
             store.session.len().await.unwrap(),
             0,
@@ -174,13 +183,8 @@ mod test {
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
-        
-        assert_ne!(
-            out.len(),
-            0,
-            "Expected non-zero quads for: {}",
-            resource
-        );
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
         store.session.clear().await?;
         Ok(())
     }
@@ -193,13 +197,8 @@ mod test {
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
-        
-        assert_ne!(
-            out.len(),
-            0,
-            "Expected non-zero quads for: {}",
-            resource
-        );
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
         store.session.clear().await?;
         Ok(())
     }
@@ -212,13 +211,8 @@ mod test {
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
-        
-        assert_ne!(
-            out.len(),
-            0,
-            "Expected non-zero quads for: {}",
-            resource
-        );
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
         store.session.clear().await?;
         Ok(())
     }
@@ -231,13 +225,8 @@ mod test {
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
-        
-        assert_ne!(
-            out.len(),
-            0,
-            "Expected non-zero quads for: {}",
-            resource
-        );
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
         store.session.clear().await?;
         Ok(())
     }
