@@ -14,7 +14,6 @@ use rdf_fusion::model::{
 };
 use smallvec::SmallVec;
 
-// TODO: Use the structure of RDF Fusion's JSON serializer for this module
 pub struct GraphDisplayDataSolutionSerializer {
     /// Maps a term to an index in the `elements` field of [`GraphDisplayData`].
     term_indices: HashMap<&TermRef<'a>, usize>,
@@ -123,19 +122,6 @@ impl GraphDisplayDataSolutionSerializer {
         knowns: &Vec<&TermRef<'a>>,
     ) -> Result<(), ()> {
         // TODO: Collect errors and show to frontend
-        // let iri = Iri::parse(value.as_str()).unwrap();
-        // let path = iri.path();
-        // let haystack = path.as_str().as_bytes();
-
-        // A prefix determines what namespace the element belongs to
-        let prefixes = [
-            "22-rdf-syntax-ns", // RDF
-            "rdf-schema",       // RDFS
-            "owl",              // OWL
-        ];
-
-        // Doesnt work
-        // let iri_type = memchr2("rdf", "owl", haystack);
 
         match term {
             TermRef::BlankNode(bnode) => {
