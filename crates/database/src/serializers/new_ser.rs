@@ -35,20 +35,21 @@ impl NewSerializer<String> {
                     node_type_term.to_string(),
                     solution.get("label").map(|term| term.to_string()),
                 );
-                if triple.2.is_some() && !is_iri(triple.2.unwrap().as_str()) {
-                    self.extract.resolve(triple.2);
+                let t = triple.clone();
+                if t.2.is_some() && !is_iri(t.2.as_ref().unwrap().as_str()) {
+                    self.extract.resolve(&t.2.clone().unwrap());
                 }
-                let (id_value, node_type_raw, label_value) = triple;
-                let (_, id) = self.extract.insert(id_value);
+                let (id_value, node_type_raw, label_value) = t;
+                let id = self.extract.insert(id_value);
                 let node_type_clean = node_type_raw.trim_matches('"').to_string();
-                let node_type: Node<u32> = Node::from_str(node_type_clean.as_str(), id)?;
+                let node_type: Node<usize> = Node::from_str(node_type_clean.as_str(), id)?;
                 println!(
                     "id: {}, node_type: {}, label: {:?}",
                     id, node_type, label_value
                 );
             }
         }
-        for (iri, id) in self.extract.iricache.iter() {
+        for (iri, id) in self.extract.irivec.iter().enumerate() {
             println!("iri: {}, id: {}", iri, id);
         }
         Ok(std::mem::take(&mut self.extract))
@@ -72,14 +73,14 @@ pub const DEFAULT_QUERY: &str = r#"
             # 1. Identify Named Classes
             ?id a owl:Class .
             FILTER(isIRI(?id))
-            BIND("1Class" AS ?nodeType)
+            BIND(owl:Class AS ?nodeType)
             OPTIONAL { ?id rdfs:label ?label }
         }
         UNION
         {
             ?id a owl:Class
             FILTER(!isIRI(?id))
-            BIND("2UnnamedClass" AS ?nodeType)
+            BIND("blanknode" AS ?nodeType)
         }
         UNION
         {
@@ -104,7 +105,8 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             ?id owl:equivalentClass ?label
             BIND("EquivalentClass" AS ?nodeType)
-        }       
+        }   
+
     }
     ORDER BY ?nodeType
     "#;

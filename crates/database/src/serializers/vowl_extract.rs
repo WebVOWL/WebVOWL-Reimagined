@@ -1,9 +1,8 @@
-use std::{collections::HashMap, fmt::Display, hash::Hash, str::FromStr};
+use std::{collections::HashMap, fmt::Display, hash::Hash, ops::Deref, str::FromStr};
 
 use webvowl_parser::errors::WebVowlStoreError;
 
 use crate::serializers::new_ser::is_iri;
-
 
 #[derive(Debug, Clone)]
 pub enum Node<T> {
@@ -18,7 +17,7 @@ pub enum Node<T> {
     DeprecatedClass(T),
     AnonymousClass(T),
     Literal(T),
-    RdfsClass(T), 
+    RdfsClass(T),
     RdfsResource(T),
     NoDraw,
 }
@@ -37,7 +36,10 @@ impl<T> Node<T> {
             "Literal" => Ok(Self::Literal(id)),
             "RdfsClass" => Ok(Self::RdfsClass(id)),
             "RdfsResource" => Ok(Self::RdfsResource(id)),
-            _ => Err(WebVowlStoreError::from(format!("Invalid node type: {}", node_type))),
+            _ => Err(WebVowlStoreError::from(format!(
+                "Invalid node type: {}",
+                node_type
+            ))),
         }
     }
 }
@@ -46,7 +48,7 @@ impl<T> Node<T> {
 #[repr(C)]
 pub enum Edge<T> {
     Datatype(T, T),
-    ObjectProperty(T,T, T),
+    ObjectProperty(T, T, T),
     DatatypeProperty(T, T),
     SubclassOf(T, T),
     InverseProperty(T, T),
@@ -61,13 +63,12 @@ pub enum Edge<T> {
 #[derive(Debug)]
 pub struct VowlExtract<A> {
     //ontology: ComponentMappedOntology<A, Rc<AnnotatedComponent<A>>>,
-    nodes: Vec<Node<u32>>,
+    nodes: Vec<Node<usize>>,
     // [from, edge_type, to]
-    edges: Vec<Edge<u32>>,
-    blanknode_mapping: HashMap<A, u32>,
-    pub iricache: HashMap<A, u32>,
-    domain: HashMap<A, Vec<A>>,
-    range: HashMap<A, Vec<A>>,
+    edges: Vec<Edge<usize>>,
+    blanknode_mapping: HashMap<A, usize>,
+    pub iricache: HashMap<A, usize>,
+    pub irivec: Vec<A>,
 }
 
 impl<A> Default for VowlExtract<A> {
@@ -76,29 +77,31 @@ impl<A> Default for VowlExtract<A> {
             nodes: vec![],
             edges: vec![],
             iricache: HashMap::new(),
-            domain: HashMap::new(),
-            range: HashMap::new(),
             blanknode_mapping: HashMap::new(),
+            irivec: vec![],
         }
     }
 }
 
 impl<A: Clone + Eq + Hash + AsRef<str>> VowlExtract<A> {
-    pub fn insert(&mut self, x: A) -> (bool, u32) {
-        let resolved = self.resolve(&x);
-        let present = self.iricache.contains_key(&resolved);
-        if !present {
-            self.iricache
-                .insert(x.clone(), self.iricache.len() as u32);
+    pub fn insert(&mut self, x: A) -> usize {
+        if self.resolve(&x).is_none() {
+            let present = self.iricache.contains_key(&x);
+            if !present {
+                self.iricache
+                    .insert(x.clone(), self.irivec.len() as usize);
+                self.irivec.push(x.clone());
+            }
         }
-        (present, self.iricache[&x])
+        self.iricache[&x]
     }
-    pub fn resolve(&mut self, x: &A) -> A {
-        if is_iri(x.as_ref()) {
-            let (present, id) = self.insert(x);
-            return id;
+    pub fn resolve(&mut self, x: &A) -> Option<usize> {
+        if self.blanknode_mapping.contains_key(x) {
+            return self.resolve(&self.irivec[self.blanknode_mapping[x]].clone());
+        } else if self.iricache.contains_key(x) {
+            return Some(self.iricache[x]);
         } else {
-            return 
+            return None;
         }
     }
 }
@@ -109,7 +112,14 @@ impl<A: Display> Display for Node<A> {
             Self::Class(id) => write!(f, "Class({})", id),
             Self::ExternalClass(id) => write!(f, "ExternalClass({})", id),
             Self::Thing(id) => write!(f, "Thing({})", id),
-            Self::EquivalentClass(ids) => write!(f, "EquivalentClass({})", ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")),
+            Self::EquivalentClass(ids) => write!(
+                f,
+                "EquivalentClass({})",
+                ids.iter()
+                    .map(|id| id.to_string())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ),
             Self::Union(id) => write!(f, "Union({})", id),
             Self::DisjointUnion(id) => write!(f, "DisjointUnion({})", id),
             Self::Intersection(id) => write!(f, "Intersection({})", id),
