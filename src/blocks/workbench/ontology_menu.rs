@@ -44,17 +44,8 @@ mod progress {
 
     pub fn reset(filename: &str) {
         if let Some(mut entry) = FILES.get_mut(filename) {
-            // println!(
-            //     "Resetting progress for '{}'. Old total: {}",
-            //     filename, entry.total
-            // );
             entry.total = 0;
-        } else {
-            // println!(
-            //     "Reset called for '{}' but no entry found in FILES map",
-            //     filename
-            // );
-        }
+        } 
     }
 
     pub fn remove(filename: &str) {
