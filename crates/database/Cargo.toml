@@ -20,6 +20,7 @@
     log="0.4"
     memchr="2.7.6"
     rdf-fusion="0.1.0"
+    rkyv="0.8.12"
     smallvec={version="1.15.1", features=["union"]}
     tempfile="3.10"
     test-generator="^0.3"

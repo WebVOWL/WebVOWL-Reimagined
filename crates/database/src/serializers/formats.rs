@@ -1,9 +1,11 @@
 pub mod graph_display {
+    use grapher::web::prelude::ElementType;
+    use rkyv::{Archive, Deserialize, Portable, Serialize};
     use std::collections::HashMap;
 
-    use grapher::web::prelude::ElementType;
-
     /// Struct containing graph data for RustGrapher
+    #[repr(C)]
+    #[derive(Archive, Deserialize, Portable, Serialize)]
     pub struct GraphDisplayData {
         /// Labels annotate classes and properties
         ///
