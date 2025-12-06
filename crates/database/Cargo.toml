@@ -28,7 +28,7 @@
     webvowl-parser={path="../parser"}
 
     [dependencies.grapher]
-        #branch="render_test"
+        branch="new_nodetype"
         features=["webgl"]
         git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
