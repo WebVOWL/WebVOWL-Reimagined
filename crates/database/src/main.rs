@@ -4,6 +4,7 @@ use futures::StreamExt;
 use rdf_fusion::store::Store;
 use webvowl_database::{serializers::new_ser::NewSerializer, store::WebVOWLStore};
 use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
+use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;
 mod store;
 
 #[tokio::main]
@@ -26,8 +27,12 @@ pub async fn main() {
     while let Some(result) = stream.next().await {
         out.extend(result.unwrap());
     }*/
-    let mut serializer = NewSerializer::<String>::default();
-    serializer.serialize(webvowl.session).await.unwrap();
+    let mut data_buffer = GraphDisplayData::new_empty();
+    let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
+    let mut query_stream = webvowl.session.query(&DEFAULT_QUERY).await.unwrap();
+    solution_serializer.serialize_stream(&mut data_buffer, query_stream).await.unwrap();
+    //let mut serializer = NewSerializer::<String>::default();
+    //serializer.serialize(webvowl.session).await.unwrap();
     //println!("{}", String::from_utf8_lossy(&out));
     println!("Written to Output.owl");
 }

@@ -13,36 +13,61 @@ use rdf_fusion::model::{
     vocab::{rdf, rdfs, xsd},
 };
 use smallvec::SmallVec;
+use crate::serializers::vowl_extract::VowlExtractData;
 
 pub struct GraphDisplayDataSolutionSerializer {
-    /// Maps a term to an index in the `elements` field of [`GraphDisplayData`].
-    term_indices: HashMap<&TermRef<'a>, usize>,
-    /// Maps a variable to its term.
-    variable_terms: HashMap<String, &TermRef<'a>>,
+    blanknode_mapping: HashMap<TermRef<'a>, usize>,
+    iricache: HashMap<TermRef<'a>, usize>,
+}
+pub struct QueryTriple {
+    subject: TermRef<'a>,
+    predicate: TermRef<'a>,
+    object: TermRef<'a>,
 }
 
 impl GraphDisplayDataSolutionSerializer {
     pub fn new() -> Self {
         Self {
-            term_indices: HashMap::new(),
-            variable_terms: HashMap::new(),
+            blanknode_mapping: HashMap::new(),
+            iricache: HashMap::new(),
         }
     }
+
+    pub async fn serialize_stream<'a>(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        solution_stream: QuadSolutionStream,
+    ) {
+        while let Some(solution) = solution_stream.next().await {
+            let solution = solution?;
+            let Some(id_term) = solution.get("s") else {
+                continue;
+            };
+            let Some(node_type_term) = solution.get("o") else {
+                continue;
+            };
+            let triple = QueryTriple {
+                subject: id_term.to_string(),
+                predicate: node_type_term.to_string(),
+                object: solution.get("p").map(|term| term.to_string()),
+            };
+            self.serialize(data_buffer, triple);
+            
+        }
+    }
+    
 
     pub fn serialize<'a>(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        solution: impl IntoIterator<Item = (VariableRef<'a>, TermRef<'a>)>,
+        triple: QueryTriple,
     ) {
         let mut knowns: Vec<&TermRef<'a>> = Vec::with_capacity(8);
         let mut unknowns: Vec<&TermRef<'a>> = Vec::with_capacity(8);
         let mut edges: [usize; 3] = [];
         for (variable, term) in solution {
             self.variable_terms.insert(variable.into_string(), &term);
-            match self.write_term(data_buffer, &variable, &term, &edges, &knowns) {
-                Ok => knowns.push(&term),
-                Err => unknowns.push(&term),
-            }
+            self.write_term(data_buffer, &variable, &term, &edges, &knowns);
         }
 
         let edge_len = edges.len();
@@ -52,41 +77,43 @@ impl GraphDisplayDataSolutionSerializer {
             warn!("Edge array of size {edge_len} differs from the expected length of 3. Skipping");
         }
     }
-
-    fn update_term_index(&mut self, term: &TermRef<'a>, index: usize) {
-        match self.term_indices.insert(term, index) {
-            Some(i) => {
-                warn!("Overwriting index {i} of term '{term}' with {index}");
+    /* 
+    pub fn insert_iri(
+        &mut self, 
+        data_buffer: &mut GraphDisplayData, 
+        x: &TermRef<'a>
+    ) -> usize {
+        if self.resolve(data_buffer, &x).is_none() {
+            let present = self.iricache.contains_key(&x);
+            if !present {
+                self.iricache.insert(x.clone(), data_buffer.irivec.len() as usize);
+                data_buffer.irivec.push(x.clone());
             }
-            _ => {}
         }
+        self.iricache[&x]
+    }*/
+
+    pub fn resolve<'a>(
+        &mut self, 
+        data_buffer: &mut GraphDisplayData, 
+        x: &TermRef<'a>
+    ) -> Option<usize> {
+        if self.blanknode_mapping.contains_key(x) {
+            return self.resolve(data_buffer, &data_buffer.labels[self.blanknode_mapping[x]].clone());
+        } else if self.iricache.contains_key(x) {
+            return Some(self.iricache[x]);
+        }
+        None
     }
 
-    fn try_insert_characteristic(
-        self,
-        data_buffer: &mut GraphDisplayData,
-        term: &TermRef<'a>,
-        characteristic: Characteristic,
-    ) -> Result<(), ()> {
-        match self.term_indices.get(term) {
-            Some(index) => {
-                data_buffer
-                    .characteristics
-                    .insert(index, characteristic.to_string());
-                Ok(())
-            }
-            None => Err(()),
-        }
-    }
-
-    fn insert_node(
+    fn insert_node<'a>(
         &mut self,
         data_buffer: &mut GraphDisplayData,
         variable: VariableRef<'a>,
         term: &TermRef<'a>,
         edges: &mut [usize; 3],
         node_type: ElementType,
-    ) -> Result<(), ()> {
+    ) {
         let index = data_buffer.elements.len();
         self.update_term_index(&term, index);
         match variable.as_str() {
@@ -94,35 +121,28 @@ impl GraphDisplayDataSolutionSerializer {
             "o" => edges[2] = index,
         }
         data_buffer.elements.push(node_type);
-        Ok(())
     }
 
     /// NOTE: The edge array is overwritten.
     /// This means if a solution has multiple edge terms, the last one seen wins.
-    fn insert_edge(
+    fn insert_edge<'a>(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        term: &TermRef<'a>,
-        edges: &mut [usize; 3],
-        edge_type: ElementType,
-    ) -> Result<(), ()> {
-        let index = data_buffer.elements.len();
-        self.update_term_index(&term, index);
-        edges[1] = index;
-        data_buffer.elements.push(edge_type);
-        Ok(())
+        triple: QueryTriple,
+        edge_type: TermRef<'a>,
+    ) {
+        let index_s = self.insert_iri(data_buffer, &triple.subject);
+        let index_o = self.insert_iri(data_buffer, &triple.object);
+        data_buffer.edges.push(edge);
     }
 
-    fn write_term<'a>(
+    fn write_triple<'a>(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        variable: VariableRef<'a>,
-        term: &TermRef<'a>,
-        edges: &mut [usize; 3],
-        knowns: &Vec<&TermRef<'a>>,
-    ) -> Result<(), ()> {
+        triple: QueryTriple,
+    ) {
         // TODO: Collect errors and show to frontend
-
+        let term = triple.object;
         match term {
             TermRef::BlankNode(bnode) => {
                 // REVIEW: Test if this works
@@ -134,10 +154,10 @@ impl GraphDisplayDataSolutionSerializer {
                         term,
                         edges,
                         ElementType::Owl(OwlNode::AnonymousClass),
-                    )
+                    );
                 } else {
                     // RDFS Named individual
-                    Ok(())
+                    
                 }
             }
             TermRef::Literal(literal) => {

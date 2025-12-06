@@ -1,17 +1,17 @@
-use crate::serializers::vowl_extract::{Node, VowlExtract};
+use crate::serializers::vowl_extract::{Node, VowlExtractData};
 use futures::StreamExt;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use webvowl_parser::errors::WebVowlStoreError;
 
 pub struct NewSerializer<A> {
-    extract: VowlExtract<A>,
+    extract: VowlExtractData<A>,
     query: String,
 }
 
 impl<A: Clone + Eq> Default for NewSerializer<A> {
     fn default() -> Self {
         Self {
-            extract: VowlExtract::default(),
+            extract: VowlExtractData::default(),
             query: DEFAULT_QUERY.to_string(),
         }
     }
@@ -20,7 +20,7 @@ impl NewSerializer<String> {
     pub async fn serialize(
         &mut self,
         store: Store,
-    ) -> Result<VowlExtract<String>, WebVowlStoreError> {
+    ) -> Result<VowlExtractData<String>, WebVowlStoreError> {
         if let QueryResults::Solutions(mut solutions) = store.query(&self.query).await? {
             while let Some(solution) = solutions.next().await {
                 let solution = solution?;
@@ -31,7 +31,7 @@ impl NewSerializer<String> {
                     continue;
                 };
                 let triple = (
-                    id_term.to_string(),
+                    id_term.to_string,
                     node_type_term.to_string(),
                     solution.get("label").map(|term| term.to_string()),
                 );

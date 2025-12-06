@@ -61,47 +61,20 @@ pub enum Edge<T> {
 }
 
 #[derive(Debug)]
-pub struct VowlExtract<A> {
-    //ontology: ComponentMappedOntology<A, Rc<AnnotatedComponent<A>>>,
-    nodes: Vec<Node<usize>>,
-    // [from, edge_type, to]
-    edges: Vec<Edge<usize>>,
-    blanknode_mapping: HashMap<A, usize>,
-    pub iricache: HashMap<A, usize>,
-    pub irivec: Vec<A>,
+pub struct VowlExtractData {
+    // the values are the indices of the nodes in the nodes vector
+    pub nodes: Vec<Node<usize>>,
+    // the values are the indices of the edges in the node vector
+    pub edges: Vec<Edge<usize>>,
+    pub irivec: Vec<String>,
 }
 
-impl<A> Default for VowlExtract<A> {
+impl<A> Default for VowlExtractData<A> {
     fn default() -> Self {
         Self {
             nodes: vec![],
             edges: vec![],
-            iricache: HashMap::new(),
-            blanknode_mapping: HashMap::new(),
             irivec: vec![],
-        }
-    }
-}
-
-impl<A: Clone + Eq + Hash + AsRef<str>> VowlExtract<A> {
-    pub fn insert(&mut self, x: A) -> usize {
-        if self.resolve(&x).is_none() {
-            let present = self.iricache.contains_key(&x);
-            if !present {
-                self.iricache
-                    .insert(x.clone(), self.irivec.len() as usize);
-                self.irivec.push(x.clone());
-            }
-        }
-        self.iricache[&x]
-    }
-    pub fn resolve(&mut self, x: &A) -> Option<usize> {
-        if self.blanknode_mapping.contains_key(x) {
-            return self.resolve(&self.irivec[self.blanknode_mapping[x]].clone());
-        } else if self.iricache.contains_key(x) {
-            return Some(self.iricache[x]);
-        } else {
-            return None;
         }
     }
 }
