@@ -1,7 +1,7 @@
 use super::WorkbenchMenuItems;
 use crate::components::tooltip::{ToolTip, ToolTipPosition};
 use crate::components::user_input::range_select::Slider;
-use grapher::web::prelude::*;
+use grapher::prelude::*;
 use leptos::prelude::*;
 
 #[component]
