@@ -163,6 +163,61 @@
         
 
 
+        <!-- http://www.example.com/owl1#ParentOfTwoChildren -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#ParentOfTwoChildren">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                            <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:cardinality>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+
+        <!-- http://www.example.com/owl1#ParentWithAtLeastThreeChildren -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#ParentWithAtLeastThreeChildren">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                            <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</owl:minCardinality>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
+        <!-- http://www.example.com/owl1#GuardianWithAtMostOneWard -->
+
+        <owl:Class rdf:about="http://www.example.com/owl1#GuardianWithAtMostOneWard">
+            <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Guardian"/>
+            <owl:equivalentClass>
+                <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                        <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                        <owl:Restriction>
+                            <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                            <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+                        </owl:Restriction>
+                    </owl:intersectionOf>
+                </owl:Class>
+            </owl:equivalentClass>
+        </owl:Class>
+        
+
         <!-- http://www.example.com/owl1#OnlyChild -->
 
         <owl:Class rdf:about="http://www.example.com/owl1#OnlyChild">
@@ -218,6 +273,58 @@
         <owl:NamedIndividual rdf:about="http://www.example.com/owl1#bob">
             <rdf:type rdf:resource="http://www.example.com/owl1#OnlyChild"/>
             <o:hasParent rdf:resource="http://www.example.com/owl1#alice"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#carol -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#carol">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Woman"/>
+            <rdf:type rdf:resource="http://www.example.com/owl1#ParentWithAtLeastThreeChildren"/>
+            <o:hasChild rdf:resource="http://www.example.com/owl1#dave"/>
+            <o:hasChild rdf:resource="http://www.example.com/owl1#eve"/>
+            <o:hasChild rdf:resource="http://www.example.com/owl1#frank"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#dave -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#dave">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+            <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#eve -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#eve">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+            <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#frank -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#frank">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+            <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#grace -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#grace">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Guardian"/>
+            <rdf:type rdf:resource="http://www.example.com/owl1#GuardianWithAtMostOneWard"/>
+            <o:hasChild rdf:resource="http://www.example.com/owl1#harry"/>
+        </owl:NamedIndividual>
+        
+
+        <!-- http://www.example.com/owl1#harry -->
+
+        <owl:NamedIndividual rdf:about="http://www.example.com/owl1#harry">
+            <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+            <o:hasParent rdf:resource="http://www.example.com/owl1#grace"/>
         </owl:NamedIndividual>
     </rdf:RDF>
 
