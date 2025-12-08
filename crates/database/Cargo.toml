@@ -26,6 +26,7 @@
     test-generator="^0.3"
     tokio="1.48.0"
     webvowl-parser={path="../parser"}
+    oxrdf="0.3.1"
 
     [dependencies.grapher]
         branch="new_nodetype"
