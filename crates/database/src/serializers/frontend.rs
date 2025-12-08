@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use crate::serializers::formats::graph_display::GraphDisplayData;
 use crate::vocab::owl;
 use futures::StreamExt;
 use grapher::web::prelude::{
-    Characteristic, ElementType, GenericNode, GenericType, OwlEdge, OwlNode, OwlType, RdfEdge,
-    RdfType, RdfsEdge, RdfsNode, RdfsType,
+    Characteristic, ElementType, GenericNode, GenericType, GraphDisplayData, OwlEdge, OwlNode,
+    OwlType, RdfEdge, RdfType, RdfsEdge, RdfsNode, RdfsType,
 };
 use log::{info, warn};
 use rdf_fusion::{

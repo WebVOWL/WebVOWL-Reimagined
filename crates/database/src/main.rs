@@ -1,14 +1,15 @@
-use std::path::Path;
+mod store;
 
 use futures::StreamExt;
+use grapher::web::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
+use std::path::Path;
 use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;
 use webvowl_database::{
-    serializers::{formats::graph_display::GraphDisplayData, new_ser::NewSerializer},
+    serializers::new_ser::NewSerializer,
     store::{DEFAULT_QUERY, WebVOWLStore},
 };
 use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
-mod store;
 
 #[tokio::main]
 pub async fn main() {
@@ -30,7 +31,7 @@ pub async fn main() {
     while let Some(result) = stream.next().await {
         out.extend(result.unwrap());
     }*/
-    let mut data_buffer = GraphDisplayData::new_empty();
+    let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
     let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
