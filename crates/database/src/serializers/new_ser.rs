@@ -3,12 +3,12 @@ use futures::StreamExt;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use webvowl_parser::errors::WebVowlStoreError;
 
-pub struct NewSerializer<A> {
-    extract: VowlExtractData<A>,
+pub struct NewSerializer {
+    extract: VowlExtractData,
     query: String,
 }
 
-impl<A: Clone + Eq> Default for NewSerializer<A> {
+impl Default for NewSerializer {
     fn default() -> Self {
         Self {
             extract: VowlExtractData::default(),
@@ -16,11 +16,11 @@ impl<A: Clone + Eq> Default for NewSerializer<A> {
         }
     }
 }
-impl NewSerializer<String> {
+impl NewSerializer {
     pub async fn serialize(
         &mut self,
         store: Store,
-    ) -> Result<VowlExtractData<String>, WebVowlStoreError> {
+    ) -> Result<VowlExtractData, WebVowlStoreError> {
         if let QueryResults::Solutions(mut solutions) = store.query(&self.query).await? {
             while let Some(solution) = solutions.next().await {
                 let solution = solution?;
@@ -31,14 +31,16 @@ impl NewSerializer<String> {
                     continue;
                 };
                 let triple = (
-                    id_term.to_string,
+                    id_term.to_string(),
                     node_type_term.to_string(),
                     solution.get("label").map(|term| term.to_string()),
                 );
+                /* 
                 let t = triple.clone();
                 if t.2.is_some() && !is_iri(t.2.as_ref().unwrap().as_str()) {
                     self.extract.resolve(&t.2.clone().unwrap());
                 }
+                
                 let (id_value, node_type_raw, label_value) = t;
                 let id = self.extract.insert(id_value);
                 let node_type_clean = node_type_raw.trim_matches('"').to_string();
@@ -47,6 +49,7 @@ impl NewSerializer<String> {
                     "id: {}, node_type: {}, label: {:?}",
                     id, node_type, label_value
                 );
+                */
             }
         }
         for (iri, id) in self.extract.irivec.iter().enumerate() {

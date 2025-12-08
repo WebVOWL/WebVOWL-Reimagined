@@ -69,7 +69,7 @@ pub struct VowlExtractData {
     pub irivec: Vec<String>,
 }
 
-impl<A> Default for VowlExtractData<A> {
+impl Default for VowlExtractData {
     fn default() -> Self {
         Self {
             nodes: vec![],
