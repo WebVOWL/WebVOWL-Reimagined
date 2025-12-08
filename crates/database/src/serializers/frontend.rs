@@ -137,8 +137,12 @@ impl<'a> GraphDisplayDataSolutionSerializer {
         let term = triple.node_type;
         match term {
             TermRef::BlankNode(bnode) => {
-                info!("Is blank node: '{}'", bnode.to_string());
-                // This would never be relevant, since the query should never put blank nodes in the ?nodeType variable
+                // The query must never put blank nodes in the ?nodeType variable
+                // TODO: Handle errors gracefully (and show to frontend)
+                panic!(
+                    "Illegal blank node during serialization: '{}'",
+                    bnode.to_string()
+                );
             }
             TermRef::Literal(literal) => {
                 // NOTE: Any string literal goes here, e.g. 'EquivalentClass'.
