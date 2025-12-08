@@ -1,11 +1,11 @@
 pub mod graph_display {
     use grapher::web::prelude::ElementType;
     use rkyv::{Archive, Deserialize, Portable, Serialize};
-    use std::collections::HashMap;
+    use std::{collections::HashMap, fmt::Display};
 
     /// Struct containing graph data for RustGrapher
     #[repr(C)]
-    #[derive(Archive, Deserialize, Portable, Serialize)]
+    #[derive(Archive, Deserialize, Serialize)]
     pub struct GraphDisplayData {
         /// Labels annotate classes and properties
         ///
@@ -46,6 +46,17 @@ pub mod graph_display {
                 cardinalities: Vec::new(),
                 characteristics: HashMap::new(),
             }
+        }
+    }
+    impl Display for GraphDisplayData {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "GraphDisplayData {{")?;
+            write!(f, "labels: {:?}", self.labels)?;
+            write!(f, "elements: {:?}", self.elements)?;
+            write!(f, "edges: {:?}", self.edges)?;
+            write!(f, "cardinalities: {:?}", self.cardinalities)?;
+            write!(f, "characteristics: {:?}", self.characteristics)?;
+            write!(f, "}}")
         }
     }
 }
