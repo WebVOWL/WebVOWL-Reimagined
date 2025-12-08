@@ -154,7 +154,6 @@ pub const DEFAULT_QUERY: &str = r#"
     ORDER BY ?nodeType
     "#;
 
-
 #[cfg(test)]
 #[allow(unused_must_use)]
 mod test {

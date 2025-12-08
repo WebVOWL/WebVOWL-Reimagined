@@ -90,7 +90,7 @@ pub mod owl {
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#annotatedProperty");
     ///The property that determines the subject of an annotated axiom or annotated annotation.
     pub const ANNOTATED_SOURCE: NamedNodeRef<'_> =
-            NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#annotatedSource");
+        NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#annotatedSource");
     ///The property that determines the object of an annotated axiom or annotated annotation.
     pub const ANNOTATED_TARGET: NamedNodeRef<'_> =
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#annotatedTarget");
@@ -126,7 +126,7 @@ pub mod owl {
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#disjointUnionOf");
     ///The property that determines that two given classes are disjoint.
     pub const DISJOINT_WITH: NamedNodeRef<'_> =
-            NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#disjointWith");
+        NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#disjointWith");
     ///The property that determines the collection of pairwise different individuals in a owl:AllDifferent axiom.
     pub const DISTINCT_MEMBERS: NamedNodeRef<'_> =
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#distinctMembers");
