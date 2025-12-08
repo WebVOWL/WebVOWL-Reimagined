@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::serializers::formats::graph_display::GraphDisplayData;
 use crate::vocab::owl;
-use fluent_uri::Iri;
 use futures::StreamExt;
 use grapher::web::prelude::{
     Characteristic, ElementType, GenericNode, GenericType, OwlEdge, OwlNode, OwlType, RdfEdge,
@@ -116,7 +115,6 @@ impl<'a> GraphDisplayDataSolutionSerializer {
         triple: NodeTriple,
         node_type: ElementType,
     ) {
-        let index = data_buffer.elements.len();
         data_buffer.elements.push(node_type);
         data_buffer.labels.push(triple.id.to_string());
     }
@@ -147,9 +145,6 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             }
             TermRef::Literal(literal) => {
                 info!("Is literal: '{}'", literal.value());
-                // match literal {
-
-                // }
             }
             TermRef::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
