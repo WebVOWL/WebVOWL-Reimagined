@@ -14,11 +14,13 @@
 
 
 [dependencies]
+    env_logger="0.11"
     fluent-uri="0.4.1"
     futures="0.3.31"
     horned-owl={git="https://github.com/phillord/horned-owl", rev="c4f7835ecae70b5e7281dc23b9b7fc6daa497f1d"}
     log="0.4"
     memchr="2.7.6"
+    oxrdf="0.3.1"
     rdf-fusion="0.1.0"
     rkyv="0.8.12"
     smallvec={version="1.15.1", features=["union"]}
@@ -26,12 +28,11 @@
     test-generator="^0.3"
     tokio="1.48.0"
     webvowl-parser={path="../parser"}
-    oxrdf="0.3.1"
 
     [dependencies.grapher]
-        branch="new_nodetype"
+        # branch="new_nodetype"
         features=["webgl"]
-        git="https://github.com/WebVOWL/RustGrapher"
+        # git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
-        # path="../../../RustGrapher"
+        path="../../../RustGrapher"
         # version="0.3"
