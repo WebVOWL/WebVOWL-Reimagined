@@ -118,8 +118,6 @@ impl<'a> GraphDisplayDataSolutionSerializer {
         data_buffer.labels.push(triple.id.to_string());
     }
 
-    /// NOTE: The edge array is overwritten.
-    /// This means if a solution has multiple edge terms, the last one seen wins.
     fn insert_edge(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -143,7 +141,72 @@ impl<'a> GraphDisplayDataSolutionSerializer {
                 // This would never be relevant, since the query should never put blank nodes in the ?nodeType variable
             }
             TermRef::Literal(literal) => {
+                // NOTE: Any string literal goes here, e.g. 'EquivalentClass'.
+                // That is, every BIND("someString" AS ?nodeType)
                 info!("Is literal: '{}'", literal.value());
+                let value = literal.value();
+                match value {
+                    "blanknode" => {}
+                    "IntersectionOf" => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
+                        );
+                    }
+                    "UnionOf" => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
+                        );
+                    }
+                    "AnonymousClass" => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Node(OwlNode::AnonymousClass)),
+                        );
+                    }
+                    "EquivalentClass" => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)),
+                        );
+                    }
+                    "SubClass" => {
+                        self.insert_edge(
+                            data_buffer,
+                            triple,
+                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::SubclassOf)),
+                        );
+                    }
+                    "Datatype" => {
+                        self.insert_edge(
+                            data_buffer,
+                            triple,
+                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
+                        );
+                    }
+                    "DatatypeProperty" => {
+                        self.insert_edge(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)),
+                        );
+                    }
+                    "disjointWith" => {
+                        self.insert_edge(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Edge(OwlEdge::DisjointWith)),
+                        );
+                    }
+                    &_ => {
+                        warn!("Visualization of literal '{value}' is not supported");
+                    }
+                }
             }
             TermRef::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
