@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use futures::StreamExt;
-use rdf_fusion::store::Store;
-use webvowl_database::{serializers::new_ser::NewSerializer, store::WebVOWLStore};
+use rdf_fusion::{execution::results::QueryResults, store::Store};
+use webvowl_database::{serializers::{formats::graph_display::GraphDisplayData, new_ser::NewSerializer}, store::{DEFAULT_QUERY, WebVOWLStore}};
 use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
 use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;
 mod store;
@@ -29,8 +29,14 @@ pub async fn main() {
     }*/
     let mut data_buffer = GraphDisplayData::new_empty();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
-    let mut query_stream = webvowl.session.query(&DEFAULT_QUERY).await.unwrap();
-    solution_serializer.serialize_stream(&mut data_buffer, query_stream).await.unwrap();
+    let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
+    if let QueryResults::Solutions(solutions) = query_stream {
+        solution_serializer.serialize_nodes_stream(
+        &mut data_buffer, solutions).await.unwrap();
+    } else {
+        panic!("Query stream is not a solutions stream");
+    }
+    println!("{}", data_buffer);
     //let mut serializer = NewSerializer::<String>::default();
     //serializer.serialize(webvowl.session).await.unwrap();
     //println!("{}", String::from_utf8_lossy(&out));
