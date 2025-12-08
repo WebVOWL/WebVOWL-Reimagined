@@ -34,5 +34,5 @@
         features=["webgl"]
         # git="https://github.com/WebVOWL/RustGrapher"
         # optional=true
-        path="../../../RustGrapher"
+        path="../../../WasmGrapher"
         # version="0.3"

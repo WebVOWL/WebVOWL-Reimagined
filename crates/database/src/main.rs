@@ -1,16 +1,11 @@
 mod store;
 
 use env_logger::Env;
-use futures::StreamExt;
 use grapher::web::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
 use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;
-use webvowl_database::{
-    serializers::new_ser::NewSerializer,
-    store::{DEFAULT_QUERY, WebVOWLStore},
-};
-use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
+use webvowl_database::store::{DEFAULT_QUERY, WebVOWLStore};
 
 #[tokio::main]
 pub async fn main() {
@@ -19,7 +14,7 @@ pub async fn main() {
     let session = Store::default();
     println!("Loaded {} quads", session.len().await.unwrap());
     // let path = Path::new("crates/database/owl1-compatible.owl");
-    let path = Path::new("crates/database/envo.owl");
+    let path = Path::new("crates/database/owl1-compatible.owl");
     let webvowl = WebVOWLStore::new(session);
     webvowl
         .insert_file(&path, false)
@@ -45,9 +40,20 @@ pub async fn main() {
     } else {
         panic!("Query stream is not a solutions stream");
     }
-    // println!("{}", data_buffer);
+    print_graph_display_data(&data_buffer);
     //let mut serializer = NewSerializer::<String>::default();
     //serializer.serialize(webvowl.session).await.unwrap();
     //println!("{}", String::from_utf8_lossy(&out));
     println!("Written to Output.owl");
+}
+
+pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
+    for (index, (element, label)) in data_buffer
+        .elements
+        .iter()
+        .zip(data_buffer.labels.iter())
+        .enumerate()
+    {
+        println!("{index}: {element:?} -> {label}");
+    }
 }

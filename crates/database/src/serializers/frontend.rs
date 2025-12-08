@@ -146,7 +146,7 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             TermRef::Literal(literal) => {
                 // NOTE: Any string literal goes here, e.g. 'EquivalentClass'.
                 // That is, every BIND("someString" AS ?nodeType)
-                info!("Is literal: '{}'", literal.value());
+                //info!("Is literal: '{}'", literal.value());
                 let value = literal.value();
                 match value {
                     "blanknode" => {}
@@ -213,7 +213,7 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             }
             TermRef::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
-                info!("Is named node: '{}'", uri);
+                // info!("Is named node: '{}'", uri);
                 // TODO: Finding external classes/properties:
                 // 1. Elements whose base URI differs from that of the visualized ontology.
                 // 2. A base URI is EITHER `xml:base` OR that of the document.
