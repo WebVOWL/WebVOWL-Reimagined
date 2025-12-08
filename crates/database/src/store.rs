@@ -130,13 +130,13 @@ pub const DEFAULT_QUERY: &str = r#"
             # 2. Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?label .
-            BIND("Intersection" AS ?nodeType)
+            BIND("IntersectionOf" AS ?nodeType)
         }
         UNION
         {
             # 3. Identify Unions
             ?id owl:unionOf ?list .
-            BIND("Union" AS ?nodeType)
+            BIND("UnionOf" AS ?nodeType)
         }
         UNION
         {
@@ -148,8 +148,44 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             ?id owl:equivalentClass ?label
             BIND("EquivalentClass" AS ?nodeType)
-        }   
-
+        }
+        # Edges
+        UNION
+        {
+            # 1. Identify RDF properties
+            ?id rdf:Property ?target
+            BIND("SubClass" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify subclasses
+            ?id rdfs:SubClassOf ?target
+            BIND("SubClass" AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify datatypes
+            ?id rdfs:Datatype ?target
+            BIND("Datatype" AS ?nodeType)
+        }
+        UNION
+        {
+            # 4. Identify OWL datatype properties
+            ?id owl:DatatypeProperty ?target
+            BIND("DatatypeProperty" AS ?nodeType)
+        }
+        UNION
+        {
+            # 5. Identify OWL disjoint with
+            ?id owl:disjointWith ?target
+            BIND("disjointWith" AS ?nodeType)
+        }
+        UNION
+        {
+            # 6. WIP Identify OWL deprecated properties
+            ?id owl:deprecated "true"^^<http://www.w3.org/2001/XMLSchema#boolean>
+            BIND("DeprecatedProperty" AS ?nodeType)
+        }
     }
     ORDER BY ?nodeType
     "#;
