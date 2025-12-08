@@ -63,7 +63,6 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             };
 
             self.write_node_triple(data_buffer, triple);
-            info!("{}", data_buffer);
         }
         Ok(())
     }
