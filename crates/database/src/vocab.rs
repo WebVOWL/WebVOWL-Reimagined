@@ -1,5 +1,6 @@
 //! Provides ready to use [`NamedNodeRef`](oxrdf::NamedNodeRef)s for basic RDF vocabularies.
 
+#![allow(unused)]
 pub mod owl {
     //! [OWL2](https://www.w3.org/TR/owl2-syntax/) vocabulary.
     use oxrdf::NamedNodeRef;
