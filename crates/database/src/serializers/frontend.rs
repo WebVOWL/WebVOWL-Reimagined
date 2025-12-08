@@ -211,6 +211,12 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             TermRef::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
                 info!("Is named node: '{}'", uri);
+                // TODO: Finding external classes/properties:
+                // 1. Elements whose base URI differs from that of the visualized ontology.
+                // 2. A base URI is EITHER `xml:base` OR that of the document.
+                // SOURCE (save this for the paper and documentation):
+                // 1. p. 6 of https://www.semantic-web-journal.net/system/files/swj1114.pdf
+                // 2. https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
                 match uri {
                     // ----------- RDF ----------- //
 
