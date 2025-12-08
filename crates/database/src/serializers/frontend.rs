@@ -49,7 +49,7 @@ impl<'a> GraphDisplayDataSolutionSerializer {
         data_buffer: &mut GraphDisplayData,
         mut solution_stream: QuerySolutionStream,
     ) -> Result<(), WebVowlStoreError> {
-        println!("Serializing nodes stream");
+        info!("Serializing nodes stream");
         while let Some(solution) = solution_stream.next().await {
             let solution = solution?;
             let Some(id_term) = solution.get("id") else {
@@ -65,7 +65,7 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             };
 
             self.write_node_triple(data_buffer, triple);
-            println!("{}", data_buffer);
+            info!("{}", data_buffer);
         }
         Ok(())
     }
@@ -142,8 +142,8 @@ impl<'a> GraphDisplayDataSolutionSerializer {
         let term = triple.node_type;
         match term {
             TermRef::BlankNode(bnode) => {
-                // TODO: Implement
-                // altought, this would never be relevant, since the query would never put blank nodes in the nodeType
+                info!("Is blank node: '{}'", bnode.to_string());
+                // This would never be relevant, since the query should never put blank nodes in the ?nodeType variable
             }
             TermRef::Literal(literal) => {
                 info!("Is literal: '{}'", literal.value());
@@ -153,7 +153,7 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             }
             TermRef::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
-                println!("Is named node: '{}'", uri);
+                info!("Is named node: '{}'", uri);
                 match uri {
                     // ----------- RDF ----------- //
 
