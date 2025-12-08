@@ -103,6 +103,58 @@ impl WebVOWLStore {
     }
 }
 
+pub const DEFAULT_QUERY: &str = r#"
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX webvowl: <http://www.example.com/iri#>
+
+    SELECT ?id ?nodeType ?label
+    WHERE {
+        {
+            # 1. Identify Named Classes
+            ?id a owl:Class .
+            FILTER(isIRI(?id))
+            BIND(owl:Class AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?label }
+        }
+        UNION
+        {
+            ?id a owl:Class
+            FILTER(!isIRI(?id))
+            BIND("blanknode" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify Intersections
+            # Any node (usually blank) that is the subject of an intersectionOf list
+            ?id owl:intersectionOf ?label .
+            BIND("Intersection" AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify Unions
+            ?id owl:unionOf ?list .
+            BIND("Union" AS ?nodeType)
+        }
+        UNION
+        {
+            # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
+            ?id a owl:Restriction .
+            BIND("AnonymousClass" AS ?nodeType)
+        }
+        UNION
+        {
+            ?id owl:equivalentClass ?label
+            BIND("EquivalentClass" AS ?nodeType)
+        }   
+
+    }
+    ORDER BY ?nodeType
+    "#;
+
+
 #[cfg(test)]
 #[allow(unused_must_use)]
 mod test {
