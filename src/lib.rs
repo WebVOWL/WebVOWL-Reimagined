@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 //! This crate contains the client- and server code for the new WebVOWL.
 
 // For JS naming compatibility
@@ -12,7 +13,7 @@ pub use grapher::web::init_render;
 #[cfg(feature = "wasm")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
-#[cfg(feature = "server")]
+// #[cfg(feature = "server")]
 pub mod network;
 
 pub mod app;

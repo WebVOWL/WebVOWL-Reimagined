@@ -51,6 +51,8 @@
     log="0.4"
     rayon="1.10"
     reqwest={version="0.12.24", optional=true}
+    serde={version="1.0", features=["derive"]}
+    serde_json="1.0"
     strum="0.27"
     strum_macros="0.27"
     tokio={version="1.47.1", optional=true}
@@ -110,7 +112,7 @@
     csr=["leptos/csr"]
     hydrate=[
         "leptos/hydrate",
-        #"thaw/hydrate", 
+        #"thaw/hydrate",
         "nonce",
     ]
     nonce=["leptos/nonce"]
@@ -163,7 +165,8 @@
                 "ssr",
                 "hydrate",
             ],
-            [],
+            [
+            ],
         ]
 
 # Default profile for devs, fast to compile, okay enough to run.

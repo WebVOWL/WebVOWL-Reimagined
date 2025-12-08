@@ -68,7 +68,7 @@ pub fn ZoomInButton() -> impl IntoView {
                     .rend_chan
                     .write()
                     .unwrap()
-                    .single_write(RenderEvent::Zoomed(-20.0));
+                    .single_write(RenderEvent::Zoomed(20.0));
             }
         >
             <Icon icon=icondata::AiZoomInOutlined />
@@ -87,7 +87,7 @@ pub fn ZoomOutButton() -> impl IntoView {
                     .rend_chan
                     .write()
                     .unwrap()
-                    .single_write(RenderEvent::Zoomed(20.0));
+                    .single_write(RenderEvent::Zoomed(-20.0));
             }
         >
             <Icon icon=icondata::AiZoomOutOutlined />
@@ -101,6 +101,13 @@ pub fn CenterGraphButton() -> impl IntoView {
         <button
             class="w-[35px] h-[35px] bg-white flex items-center justify-center text-black border border-black cursor-pointer hover:bg-[#dd9900] transition-colors"
             title="Center the graph"
+            on:click=move |_| {
+                EVENT_DISPATCHER
+                    .rend_chan
+                    .write()
+                    .unwrap()
+                    .single_write(RenderEvent::CenterGraph);
+            }
         >
             <Icon icon=icondata::MdiImageFilterCenterFocus />
         </button>
