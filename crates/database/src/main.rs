@@ -1,5 +1,6 @@
 mod store;
 
+use env_logger::Env;
 use futures::StreamExt;
 use grapher::web::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
@@ -13,10 +14,12 @@ use webvowl_parser::parser_util::{ResourceType, parse_stream_to};
 
 #[tokio::main]
 pub async fn main() {
+    env_logger::Builder::from_env(Env::default().default_filter_or("trace")).init();
     //let session = Store::open("oxigraph.db").unwrap();
     let session = Store::default();
     println!("Loaded {} quads", session.len().await.unwrap());
-    let path = Path::new("crates/database/owl1-compatible.owl");
+    // let path = Path::new("crates/database/owl1-compatible.owl");
+    let path = Path::new("crates/database/envo.owl");
     let webvowl = WebVOWLStore::new(session);
     webvowl
         .insert_file(&path, false)
@@ -42,7 +45,7 @@ pub async fn main() {
     } else {
         panic!("Query stream is not a solutions stream");
     }
-    println!("{}", data_buffer);
+    // println!("{}", data_buffer);
     //let mut serializer = NewSerializer::<String>::default();
     //serializer.serialize(webvowl.session).await.unwrap();
     //println!("{}", String::from_utf8_lossy(&out));
