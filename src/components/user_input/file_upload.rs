@@ -48,7 +48,7 @@ mod progress {
     pub fn reset(filename: &str) {
         if let Some(mut entry) = FILES.get_mut(filename) {
             entry.total = 0;
-        } 
+        }
     }
 
     pub fn remove(filename: &str) {
@@ -75,8 +75,6 @@ pub async fn ontology_progress(filename: String) -> Result<TextStream, ServerFnE
     Ok(TextStream::new(progress))
 }
 
-
-
 #[server(
     input = MultipartFormData,
 )]
@@ -100,7 +98,7 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
         }
 
         while let Ok(Some(chunk)) = field.chunk().await {
-            println!("{}",chunk.len());
+            println!("{}", chunk.len());
             let len = chunk.len();
             count += len;
             let _ = session.upload_chunk(&chunk).await;
@@ -116,17 +114,12 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
     Ok((dtype, count))
 }
 
-
 /// Remote reads url and calls for the datatype label and returns (label, data content)
 #[server]
 pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnError> {
     let client = Client::new();
 
-    let resp = match client
-        .get(&url)
-        .send()
-        .await 
-    {
+    let resp = match client.get(&url).send().await {
         Ok(r) => r,
         Err(e) => {
             return Err(ServerFnError::ServerError(format!(
@@ -167,8 +160,6 @@ pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnErr
     session.complete_upload().await.ok();
     Ok((dtype, total))
 }
- 
-
 
 /// Sparql reads (endpoint + query) and calls for the datatype label and returns (label, data content)
 #[server]
@@ -208,8 +199,12 @@ pub async fn handle_sparql(
     let mut stream = resp.bytes_stream();
     while let Some(chunk_result) = stream.next().await {
         let chunk = match chunk_result {
-        Ok(c) => c,
-        Err(e) => return Err(ServerFnError::ServerError(format!("Error reading chunk: {e}"))),
+            Ok(c) => c,
+            Err(e) => {
+                return Err(ServerFnError::ServerError(format!(
+                    "Error reading chunk: {e}"
+                )));
+            }
         };
 
         total += chunk.len();
@@ -235,7 +230,8 @@ pub struct UploadProgress {
     pub parsing_status: RwSignal<String>,
     pub parsing_done: RwSignal<bool>,
     pub interval_handle: Rc<RefCell<Option<Interval>>>,
-} impl UploadProgress {
+}
+impl UploadProgress {
     pub fn new() -> Self {
         Self {
             filename: RwSignal::new("Select File".to_string()),
@@ -248,8 +244,9 @@ pub struct UploadProgress {
     }
 
     fn track_progress<F>(&self, key: String, total_size: Option<usize>, dispatch: F)
-    where F: FnOnce() + 'static,
-    {   
+    where
+        F: FnOnce() + 'static,
+    {
         self.filename.set(key.clone());
         self.upload_progress.set(0);
         self.parsing_status.set(String::new());
@@ -273,7 +270,7 @@ pub struct UploadProgress {
                                     progress.set(percent as i32);
                                 } else {
                                     let current = progress.get();
-                                    progress.set((current + 5). min(95));
+                                    progress.set((current + 5).min(95));
                                     // progress.set(new_progress);
                                 }
                             }
@@ -308,9 +305,9 @@ pub struct UploadProgress {
         });
     }
 
-
     pub fn upload_files<F>(&self, file_list: FileList, dispatch: F)
-    where F: FnOnce(FormData) + 'static,
+    where
+        F: FnOnce(FormData) + 'static,
     {
         let len = file_list.length();
         let form = FormData::new().unwrap();
@@ -331,15 +328,16 @@ pub struct UploadProgress {
         self.track_progress(fname, Some(self.file_size.get()), move || dispatch(form));
     }
 
-
     pub fn upload_url<F>(&self, url: String, dispatch: F)
-    where F: FnOnce(String) + 'static,
+    where
+        F: FnOnce(String) + 'static,
     {
         self.track_progress(url.clone(), None, move || dispatch(url));
     }
 
     pub fn upload_sparql<F>(&self, endpoint: String, query: String, dispatch: F)
-    where F: FnOnce((String, String, Option<String>)) + 'static,
+    where
+        F: FnOnce((String, String, Option<String>)) + 'static,
     {
         let key = format!("sparql-{}", endpoint);
         let ep = endpoint.clone();
@@ -349,31 +347,36 @@ pub struct UploadProgress {
     }
 }
 
-
 /// handles what server side function to use (local, remote or sparql)
 #[derive(Clone)]
 pub struct FileUpload {
     pub mode: RwSignal<String>,
     pub local_action: Action<FormData, Result<(DataType, usize), ServerFnError>>,
     pub remote_action: Action<String, Result<(DataType, usize), ServerFnError>>,
-    pub sparql_action: Action<(String, String, Option<String>), Result<(DataType, usize), ServerFnError>>,
+    pub sparql_action:
+        Action<(String, String, Option<String>), Result<(DataType, usize), ServerFnError>>,
     pub tracker: Rc<UploadProgress>,
 }
 impl FileUpload {
     pub fn new() -> Self {
         let mode = RwSignal::new("local".to_string());
 
-        let local_action = Action::<FormData, Result<(DataType, usize), ServerFnError>>::new_local(
-|data| handle_local(data.clone().into())       
-        );
+        let local_action =
+            Action::<FormData, Result<(DataType, usize), ServerFnError>>::new_local(|data| {
+                handle_local(data.clone().into())
+            });
 
-        let remote_action= Action::<String, Result<(DataType, usize), ServerFnError>>::new(|url| {
-            handle_remote(url.clone())
+        let remote_action =
+            Action::<String, Result<(DataType, usize), ServerFnError>>::new(|url| {
+                handle_remote(url.clone())
+            });
+
+        let sparql_action = Action::<
+            (String, String, Option<String>),
+            Result<(DataType, usize), ServerFnError>,
+        >::new(|(endpoint, query, format)| {
+            handle_sparql(endpoint.clone(), query.clone(), format.clone())
         });
-
-        let sparql_action = Action::<(String, String, Option<String>), Result<(DataType, usize), ServerFnError>>::new(
-            |(endpoint, query, format)| handle_sparql(endpoint.clone(), query.clone(), format.clone())
-        );
 
         let tracker = Rc::new(UploadProgress::new());
 

@@ -154,7 +154,7 @@ fn Sparql() -> impl IntoView {
             let scroll = el.scroll_height();
             let new_height = scroll - 16;
 
-            el.style(("height",format!("{}px", new_height)));
+            el.style(("height", format!("{}px", new_height)));
         }
     };
 
@@ -235,7 +235,6 @@ fn Sparql() -> impl IntoView {
         </fieldset>
     }
 }
-
 
 #[component]
 pub fn OntologyMenu() -> impl IntoView {

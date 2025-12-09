@@ -33,7 +33,6 @@
         unused_qualifications="warn"
 
 [dependencies]
-    reqwest={version="0.12.24", optional=true, features = ["json", "stream"]}
     actix-files={version="=0.6.6", optional=true}
     actix-web={version="=4.11.0", optional=true, features=[
         "macros",
@@ -56,6 +55,7 @@
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
     rayon="1.10"
+    reqwest={version="0.12.24", optional=true, features=["json", "stream"]}
     serde={version="1.0", features=["derive"]}
     serde_json="1.0"
     strum="0.27"
@@ -92,7 +92,7 @@
     [dependencies.grapher]
         #branch="render_test"
         features=["webgl"]
-        git="https://github.com/WebVOWL/RustGrapher"
+        git="https://github.com/WebVOWL/WasmGrapher"
         # optional=true
         # path="../RustGrapher"
         # version="0.3"
@@ -117,7 +117,7 @@
     csr=["leptos/csr"]
     hydrate=[
         "leptos/hydrate",
-        #"thaw/hydrate", 
+        #"thaw/hydrate",
         "nonce",
     ]
     nonce=["leptos/nonce"]

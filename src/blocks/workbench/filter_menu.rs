@@ -1,5 +1,5 @@
 use super::WorkbenchMenuItems;
-use grapher::web::prelude::NodeType;
+use grapher::prelude::ElementType;
 use leptos::prelude::*;
 use std::collections::{HashMap, HashSet};
 use strum::IntoEnumIterator;
@@ -17,6 +17,120 @@ fn format_node_type_name(node_type: &NodeType) -> String {
     }
 
     result
+}
+
+fn get_node_type_pattern(node_type: &NodeType) -> Option<String> {
+    match node_type {
+        NodeType::Class => Some(
+            "{ ?class rdf:type owl:Class . FILTER(!isBlank(?class)) . OPTIONAL { ?class rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::ExternalClass => Some(
+            "{ ?externalClass rdf:type owl:Class . ?externalClass rdfs:isDefinedBy ?definedBy . OPTIONAL { ?externalClass rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::EquivalentClass => Some(
+            "{ ?equivalentClass rdf:type owl:Class . ?equivalentClass owl:equivalentClass ?target . OPTIONAL { ?equivalentClass rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::DeprecatedClass => Some(
+            "{ ?deprecatedClass rdf:type owl:Class . ?deprecatedClass owl:deprecated true . OPTIONAL { ?deprecatedClass rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::AnonymousClass => Some(
+            "{ ?anonymousClass rdf:type owl:Class . FILTER(isBlank(?anonymousClass)) }"
+                .to_string(),
+        ),
+        NodeType::Thing => Some("{ VALUES ?thing { <http://www.w3.org/2002/07/owl#Thing> } }".to_string()),
+        NodeType::RdfsClass => Some(
+            "{ ?rdfsClass rdf:type rdfs:Class . OPTIONAL { ?rdfsClass rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::RdfsResource => Some(
+            "{ ?rdfsResource rdf:type rdfs:Resource . OPTIONAL { ?rdfsResource rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::Literal => Some(
+            "{ ?literal rdf:type rdfs:Datatype . OPTIONAL { ?literal rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::Datatype => Some(
+            "{ ?datatype rdf:type rdfs:Datatype . OPTIONAL { ?datatype rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::Union => Some(
+            "{ ?unionOf rdf:type owl:Class . FILTER(EXISTS { ?unionOf owl:unionOf ?v }) . OPTIONAL { ?unionOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?unionOf . ?owner rdfs:label ?ownerLabel } }"
+                .to_string(),
+        ),
+        NodeType::Intersection => Some(
+            "{ ?intersectionOf rdf:type owl:Class . FILTER(EXISTS { ?intersectionOf owl:intersectionOf ?v }) . OPTIONAL { ?intersectionOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?intersectionOf . ?owner rdfs:label ?ownerLabel } }"
+                .to_string(),
+        ),
+        NodeType::Complement => Some(
+            "{ ?complementOf rdf:type owl:Class . FILTER(EXISTS { ?complementOf owl:complementOf ?v }) . OPTIONAL { ?complementOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?complementOf . ?owner rdfs:label ?ownerLabel } }"
+                .to_string(),
+        ),
+        NodeType::DisjointUnion => Some(
+            "{ ?disjointUnionOf rdf:type owl:Class . FILTER(EXISTS { ?disjointUnionOf owl:disjointUnionOf ?v }) . OPTIONAL { ?disjointUnionOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?disjointUnionOf . ?owner rdfs:label ?ownerLabel } }"
+                .to_string(),
+        ),
+        NodeType::ObjectProperty => Some(
+            "{ ?objectProperty rdf:type owl:ObjectProperty . OPTIONAL { ?objectProperty rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::DatatypeProperty => Some(
+            "{ ?datatypeProperty rdf:type owl:DatatypeProperty . OPTIONAL { ?datatypeProperty rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::SubclassOf => Some(
+            "{ ?subClassOf rdf:type owl:Class . FILTER(EXISTS { ?subClassOf rdfs:subClassOf ?v }) }"
+                .to_string(),
+        ),
+        NodeType::InverseProperty => Some(
+            "{ ?inverseOf rdf:type owl:ObjectProperty . FILTER(EXISTS { ?inverseOf owl:inverseOf ?v }) }"
+                .to_string(),
+        ),
+        NodeType::DisjointWith => Some(
+            "{ ?disjointWith rdf:type owl:Class . FILTER(EXISTS { ?disjointWith owl:disjointWith ?v }) }"
+                .to_string(),
+        ),
+        NodeType::RdfProperty => Some(
+            "{ ?rdfProperty rdf:type rdf:Property . OPTIONAL { ?rdfProperty rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::DeprecatedProperty => Some(
+            "{ ?deprecatedProperty rdf:type owl:DeprecatedProperty . OPTIONAL { ?deprecatedProperty rdfs:comment ?comment } }"
+                .to_string(),
+        ),
+        NodeType::ExternalProperty => Some(
+            "{ ?externalProperty rdf:type owl:Property . ?externalProperty rdfs:isDefinedBy ?definedBy . OPTIONAL { ?externalProperty rdfs:label ?label } }"
+                .to_string(),
+        ),
+        NodeType::ValuesFrom => Some(
+            "{ ?valuesFrom rdf:type owl:Restriction . FILTER (EXISTS { ?valuesFrom owl:someValuesFrom ?v }) . ?valuesFrom owl:someValuesFrom ?someValuesFrom }"
+                .to_string(),
+        ),
+        NodeType::NoDraw => None,
+    }
+}
+
+fn generate_sparql_query(checks: &HashMap<NodeType, bool>) -> String {
+    let mut patterns: Vec<String> = Vec::new();
+
+    for (node_type, &checked) in checks.iter() {
+        if checked {
+            if let Some(pattern) = get_node_type_pattern(node_type) {
+                patterns.push(pattern);
+            }
+        }
+    }
+
+    if patterns.is_empty() {
+        return "SELECT DISTINCT * WHERE { ?s ?p ?o }".to_string();
+    }
+
+    let union_clause = patterns.join(" UNION ");
+    format!("SELECT DISTINCT * WHERE {{ {} }}", union_clause)
 }
 
 #[derive(Clone)]
@@ -106,6 +220,10 @@ pub fn FilterMenu() -> impl IntoView {
                     node_type: NodeType::Literal,
                     display: "Literal",
                 },
+                NodeChild {
+                    node_type: NodeType::Datatype,
+                    display: "Datatype",
+                },
             ],
         },
         NodeGroup {
@@ -132,10 +250,6 @@ pub fn FilterMenu() -> impl IntoView {
         NodeGroup {
             name: "Properties",
             children: &[
-                NodeChild {
-                    node_type: NodeType::Datatype,
-                    display: "Datatype",
-                },
                 NodeChild {
                     node_type: NodeType::ObjectProperty,
                     display: "Object Property",
@@ -264,6 +378,8 @@ pub fn FilterMenu() -> impl IntoView {
                             for nodeType in nodeTypeKeys {
                                 updatedChecks.insert(nodeType, !allEnabled);
                             }
+                            let query = generate_sparql_query(&updatedChecks);
+                            leptos::logging::log!("{}", query);
                             set_checks.set(updatedChecks);
                         }
                     />
@@ -370,6 +486,8 @@ pub fn FilterMenu() -> impl IntoView {
                                             for child in group.children.iter() {
                                                 updatedChecks.insert(child.node_type, !allEnabled);
                                             }
+                                            let query = generate_sparql_query(&updatedChecks);
+                                            leptos::logging::log!("{}", query);
                                             set_checks.set(updatedChecks);
                                         }
                                     />
@@ -411,6 +529,8 @@ pub fn FilterMenu() -> impl IntoView {
                                                             let mut m = checks.get();
                                                             let entry = m.entry(child_type).or_insert(true);
                                                             *entry = !*entry;
+                                                            let query = generate_sparql_query(&m);
+                                                            leptos::logging::log!("{}", query);
                                                             set_checks.set(m);
                                                         }
                                                     />

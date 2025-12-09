@@ -1,27 +1,30 @@
 <?xml version="1.0"?>
 <rdf:RDF xmlns="http://www.example.com/owl1#"
-     xml:base="http://www.example.com/owl1"
-     xmlns:o="http://www.example.com/owl1#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:xml="http://www.w3.org/XML/1998/namespace"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    xml:base="http://www.example.com/owl1"
+    xmlns:o="http://www.example.com/owl1#"
+    xmlns:obo="http://purl.obolibrary.org/obo/"
+    xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xml="http://www.w3.org/XML/1998/namespace"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
     <owl:Ontology rdf:about="http://www.example.com/owl1">
         <owl:versionIRI rdf:resource="http://www.example.com/owl1/v1"/>
     </owl:Ontology>
-    
 
 
-    <!-- 
+
+    <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
     // Object Properties
     //
     ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+    -->
 
-    
+
 
 
     <!-- http://www.example.com/owl1#hasChild -->
@@ -30,7 +33,7 @@
         <rdfs:domain rdf:resource="http://www.example.com/owl1#Person"/>
         <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
     </owl:ObjectProperty>
-    
+
 
 
     <!-- http://www.example.com/owl1#hasParent -->
@@ -40,24 +43,24 @@
         <rdfs:range rdf:resource="http://www.example.com/owl1#Person"/>
         <owl:inverseOf rdf:resource="http://www.example.com/owl1#hasChild"/>
     </owl:ObjectProperty>
-    
 
 
-    <!-- 
+
+    <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
     // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+    -->
 
-    
+
 
 
     <!-- http://www.example.com/owl1#Person -->
 
     <owl:Class rdf:about="http://www.example.com/owl1#Person"/>
-    
+
 
 
     <!-- http://www.example.com/owl1#Parent -->
@@ -76,7 +79,7 @@
             </owl:Class>
         </owl:equivalentClass>
     </owl:Class>
-    
+
 
 
     <!-- http://www.example.com/owl1#Woman -->
@@ -84,7 +87,7 @@
     <owl:Class rdf:about="http://www.example.com/owl1#Woman">
         <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
     </owl:Class>
-    
+
 
 
     <!-- http://www.example.com/owl1#Guardian -->
@@ -92,7 +95,7 @@
     <owl:Class rdf:about="http://www.example.com/owl1#Guardian">
         <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
     </owl:Class>
-    
+
 
 
     <!-- http://www.example.com/owl1#ParentalGuardian -->
@@ -110,7 +113,7 @@
             </owl:Class>
         </owl:equivalentClass>
     </owl:Class>
-    
+
 
 
     <!-- http://www.example.com/owl1#Caregiver -->
@@ -126,7 +129,22 @@
             <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian"/>
         </owl:equivalentClass>
     </owl:Class>
-    
+
+
+
+    <!-- http://www.example.com/owl1#ParentOrGuardian -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#ParentOrGuardian">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+
 
 
     <!-- http://www.example.com/owl1#Mother -->
@@ -145,7 +163,62 @@
             </owl:Class>
         </owl:equivalentClass>
     </owl:Class>
-    
+
+
+
+    <!-- http://www.example.com/owl1#ParentOfTwoChildren -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#ParentOfTwoChildren">
+        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:cardinality>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+
+
+
+    <!-- http://www.example.com/owl1#ParentWithAtLeastThreeChildren -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#ParentWithAtLeastThreeChildren">
+        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Parent"/>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</owl:minCardinality>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+
+
+    <!-- http://www.example.com/owl1#GuardianWithAtMostOneWard -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#GuardianWithAtMostOneWard">
+        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Guardian"/>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.example.com/owl1#hasChild"/>
+                        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxCardinality>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
 
 
     <!-- http://www.example.com/owl1#OnlyChild -->
@@ -174,18 +247,18 @@
             </owl:Class>
         </owl:equivalentClass>
     </owl:Class>
-    
 
 
-    <!-- 
+
+    <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
     // Individuals
     //
     ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+    -->
 
-    
+
 
 
     <!-- http://www.example.com/owl1#alice -->
@@ -195,7 +268,7 @@
         <rdf:type rdf:resource="http://www.example.com/owl1#Parent"/>
         <o:hasChild rdf:resource="http://www.example.com/owl1#bob"/>
     </owl:NamedIndividual>
-    
+
 
 
     <!-- http://www.example.com/owl1#bob -->
@@ -204,8 +277,86 @@
         <rdf:type rdf:resource="http://www.example.com/owl1#OnlyChild"/>
         <o:hasParent rdf:resource="http://www.example.com/owl1#alice"/>
     </owl:NamedIndividual>
-</rdf:RDF>
 
+
+    <!-- http://www.example.com/owl1#carol -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#carol">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Woman"/>
+        <rdf:type rdf:resource="http://www.example.com/owl1#ParentWithAtLeastThreeChildren"/>
+        <o:hasChild rdf:resource="http://www.example.com/owl1#dave"/>
+        <o:hasChild rdf:resource="http://www.example.com/owl1#eve"/>
+        <o:hasChild rdf:resource="http://www.example.com/owl1#frank"/>
+    </owl:NamedIndividual>
+
+
+    <!-- http://www.example.com/owl1#dave -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#dave">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+        <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+    </owl:NamedIndividual>
+
+
+    <!-- http://www.example.com/owl1#eve -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#eve">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+        <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+    </owl:NamedIndividual>
+
+
+    <!-- http://www.example.com/owl1#frank -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#frank">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+        <o:hasParent rdf:resource="http://www.example.com/owl1#carol"/>
+    </owl:NamedIndividual>
+
+
+    <!-- http://www.example.com/owl1#grace -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#grace">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Guardian"/>
+        <rdf:type rdf:resource="http://www.example.com/owl1#GuardianWithAtMostOneWard"/>
+        <o:hasChild rdf:resource="http://www.example.com/owl1#harry"/>
+    </owl:NamedIndividual>
+
+
+    <!-- http://www.example.com/owl1#harry -->
+
+    <owl:NamedIndividual rdf:about="http://www.example.com/owl1#harry">
+        <rdf:type rdf:resource="http://www.example.com/owl1#Person"/>
+        <o:hasParent rdf:resource="http://www.example.com/owl1#grace"/>
+    </owl:NamedIndividual>
+
+
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Other
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+    -->
+
+
+    <!-- Deprecated -->
+    <owl:ObjectProperty rdf:about="ENVO_2100007">
+        <rdfs:label>obsolete determined by part of</rdfs:label>
+        <owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+    </owl:ObjectProperty>
+
+    <!-- External -->
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ENVO_03501340">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/ENVO_00000073"/>
+        <obo:IAO_0000115 xml:lang="en">A public building in which health, recreation or other public services to a local community are provided.</obo:IAO_0000115>
+        <oboInOwl:created_by rdf:resource="https://orcid.org/0000-0002-9578-0788"/>
+        <oboInOwl:creation_date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-03-15T04:00:01.750Z</oboInOwl:creation_date>
+        <rdfs:label xml:lang="en">community service centre</rdfs:label>
+    </owl:Class>
+
+
+</rdf:RDF>
 
 
 <!-- Generated by the OWL API (version 4.5.26) https://github.com/owlcs/owlapi -->

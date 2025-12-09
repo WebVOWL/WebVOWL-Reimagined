@@ -5,7 +5,6 @@ use std::path::Path;
 
 use webvowl_parser::{
     errors::WebVowlStoreError,
-    errors::WebVowlStoreErrorKind,
     parser_util::{ResourceType, parse_stream_to, parser_from_format},
 };
 
@@ -101,15 +100,218 @@ impl WebVOWLStore {
     }
 }
 
+pub const DEFAULT_QUERY: &str = r#"
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX webvowl: <http://www.example.com/iri#>
+
+    SELECT ?id ?nodeType ?label
+    WHERE {
+        {
+            # 1. Identify Named Classes
+            ?id a owl:Class .
+            FILTER(isIRI(?id))
+            BIND(owl:Class AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?label }
+        }
+        UNION
+        {
+            ?id a owl:Class
+            FILTER(!isIRI(?id))
+            BIND("blanknode" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify Intersections
+            # Any node (usually blank) that is the subject of an intersectionOf list
+            ?id owl:intersectionOf ?label .
+            BIND("IntersectionOf" AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify Unions
+            ?id owl:unionOf ?list .
+            BIND("UnionOf" AS ?nodeType)
+        }
+        UNION
+        {
+            # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
+            ?id a owl:Restriction .
+            BIND("AnonymousClass" AS ?nodeType)
+        }
+        UNION
+        {
+            ?id owl:equivalentClass ?label
+            BIND("EquivalentClass" AS ?nodeType)
+        }
+        # Edges
+        UNION
+        {
+            # 1. Identify RDF properties
+            ?id rdf:Property ?target
+            BIND("SubClass" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify subclasses
+            ?id rdfs:SubClassOf ?target
+            BIND("SubClass" AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify datatypes
+            ?id rdfs:Datatype ?target
+            BIND("Datatype" AS ?nodeType)
+        }
+        UNION
+        {
+            # 4. Identify OWL datatype properties
+            ?id owl:DatatypeProperty ?target
+            BIND("DatatypeProperty" AS ?nodeType)
+        }
+        UNION
+        {
+            # 5. Identify OWL disjoint with
+            ?id owl:disjointWith ?target
+            BIND("disjointWith" AS ?nodeType)
+        }
+        UNION
+        {
+            # 6. WIP Identify OWL deprecated properties
+            ?id owl:deprecated "true"^^<http://www.w3.org/2001/XMLSchema#boolean>
+            BIND("DeprecatedProperty" AS ?nodeType)
+        }
+    }
+    ORDER BY ?nodeType
+    "#;
+
 #[cfg(test)]
+#[allow(unused_must_use)]
 mod test {
     use super::*;
+    use test_generator::test_resources;
 
-    #[tokio::test]
-    async fn test_insert_file() {
-        let session = Store::default();
-        let webvowl = WebVOWLStore::new(session);
-        let path = Path::new("data/test.ttl");
-        let _ = webvowl.insert_file(path, false).await;
+    #[test_resources("crates/database/data/owl-functional/*.ofn")]
+    async fn test_ofn_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-rdf/*.owl")]
+    async fn test_owl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-ttl/*.ttl")]
+    async fn test_ttl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-xml/*.owx")]
+    async fn test_owx_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
+        let store = WebVOWLStore::default();
+        store
+            .insert_file(Path::new(&resource), false)
+            .await
+            .unwrap();
+        assert_ne!(
+            store.session.len().await.unwrap(),
+            0,
+            "Expected non-zero quads for: {}",
+            resource
+        );
+        store.session.clear().await?;
+        Ok(())
+    }
+
+    #[test_resources("crates/database/data/owl-functional/*.ofn")]
+    async fn test_ofn_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-rdf/*.owl")]
+    async fn test_owl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-ttl/*.ttl")]
+    async fn test_ttl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
+        store.session.clear().await?;
+        Ok(())
+    }
+    #[test_resources("crates/database/data/owl-xml/*.owx")]
+    async fn test_owx_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
+        let mut out = vec![];
+        let store = WebVOWLStore::default();
+        store.insert_file(Path::new(&resource), false).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        while let Some(result) = results.next().await {
+            out.extend(result?);
+        }
+
+        assert_ne!(out.len(), 0, "Expected non-zero quads for: {}", resource);
+        store.session.clear().await?;
+        Ok(())
     }
 }
