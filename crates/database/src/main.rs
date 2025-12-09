@@ -1,7 +1,7 @@
 mod store;
 
 use env_logger::Env;
-use grapher::web::prelude::GraphDisplayData;
+use grapher::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
 use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;

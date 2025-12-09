@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::vocab::owl;
 use futures::StreamExt;
-use grapher::web::prelude::{
+use grapher::prelude::{
     Characteristic, ElementType, GenericNode, GenericType, GraphDisplayData, OwlEdge, OwlNode,
     OwlType, RdfEdge, RdfType, RdfsEdge, RdfsNode, RdfsType,
 };

@@ -4,8 +4,8 @@
 // For JS naming compatibility
 #![allow(non_snake_case)]
 
-#[cfg(feature = "wasm")]
-pub use grapher::web::init_render;
+#[cfg(target_arch = "wasm32")]
+pub use grapher::init_render;
 
 // Expose an async initThreadPool function in the final generated JavaScript.
 // You'll need to invoke it right after instantiating your module on the main

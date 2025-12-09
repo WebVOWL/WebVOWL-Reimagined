@@ -1,6 +1,6 @@
 use crate::components::icon::Icon;
-use grapher::web::prelude::EVENT_DISPATCHER;
-use grapher::web::prelude::RenderEvent;
+use grapher::prelude::EVENT_DISPATCHER;
+use grapher::prelude::RenderEvent;
 use leptos::prelude::*;
 
 #[component]
