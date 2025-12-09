@@ -1,5 +1,5 @@
 use super::WorkbenchMenuItems;
-use grapher::web::prelude::NodeType;
+use grapher::prelude::NodeType;
 use leptos::prelude::*;
 use std::collections::{HashMap, HashSet};
 use strum::IntoEnumIterator;

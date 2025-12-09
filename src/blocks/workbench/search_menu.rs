@@ -1,5 +1,5 @@
 use super::WorkbenchMenuItems;
-use grapher::web::prelude::NodeType;
+use grapher::prelude::NodeType;
 use leptos::prelude::*;
 use strum::IntoEnumIterator;
 
