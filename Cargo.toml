@@ -18,6 +18,19 @@
 [lib]
     crate-type=["cdylib", "rlib"]
 
+[workspace]
+    members=[
+        # All of the official crates are within the `crates` folder!
+        "crates/*",
+    ]
+    resolver="2"
+
+    [workspace.lints.rust]
+        missing_docs="warn"
+        unexpected_cfgs={level="warn", check-cfg=['cfg(docsrs_dep)']}
+        unsafe_code="deny"
+        unsafe_op_in_unsafe_fn="warn"
+        unused_qualifications="warn"
 
 [dependencies]
     actix-files={version="=0.6.6", optional=true}
@@ -46,6 +59,8 @@
     wasm-bindgen={version="=0.2.100", optional=true}
     wasm-bindgen-futures={version="0.4.50", optional=true}
     wasm-bindgen-rayon={version="1.3.0", optional=true, features=["no-bundler"]}
+    webvowl-database={path="crates/database", optional=true}
+    webvowl-parser={path="crates/parser", optional=true}
     [dependencies.icondata]
         default-features=false
         features=[
@@ -60,6 +75,14 @@
     [dependencies.leptos-use]
         features=["on_click_outside", "use_preferred_dark"]
         version="0.16.3"
+
+
+        # [dependencies.thaw]
+        #     features=["nightly"]
+        #     # path="../thaw/thaw"
+        #     branch="generic_tooltip"
+        #     git="https://github.com/WebVOWL/thaw"
+        #     version="0.5.0-beta"
 
     [dependencies.grapher]
         #branch="render_test"
@@ -87,9 +110,20 @@
 
 [features]
     csr=["leptos/csr"]
-    hydrate=["leptos/hydrate", "nonce"]
+    hydrate=[
+        "leptos/hydrate",
+        #"thaw/hydrate",
+        "nonce",
+    ]
     nonce=["leptos/nonce"]
-    server=["dep:env_logger", "dep:reqwest", "dep:tokio", "leptos-use/actix"]
+    server=[
+        "dep:env_logger",
+        "dep:reqwest",
+        "dep:tokio",
+        "dep:webvowl-database",
+        "dep:webvowl-parser",
+        "leptos-use/actix",
+    ]
     ssr=[
         "dep:actix-files",
         "dep:actix-web",
@@ -98,6 +132,7 @@
         "leptos_meta/ssr",
         "leptos_router/ssr",
         "leptos-use/ssr",
+        # "thaw/ssr",
     ]
     wasm=[
         "dep:console_error_panic_hook",

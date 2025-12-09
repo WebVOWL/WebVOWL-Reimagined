@@ -1,4 +1,7 @@
 #![recursion_limit = "256"]
+//! This crate contains the client- and server code for the new WebVOWL.
+
+// For JS naming compatibility
 #![allow(non_snake_case)]
 
 #[cfg(target_arch = "wasm32")]

@@ -1,8 +1,7 @@
 use super::WorkbenchMenuItems;
-use leptos::prelude::*;
-use web_sys::{FormData, HtmlInputElement, FileList};
 use crate::components::user_input::file_upload::FileUpload;
-
+use leptos::prelude::*;
+use web_sys::{FileList, FormData, HtmlInputElement};
 
 #[component]
 fn SelectStaticInput() -> impl IntoView {
@@ -28,7 +27,7 @@ fn SelectStaticInput() -> impl IntoView {
     view! {
         <div class="mb-2">
             <label class="block mb-1">"Premade Ontology:"</label>
-            <select 
+            <select
                 class="w-full border-b-0 rounded p-1 text-sm bg-gray-200"
                 prop:value=selected_ontology
                 on:change=move |ev| {
@@ -104,14 +103,13 @@ fn UploadInput() -> impl IntoView {
                     "Select ontology file(s)"
                 </label>
             </div>
-            {move || {
-                let msg = message.get();
-                (!msg.is_empty()).then(|| view! {<p class="mt-1 text-green">{msg}</p>})
-            }}
+            // {move || {
+            //     let msg = message.get();
+            //     (!msg.is_empty()).then(|| view! {<p class="mt-1 text-green">{msg}</p>})
+            // }}
         </div>
     }
 }
-
 
 #[component]
 fn Sparql() -> impl IntoView {
@@ -128,8 +126,17 @@ fn Sparql() -> impl IntoView {
             let scroll = el.scroll_height();
             let new_height = scroll - 16;
 
-            el.style(("height",format!("{}px", new_height)));
+            el.style(("height", format!("{}px", new_height)));
         }
+    };
+
+    let run_sparql = move || {
+        upload.mode.set("sparql".into());
+        upload.sparql_action.dispatch((
+            endpoint_signal.get(),
+            query_signal.get(),
+            Some("json".to_string()),
+        ));
     };
 
     let run_sparql = move || {
