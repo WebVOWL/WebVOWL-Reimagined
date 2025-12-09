@@ -33,6 +33,7 @@
         unused_qualifications="warn"
 
 [dependencies]
+    reqwest={version="0.12.24", optional=true, features = ["json", "stream"]}
     actix-files={version="=0.6.6", optional=true}
     actix-web={version="=4.11.0", optional=true, features=[
         "macros",
@@ -55,7 +56,6 @@
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
     rayon="1.10"
-    reqwest={version="0.12.24", optional=true}
     serde={version="1.0", features=["derive"]}
     serde_json="1.0"
     strum="0.27"
@@ -170,7 +170,8 @@
                 "ssr",
                 "hydrate",
             ],
-            [],
+            [
+            ],
         ]
 
 # Default profile for devs, fast to compile, okay enough to run.

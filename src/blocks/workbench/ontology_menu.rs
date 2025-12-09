@@ -1,107 +1,12 @@
 use super::WorkbenchMenuItems;
-use futures::StreamExt;
-use std::cell::RefCell;
-use std::rc::Rc;
-use gloo_timers::callback::Interval;
+use crate::components::user_input::file_upload::*;
+//use actix_web::cookie::time::parsing;
 use leptos::prelude::*;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData, StreamingText, TextStream};
 use leptos::task::spawn_local;
 use web_sys::HtmlInputElement;
 use web_sys::wasm_bindgen::JsCast;
 use web_sys::{FormData, HtmlFormElement, SubmitEvent};
-#[cfg(feature = "server")]
-use webvowl_database::store::WebVOWLStore;
-
-#[cfg(feature = "ssr")]
-mod progress {
-    use async_broadcast::{Receiver, Sender, broadcast};
-    use dashmap::DashMap;
-    use futures::Stream;
-    use std::sync::LazyLock;
-
-    struct File {
-        total: usize,
-        tx: Sender<usize>,
-        rx: Receiver<usize>,
-    }
-
-    static FILES: LazyLock<DashMap<String, File>> = LazyLock::new(DashMap::new);
-
-    pub async fn add_chunk(filename: &str, len: usize) {
-        let mut entry = FILES.entry(filename.to_string()).or_insert_with(|| {
-            let (mut tx, rx) = broadcast(128);
-            tx.set_overflow(true);
-            File { total: 0, tx, rx }
-        });
-        entry.total += len;
-        let new_total = entry.total;
-
-        let tx = entry.tx.clone();
-        drop(entry);
-
-        let _ = tx.broadcast(new_total).await;
-    }
-
-    pub fn reset(filename: &str) {
-        if let Some(mut entry) = FILES.get_mut(filename) {
-            entry.total = 0;
-        } 
-    }
-
-    pub fn remove(filename: &str) {
-        if FILES.remove(filename).is_some() {
-            // println!("Removed progress entry for '{}'", filename);
-        }
-    }
-
-    pub fn for_file(filename: String) -> impl Stream<Item = usize> {
-        let entry = FILES.entry(filename).or_insert_with(|| {
-            let (mut tx, rx) = broadcast(2048);
-            tx.set_overflow(true);
-            File { total: 0, tx, rx }
-        });
-        entry.rx.clone()
-    }
-}
-
-#[server(output = StreamingText)]
-pub async fn ontology_progress(filename: String) -> Result<TextStream, ServerFnError> {
-    // println!("ontology_progress called for: {}", filename);
-    let progress = progress::for_file(filename);
-    let progress = progress.map(|bytes| Ok(format!("{bytes}\n")));
-    Ok(TextStream::new(progress))
-}
-
-#[server(
-    input = MultipartFormData,
-)]
-pub async fn load_ontology(data: MultipartData) -> Result<usize, ServerFnError> {
-    let mut session = WebVOWLStore::default();
-    let mut data = data.into_inner().unwrap();
-    let mut count = 0;
-    while let Ok(Some(mut field)) = data.next_field().await {
-        let name = field.file_name().unwrap_or_default().to_string();
-
-        if !name.is_empty() {
-            progress::reset(&name);
-            let _ = session.start_upload(&name).await;
-        }
-
-        while let Ok(Some(chunk)) = field.chunk().await {
-            let len = chunk.len();
-            count += len;
-            let _ = session.upload_chunk(&chunk).await;
-            progress::add_chunk(&name, len).await;
-        }
-
-        if !name.is_empty() {
-            progress::remove(&name);
-        }
-    }
-    let _ = session.complete_upload().await;
-    println!("Upload done. Total bytes uploaded: {count}");
-    Ok(count)
-}
 
 #[component]
 fn SelectStaticInput() -> impl IntoView {
@@ -143,145 +48,75 @@ fn SelectStaticInput() -> impl IntoView {
 
 #[component]
 fn UploadInput() -> impl IntoView {
-    let (filename, set_filename) = signal("Select File".to_string());
-    let (file_size, set_file_size) = signal(0usize);
-    let (upload_progress, set_upload_progress) = signal(0);
-    let (parsing_status, set_parsing_status) = signal(String::new());
-    let (parsing_done, set_parsing_done) = signal(false);
-    let interval_handle: Rc<RefCell<Option<Interval>>> = Rc::new(RefCell::new(None));
-    let upload_action = Action::new_local(|data: &FormData| load_ontology(data.clone().into()));
-    let upload_result = upload_action.value();
+    let upload = FileUpload::new();
+    //let message = RwSignal::new(String::new());
+    let upload_progress = upload.tracker.upload_progress.clone();
+    let parsing_status = upload.tracker.parsing_status.clone();
+    let parsing_done = upload.tracker.parsing_done.clone();
+    let tracker_url = upload.tracker.clone();
+    let tracker_file = upload.tracker.clone();
 
-    Effect::new({
-        let interval_handle = Rc::clone(&interval_handle);
-        move |_| {
-            if let Some(result) = upload_result.get() {
-                match result {
-                    Ok(_) => {
-                        if let Some(interval) = interval_handle.borrow_mut().take() {
-                            interval.cancel();
-                        }
-                        set_parsing_status.set("Parsing complete".to_string());
-                        set_parsing_done.set(true);
-                    }
-                    Err(err) => {
-                        if let Some(interval) = interval_handle.borrow_mut().take() {
-                            interval.cancel();
-                        }
-                        set_parsing_status.set(format!("Parsing failed: {err}"));
-                        set_parsing_done.set(false);
-                    }
-                }
-            }
-        }
-    });
     view! {
-        <div class="mb-2">
+         <div class="mb-2">
             <label class="block mb-1">"From URL:"</label>
             <input
                 class="w-full border-b-0 rounded p-1 bg-gray-200"
                 placeholder="Enter input URL"
+                on:change=move |ev| {
+                    let target: HtmlInputElement = event_target(&ev);
+                    let url = target.value();
+
+                    tracker_url.upload_url(url.clone(), move |u| {
+                        upload.remote_action.dispatch(u);
+                        upload.mode.set("remote".to_string());
+                    });
+                }
             />
         </div>
+
         <div class="mb-2">
             <label class="block mb-1">"From File:"</label>
             <div class="relative">
-
-            <form on:submit=move |ev: SubmitEvent| {
-                ev.prevent_default();
-                let target = ev.target().unwrap().unchecked_into::<HtmlFormElement>();
-                let form_data = FormData::new_with_form(&target).unwrap();
-
-                // Clear the file input to allow re-selecting the same file
-                if let Some(file_input) = target.elements().named_item("file_to_upload") {
-                     if let Some(input) = file_input.dyn_ref::<HtmlInputElement>() {
-                         input.set_value("");
-                     }
-                }
-
-                let fname = filename.get_untracked();
-                let fsize = file_size.get_untracked();
-
-                set_upload_progress.set(0);
-                set_parsing_status.set(String::new());
-                set_parsing_done.set(false);
-
-                let interval_handle = Rc::clone(&interval_handle);
-                spawn_local(async move {
-                    match ontology_progress(fname).await {
-                        Ok(stream_result) => {
-                            // Dispatch upload AFTER connecting to stream
-                            upload_action.dispatch_local(form_data);
-
-                            let mut stream = stream_result.into_inner();
-                            while let Some(result) = stream.next().await {
-                                match result {
-                                    Ok(chunk) => {
-                                        if let Ok(bytes) = chunk.trim().parse::<usize>() {
-                                            if fsize > 0 {
-                                                let percent = (bytes as f64 / fsize as f64) * 100.0;
-                                                set_upload_progress.set(percent as i32);
-                                            }
-                                        }
-                                    }
-                                    Err(e) => {
-                                        leptos::logging::error!("Stream error: {:?}", e);
-                                    }
-                                }
-                            }
-                            set_upload_progress.set(100);
-                            set_parsing_status.set("Parsing".to_string());
-                            let interval = Interval::new(1500, move || {
-                                set_parsing_status.update(|s| {
-                                    if s.ends_with("......") {
-                                        *s = "Parsing".to_string();
-                                    } else {
-                                        s.push('.');
-                                    }
-                                });
+                <input
+                    id="file-upload"
+                    type="file"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    multiple=""
+                    accept=".owl,.ofn,.owx,.xml,.json,.ttl,.rdf,.nt,.nq,.trig,.jsonld,.n3,.srj,.srx,.json,.xml,.csv,.tsv"
+                    on:change=move |ev| {
+                        let input: HtmlInputElement =event_target(&ev);
+                        if let Some(files) = input.files() {
+                            tracker_file.upload_files(files, move |form|{
+                                upload.local_action.dispatch_local(form);
+                                upload.mode.set("local".to_string());
                             });
-                            {
-                                let mut handle = interval_handle.borrow_mut();
-                                if let Some(existing) = handle.take() {
-                                    existing.cancel();
-                                }
-                                *handle = Some(interval);
-                            }
-                        },
-                        Err(e) => {
-                            leptos::logging::error!("Failed to connect to progress stream: {:?}", e);
-                            upload_action.dispatch_local(form_data);
                         }
                     }
-                });
-            }>
-                <label class="cursor-pointer block w-full border-b-0 rounded p-1 bg-gray-200">
-                    {filename}
-                    <input type="file" name="file_to_upload" class="hidden"
-                        on:change=move |ev| {
-                            let target = event_target::<HtmlInputElement>(&ev);
-                            if let Some(files) = target.files() {
-                                if let Some(file) = files.get(0) {
-                                    set_filename.set(file.name());
-                                    set_file_size.set(file.size() as usize);
-                                }
-                            }
-                            target.form().unwrap().request_submit().unwrap();
-                        }
-                    />
+                />
+                <label for="file-upload"
+                    class="block w-full border-b-0 rounded p-1 bg-gray-200"
+                    >
+                    "Select ontology file(s)"
                 </label>
-                {move || {
-                    let progress = upload_progress.get();
-                    if progress > 0 {
-                        view! {
+            </div>
+            {move || {
+                // let msg = message.get();
+                // (!msg.is_empty()).then(|| view! {<p class="mt-1 text-green">{msg}</p>})
+                let progress = upload_progress.get();
+                let parsing = parsing_status.get();
+                let done = parsing_done.get();
+
+                if progress > 0 {
+                    view! {
+                        <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 dark:bg-gray-700">
                                 <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style=format!("width: {}%", std::cmp::min(progress, 100))></div>
                             </div>
                             {if progress >= 100 {
                                 view! {
                                     <div class="text-sm mt-1 text-center font-bold">"Upload done"</div>
-                                    {if !parsing_done.get() {
-                                        view! { <div class="text-sm mt-1 text-center">{parsing_status}</div> }.into_any()
+                                    {if !done {
+                                        view! { <div class="text-sm mt-1 text-center">{parsing}</div> }.into_any()
                                     } else {
                                         view! { <div class="text-sm mt-1 text-center font-bold">"Parsing done"</div> }.into_any()
                                     }}
@@ -289,19 +124,27 @@ fn UploadInput() -> impl IntoView {
                             } else {
                                 view! { <></> }.into_any()
                             }}
-                        }.into_any()
-                    } else {
-                        view! { <></> }.into_any()
-                    }
-                }}
-                <input type="submit" class="hidden" />
-            </form>
-            </div>
+                        </div>
+                    }.into_any()
+                } else {
+                    view! { <></> }.into_any()
+                }
+            }}
         </div>
     }
 }
 
+#[component]
 fn Sparql() -> impl IntoView {
+    let upload = FileUpload::new();
+    let upload_progress = upload.tracker.upload_progress.clone();
+    let parsing_status = upload.tracker.parsing_status.clone();
+    let parsing_done = upload.tracker.parsing_done.clone();
+    let tracker_sparql = upload.tracker.clone();
+
+    let endpoint_signal = RwSignal::new(String::new());
+    let query_signal = RwSignal::new(String::new());
+
     let textarea_ref = NodeRef::<leptos::html::Textarea>::new();
 
     let handle_input = move |_| {
@@ -311,8 +154,19 @@ fn Sparql() -> impl IntoView {
             let scroll = el.scroll_height();
             let new_height = scroll - 16;
 
-            el.style(("height", format!("{}px", new_height)));
+            el.style(("height",format!("{}px", new_height)));
         }
+    };
+
+    let run_sparql = move || {
+        tracker_sparql.upload_sparql(
+            endpoint_signal.get(),
+            query_signal.get(),
+            move |(ep, q, fmt)| {
+                upload.sparql_action.dispatch((ep, q, fmt));
+                upload.mode.set("sparql".to_string());
+            },
+        );
     };
 
     view! {
@@ -321,7 +175,12 @@ fn Sparql() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <div>
                     <label class="block text-xs text-gray mb-1">"Query Endpoint"</label>
-                    <input class="w-full text-xs border-b-0 rounded p-1 bg-gray-200" placeholder="Enter query endpoint"/>
+                    <input class="w-full text-xs border-b-0 rounded p-1 bg-gray-200" placeholder="Enter query endpoint"
+                        on:input=move |ev| {
+                            let t: HtmlInputElement = event_target(&ev);
+                            endpoint_signal.set(t.value());
+                        }
+                    />
                 </div>
 
                 <div>
@@ -330,15 +189,53 @@ fn Sparql() -> impl IntoView {
                         node_ref=textarea_ref
                         class="w-full text-xs border-b-0 rounded p-1 resize-none overflow-hidden min-h-24 bg-gray-200"
                         rows=1
-                        placeholder="Enter SPARQL query"
-                        on:input=handle_input
-
+                        placeholder="Enter query"
+                        on:input=move |ev| {
+                            let t: HtmlInputElement = event_target(&ev);
+                            query_signal.set(t.value());
+                            handle_input(());
+                        }
                     />
                 </div>
+
+                <button class="p-1 mt-1 rounded bg-blue-500 text-white text-xs"
+                        on:click=move |_| run_sparql()
+                >"Run query"</button>
+
+                {move || {
+                    let progress = upload_progress.get();
+                    let parsing = parsing_status.get();
+                    let done = parsing_done.get();
+
+                    if progress > 0 {
+                        view! {
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+                                    <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style=format!("width: {}%", std::cmp::min(progress, 100))></div>
+                                </div>
+                                {if progress >= 100 {
+                                    view! {
+                                        <div class="text-sm mt-1 text-center font-bold">"Upload done"</div>
+                                        {if !done {
+                                            view! { <div class="text-sm mt-1 text-center">{parsing}</div> }.into_any()
+                                        } else {
+                                            view! { <div class="text-sm mt-1 text-center font-bold">"Parsing done"</div> }.into_any()
+                                        }}
+                                    }.into_any()
+                                } else {
+                                    view! { <></> }.into_any()
+                                }}
+                            </div>
+                        }.into_any()
+                    } else {
+                        view! { <></> }.into_any()
+                    }
+                }}
             </div>
         </fieldset>
     }
 }
+
 
 #[component]
 pub fn OntologyMenu() -> impl IntoView {
