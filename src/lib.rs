@@ -13,7 +13,6 @@ pub use grapher::init_render;
 #[cfg(feature = "wasm")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
-// #[cfg(feature = "server")]
 pub mod network;
 
 pub mod app;

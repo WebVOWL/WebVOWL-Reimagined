@@ -1,7 +1,12 @@
 use super::WorkbenchMenuItems;
-use crate::components::user_input::file_upload::FileUpload;
+use crate::components::user_input::file_upload::*;
+//use actix_web::cookie::time::parsing;
 use leptos::prelude::*;
-use web_sys::{FileList, FormData, HtmlInputElement};
+use leptos::server_fn::codec::{MultipartData, MultipartFormData, StreamingText, TextStream};
+use leptos::task::spawn_local;
+use web_sys::HtmlInputElement;
+use web_sys::wasm_bindgen::JsCast;
+use web_sys::{FormData, HtmlFormElement, SubmitEvent};
 
 #[component]
 fn SelectStaticInput() -> impl IntoView {
@@ -44,39 +49,27 @@ fn SelectStaticInput() -> impl IntoView {
 #[component]
 fn UploadInput() -> impl IntoView {
     let upload = FileUpload::new();
-    let message = RwSignal::new(String::new());
-    // TODO: This should be a loading widget until stuff has loaded
-    // Maybe, if possible, also make some sort of progress bar or status update.
-    let custom_request = move |file_list: FileList| {
-        let len = file_list.length();
-        message.set(format!("Number of uploaded files: {}", len));
+    //let message = RwSignal::new(String::new());
+    let upload_progress = upload.tracker.upload_progress.clone();
+    let parsing_status = upload.tracker.parsing_status.clone();
+    let parsing_done = upload.tracker.parsing_done.clone();
+    let tracker_url = upload.tracker.clone();
+    let tracker_file = upload.tracker.clone();
 
-        let form = FormData::new().unwrap();
-        for i in 0..len {
-            if let Some(file) = file_list.item(i) {
-                form.append_with_blob("file_to_upload", &file).unwrap();
-            }
-        }
-
-        upload.local_action.dispatch_local(form);
-        upload.mode.set("local".into());
-    };
-
-    let handle_url = move |url: String| {
-        upload.remote_action.dispatch(url);
-        upload.mode.set("remote".into());
-    };
-
-    // TODO: Make accept formats a pointer to somewhere in network module as it should have definitions for accepted input.
     view! {
-        <div class="mb-2">
+         <div class="mb-2">
             <label class="block mb-1">"From URL:"</label>
             <input
                 class="w-full border-b-0 rounded p-1 bg-gray-200"
                 placeholder="Enter input URL"
                 on:change=move |ev| {
-                    let target: HtmlInputElement = event_target::<HtmlInputElement>(&ev);
-                    handle_url(target.value());
+                    let target: HtmlInputElement = event_target(&ev);
+                    let url = target.value();
+
+                    tracker_url.upload_url(url.clone(), move |u| {
+                        upload.remote_action.dispatch(u);
+                        upload.mode.set("remote".to_string());
+                    });
                 }
             />
         </div>
@@ -91,9 +84,12 @@ fn UploadInput() -> impl IntoView {
                     multiple=""
                     accept=".owl,.ofn,.owx,.xml,.json,.ttl,.rdf,.nt,.nq,.trig,.jsonld,.n3,.srj,.srx,.json,.xml,.csv,.tsv"
                     on:change=move |ev| {
-                        let input: HtmlInputElement =event_target::<HtmlInputElement>(&ev);
+                        let input: HtmlInputElement =event_target(&ev);
                         if let Some(files) = input.files() {
-                            custom_request(files);
+                            tracker_file.upload_files(files, move |form|{
+                                upload.local_action.dispatch_local(form);
+                                upload.mode.set("local".to_string());
+                            });
                         }
                     }
                 />
@@ -103,10 +99,37 @@ fn UploadInput() -> impl IntoView {
                     "Select ontology file(s)"
                 </label>
             </div>
-            // {move || {
-            //     let msg = message.get();
-            //     (!msg.is_empty()).then(|| view! {<p class="mt-1 text-green">{msg}</p>})
-            // }}
+            {move || {
+                // let msg = message.get();
+                // (!msg.is_empty()).then(|| view! {<p class="mt-1 text-green">{msg}</p>})
+                let progress = upload_progress.get();
+                let parsing = parsing_status.get();
+                let done = parsing_done.get();
+
+                if progress > 0 {
+                    view! {
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+                                <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style=format!("width: {}%", std::cmp::min(progress, 100))></div>
+                            </div>
+                            {if progress >= 100 {
+                                view! {
+                                    <div class="text-sm mt-1 text-center font-bold">"Upload done"</div>
+                                    {if !done {
+                                        view! { <div class="text-sm mt-1 text-center">{parsing}</div> }.into_any()
+                                    } else {
+                                        view! { <div class="text-sm mt-1 text-center font-bold">"Parsing done"</div> }.into_any()
+                                    }}
+                                }.into_any()
+                            } else {
+                                view! { <></> }.into_any()
+                            }}
+                        </div>
+                    }.into_any()
+                } else {
+                    view! { <></> }.into_any()
+                }
+            }}
         </div>
     }
 }
@@ -114,6 +137,11 @@ fn UploadInput() -> impl IntoView {
 #[component]
 fn Sparql() -> impl IntoView {
     let upload = FileUpload::new();
+    let upload_progress = upload.tracker.upload_progress.clone();
+    let parsing_status = upload.tracker.parsing_status.clone();
+    let parsing_done = upload.tracker.parsing_done.clone();
+    let tracker_sparql = upload.tracker.clone();
+
     let endpoint_signal = RwSignal::new(String::new());
     let query_signal = RwSignal::new(String::new());
 
@@ -131,21 +159,14 @@ fn Sparql() -> impl IntoView {
     };
 
     let run_sparql = move || {
-        upload.mode.set("sparql".into());
-        upload.sparql_action.dispatch((
+        tracker_sparql.upload_sparql(
             endpoint_signal.get(),
             query_signal.get(),
-            Some("json".to_string()),
-        ));
-    };
-
-    let run_sparql = move || {
-        upload.mode.set("sparql".into());
-        upload.sparql_action.dispatch((
-            endpoint_signal.get(),
-            query_signal.get(),
-            Some("json".to_string()),
-        ));
+            move |(ep, q, fmt)| {
+                upload.sparql_action.dispatch((ep, q, fmt));
+                upload.mode.set("sparql".to_string());
+            },
+        );
     };
 
     view! {
@@ -180,6 +201,36 @@ fn Sparql() -> impl IntoView {
                 <button class="p-1 mt-1 rounded bg-blue-500 text-white text-xs"
                         on:click=move |_| run_sparql()
                 >"Run query"</button>
+
+                {move || {
+                    let progress = upload_progress.get();
+                    let parsing = parsing_status.get();
+                    let done = parsing_done.get();
+
+                    if progress > 0 {
+                        view! {
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+                                    <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style=format!("width: {}%", std::cmp::min(progress, 100))></div>
+                                </div>
+                                {if progress >= 100 {
+                                    view! {
+                                        <div class="text-sm mt-1 text-center font-bold">"Upload done"</div>
+                                        {if !done {
+                                            view! { <div class="text-sm mt-1 text-center">{parsing}</div> }.into_any()
+                                        } else {
+                                            view! { <div class="text-sm mt-1 text-center font-bold">"Parsing done"</div> }.into_any()
+                                        }}
+                                    }.into_any()
+                                } else {
+                                    view! { <></> }.into_any()
+                                }}
+                            </div>
+                        }.into_any()
+                    } else {
+                        view! { <></> }.into_any()
+                    }
+                }}
             </div>
         </fieldset>
     }
