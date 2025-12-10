@@ -14,6 +14,7 @@ pub use grapher::init_render;
 pub use wasm_bindgen_rayon::init_thread_pool;
 
 pub mod network;
+pub mod sparql_queries;
 
 pub mod app;
 pub mod blocks;

@@ -1,10 +1,12 @@
 use crate::network::DataType;
 use futures::StreamExt;
 use gloo_timers::callback::Interval;
+use grapher::prelude::GraphDisplayData;
 use leptos::prelude::*;
 use leptos::server_fn::ServerFnError;
-use leptos::server_fn::codec::{MultipartData, MultipartFormData, StreamingText, TextStream};
+use leptos::server_fn::codec::{MultipartData, MultipartFormData, Rkyv, StreamingText, TextStream};
 use leptos::task::spawn_local;
+use log::info;
 #[cfg(feature = "server")]
 use reqwest::Client;
 use std::cell::RefCell;
@@ -12,6 +14,8 @@ use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
 use web_sys::{FileList, FormData};
+#[cfg(feature = "server")]
+use webvowl_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
 #[cfg(feature = "server")]
 use webvowl_database::store::WebVOWLStore;
 
@@ -221,6 +225,26 @@ pub async fn handle_sparql(
         DataType::SPARQLJSON
     };
     Ok((dtype, total))
+}
+
+#[server (input = Rkyv ,output = Rkyv)]
+pub async fn handle_internal_sparql(query: String) -> Result<GraphDisplayData, ServerFnError> {
+    let webvowl = WebVOWLStore::default();
+
+    let mut data_buffer = GraphDisplayData::new();
+    let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
+    let query_stream = webvowl.session.query(query.as_str()).await.unwrap();
+    if let QueryResults::Solutions(solutions) = query_stream {
+        solution_serializer
+            .serialize_nodes_stream(&mut data_buffer, solutions)
+            .await
+            .unwrap();
+    } else {
+        return Err(ServerFnError::ServerError(
+            "Query stream is not a solutions stream".to_string(),
+        ));
+    }
+    Ok(data_buffer)
 }
 
 pub struct UploadProgress {
