@@ -16,8 +16,7 @@ pub fn SimulatorSettings() -> impl IntoView {
     let freeze_thresh = RwSignal::new(FreezeThreshold::default().0.into());
 
     Effect::new(move |_| {
-        let mut sim_chan = EVENT_DISPATCHER.sim_chan.write().unwrap();
-        sim_chan.iter_write([
+        let messages = [
             SimulatorEvent::RepelForceUpdated(repel_force.get() as f32),
             SimulatorEvent::SpringStiffnessUpdated(spring_stiffness.get() as f32),
             SimulatorEvent::SpringNeutralLengthUpdated(spring_neutral_length.get() as f32),
@@ -26,7 +25,10 @@ pub fn SimulatorSettings() -> impl IntoView {
             SimulatorEvent::DampingUpdated(damping.get() as f32),
             SimulatorEvent::QuadTreeThetaUpdated(quadtree_theta.get() as f32),
             SimulatorEvent::FreezeThresholdUpdated(freeze_thresh.get() as f32),
-        ]);
+        ];
+        for msg in messages {
+            EVENT_DISPATCHER.sim_write_chan.send(msg);
+        }
     });
 
     view! {
