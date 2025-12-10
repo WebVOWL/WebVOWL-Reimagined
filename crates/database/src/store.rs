@@ -1,7 +1,9 @@
 use futures::{StreamExt, stream::BoxStream};
+use log::{info, warn};
 use rdf_fusion::store::Store;
-use std::fs::File;
 use std::path::Path;
+use std::time::Duration;
+use std::{fs::File, time::Instant};
 
 use webvowl_parser::{
     errors::WebVowlStoreError,
@@ -55,7 +57,7 @@ impl WebVOWLStore {
     pub async fn serialize_stream(
         &self,
     ) -> Result<BoxStream<'static, Result<Vec<u8>, WebVowlStoreError>>, WebVowlStoreError> {
-        println!(
+        info!(
             "Store size before export: {}",
             self.session.len().await.unwrap_or(0)
         );
@@ -80,7 +82,7 @@ impl WebVOWLStore {
             std::io::Write::write_all(file, data)?;
             Ok(())
         } else {
-            println!("Warning: upload_chunk called without start_upload");
+            warn!("upload_chunk called without start_upload");
             Ok(())
         }
     }
@@ -90,10 +92,19 @@ impl WebVOWLStore {
             std::io::Write::flush(file)?;
             let path = file.path();
             let parser = parser_from_format(path, false)?;
+
+            info!("Parsing input...");
+            let start_time = Instant::now();
             self.session
                 .load_from_reader(parser.parser, parser.input.as_slice())
                 .await?;
-            println!("Loaded ontology");
+            info!(
+                "Parsing complete in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
         }
         self.upload_handle = None;
         Ok(())
