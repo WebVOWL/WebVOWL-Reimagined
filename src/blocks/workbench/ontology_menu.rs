@@ -1,6 +1,6 @@
 use super::WorkbenchMenuItems;
 use crate::components::user_input::file_upload::*;
-use crate::sparql_queries::testing::TESTING_QUERY;
+use crate::sparql_queries::TESTING;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -59,7 +59,7 @@ fn UploadInput() -> impl IntoView {
         if let Some(value) = loading_done.get() {
             match value {
                 Ok(_) => spawn_local(async {
-                    let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                    let output_result = handle_internal_sparql(TESTING.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
                             EVENT_DISPATCHER
@@ -160,7 +160,7 @@ fn FetchData() -> impl IntoView {
     view! {
         <button on:click=move |_| {
             spawn_local(async {
-                let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                let output_result = handle_internal_sparql(TESTING.to_string()).await;
                 match output_result {
                     Ok(graph_data) => {
                         EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
