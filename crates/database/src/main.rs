@@ -3,7 +3,7 @@ mod store;
 use grapher::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
-use webvowl_database::serializers::frontend::GraphDisplayDataSolutionSerializer;
+use webvowl_database::prelude::serializers::frontend::GraphDisplayDataSolutionSerializer;
 use webvowl_database::store::{DEFAULT_QUERY, WebVOWLStore};
 
 #[tokio::main]

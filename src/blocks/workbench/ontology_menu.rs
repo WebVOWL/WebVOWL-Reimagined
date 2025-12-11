@@ -1,12 +1,11 @@
 use super::WorkbenchMenuItems;
 use crate::components::user_input::file_upload::*;
-//use actix_web::cookie::time::parsing;
+use crate::sparql_queries::testing::TESTING_QUERY;
+use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
-use leptos::server_fn::codec::{MultipartData, MultipartFormData, StreamingText, TextStream};
 use leptos::task::spawn_local;
+use log::{error, info};
 use web_sys::HtmlInputElement;
-use web_sys::wasm_bindgen::JsCast;
-use web_sys::{FormData, HtmlFormElement, SubmitEvent};
 
 #[component]
 fn SelectStaticInput() -> impl IntoView {
@@ -49,12 +48,31 @@ fn SelectStaticInput() -> impl IntoView {
 #[component]
 fn UploadInput() -> impl IntoView {
     let upload = FileUpload::new();
-    //let message = RwSignal::new(String::new());
+    let loading_done = upload.local_action.value();
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
     let parsing_done = upload.tracker.parsing_done.clone();
     let tracker_url = upload.tracker.clone();
     let tracker_file = upload.tracker.clone();
+
+    Effect::new(move || {
+        if let Some(value) = loading_done.get() {
+            match value {
+                Ok(_) => spawn_local(async {
+                    let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                    match output_result {
+                        Ok(graph_data) => {
+                            EVENT_DISPATCHER
+                                .rend_write_chan
+                                .send(RenderEvent::LoadGraph(graph_data));
+                        }
+                        Err(e) => error!("{}", e),
+                    }
+                }),
+                Err(e) => error!("{}", e),
+            }
+        }
+    });
 
     view! {
          <div class="mb-2">
@@ -62,7 +80,7 @@ fn UploadInput() -> impl IntoView {
             <input
                 class="w-full border-b-0 rounded p-1 bg-gray-200"
                 placeholder="Enter input URL"
-                on:change=move |ev| {
+                on:input=move |ev| {
                     let target: HtmlInputElement = event_target(&ev);
                     let url = target.value();
 
@@ -83,13 +101,16 @@ fn UploadInput() -> impl IntoView {
                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     multiple=""
                     accept=".owl,.ofn,.owx,.xml,.json,.ttl,.rdf,.nt,.nq,.trig,.jsonld,.n3,.srj,.srx,.json,.xml,.csv,.tsv"
-                    on:change=move |ev| {
-                        let input: HtmlInputElement =event_target(&ev);
+                    on:input=move |ev| {
+                        let input: HtmlInputElement = event_target(&ev);
                         if let Some(files) = input.files() {
                             tracker_file.upload_files(files, move |form|{
+                                info!("Uploading files");
                                 upload.local_action.dispatch_local(form);
                                 upload.mode.set("local".to_string());
                             });
+                        } else {
+                            info!("Found no files to upload");
                         }
                     }
                 />
@@ -131,6 +152,21 @@ fn UploadInput() -> impl IntoView {
                 }
             }}
         </div>
+    }
+}
+
+#[component]
+fn FetchData() -> impl IntoView {
+    view! {
+        <button on:click=move |_| {
+            spawn_local(async {
+                let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                match output_result {
+                    Ok(graph_data) => {
+                        EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
+                    Err(e) => error!("{}", e),
+                }})
+        }>"reload data"</button>
     }
 }
 
@@ -243,6 +279,7 @@ pub fn OntologyMenu() -> impl IntoView {
             <SelectStaticInput />
             <UploadInput />
             <Sparql />
+            <FetchData />
         </WorkbenchMenuItems>
     }
 }

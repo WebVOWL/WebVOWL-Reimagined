@@ -10,18 +10,10 @@ pub fn PauseButton() -> impl IntoView {
     let toggle_pause = move |_| {
         let currently_paused = paused.get();
         if currently_paused {
-            EVENT_DISPATCHER
-                .rend_chan
-                .write()
-                .unwrap()
-                .single_write(RenderEvent::Resumed);
+            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Resumed);
             paused.set(false);
         } else {
-            EVENT_DISPATCHER
-                .rend_chan
-                .write()
-                .unwrap()
-                .single_write(RenderEvent::Paused);
+            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Paused);
             paused.set(true);
         }
     };
@@ -65,10 +57,7 @@ pub fn ZoomInButton() -> impl IntoView {
             title="Zoom in on the graph"
             on:click=move |_| {
                 EVENT_DISPATCHER
-                    .rend_chan
-                    .write()
-                    .unwrap()
-                    .single_write(RenderEvent::Zoomed(20.0));
+                    .rend_write_chan.send(RenderEvent::Zoomed(20.0));
             }
         >
             <Icon icon=icondata::AiZoomInOutlined />
@@ -84,10 +73,7 @@ pub fn ZoomOutButton() -> impl IntoView {
             title="Zoom out on the graph"
             on:click=move |_| {
                 EVENT_DISPATCHER
-                    .rend_chan
-                    .write()
-                    .unwrap()
-                    .single_write(RenderEvent::Zoomed(-20.0));
+                    .rend_write_chan.send(RenderEvent::Zoomed(-20.0));
             }
         >
             <Icon icon=icondata::AiZoomOutOutlined />
@@ -103,10 +89,7 @@ pub fn CenterGraphButton() -> impl IntoView {
             title="Center the graph"
             on:click=move |_| {
                 EVENT_DISPATCHER
-                    .rend_chan
-                    .write()
-                    .unwrap()
-                    .single_write(RenderEvent::CenterGraph);
+                    .rend_write_chan.send(RenderEvent::CenterGraph);
             }
         >
             <Icon icon=icondata::MdiImageFilterCenterFocus />

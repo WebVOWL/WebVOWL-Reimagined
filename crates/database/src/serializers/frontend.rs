@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
+    time::{Duration, Instant},
     fmt::{Display, Formatter},
 };
 
@@ -57,7 +58,9 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer: &mut GraphDisplayData,
         mut solution_stream: QuerySolutionStream,
     ) -> Result<(), WebVowlStoreError> {
-        info!("Serializing nodes stream");
+        let mut count: u32 = 0;
+        info!("Serializing query solution stream...");
+        let start_time = Instant::now();
         while let Some(solution) = solution_stream.next().await {
             let solution = solution?;
             let Some(id_term) = solution.get("id") else {
@@ -71,9 +74,29 @@ impl GraphDisplayDataSolutionSerializer {
                 node_type: node_type_term.to_owned(),
                 target: solution.get("label").map(|term| term.to_owned()),
             };
-
             self.write_node_triple(data_buffer, triple);
+            count += 1;
         }
+        let finish_time = start_time
+            .checked_duration_since(Instant::now())
+            .unwrap_or(Duration::new(0, 0))
+            .as_secs();
+        info!(
+            "Serialization completed in {} s\n \
+            \tTotal solutions: {count}\n \
+            \tElements       : {}\n \
+            \tEdges          : {}\n \
+            \tLabels         : {}\n \
+            \tCardinalities  : {}\n \
+            \tCharacteristics: {}\n\n \
+        ",
+            finish_time,
+            data_buffer.elements.len(),
+            data_buffer.edges.len(),
+            data_buffer.labels.len(),
+            data_buffer.cardinalities.len(),
+            data_buffer.characteristics.len()
+        );
         Ok(())
     }
 
