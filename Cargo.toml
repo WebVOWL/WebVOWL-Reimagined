@@ -55,8 +55,8 @@
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
     rayon="1.10"
-    rkyv="0.8.12"
     reqwest={version="0.12.24", optional=true, features=["json", "stream"]}
+    rkyv="0.8.12"
     serde={version="1.0", features=["derive"]}
     serde_json="1.0"
     strum="0.27"
@@ -93,9 +93,9 @@
     [dependencies.grapher]
         #branch="render_test"
         features=["webgl"]
-        git="https://github.com/WebVOWL/WasmGrapher"
+        # git="https://github.com/WebVOWL/WasmGrapher"
         # optional=true
-        # path="../RustGrapher"
+        path="../RustGrapher"
         # version="0.3"
 
     [dependencies.web-sys]
