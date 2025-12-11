@@ -5,7 +5,7 @@ pub const DEFAULT_QUERY: &str = r#"
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     PREFIX webvowl: <http://www.example.com/iri#>
 
-    SELECT ?id ?nodeType ?label
+    SELECT ?id ?nodeType ?target ?label
     WHERE {
         {
             # 1. Identify Named Classes
@@ -16,65 +16,157 @@ pub const DEFAULT_QUERY: &str = r#"
         }
         UNION
         {
-            ?id a owl:Class
-            FILTER(!isIRI(?id))
-            BIND("blanknode" AS ?nodeType)
-        }
-        UNION
-        {
-            # 2. Identify Intersections
-            # Any node (usually blank) that is the subject of an intersectionOf list
-            ?id owl:intersectionOf ?label .
-            BIND("IntersectionOf" AS ?nodeType)
-        }
-        UNION
-        {
-            # 3. Identify Unions
-            ?id owl:unionOf ?list .
-            BIND("UnionOf" AS ?nodeType)
-        }
-        UNION
-        {
             # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
             ?id a owl:Restriction .
             BIND("AnonymousClass" AS ?nodeType)
         }
         UNION
         {
-            ?id owl:equivalentClass ?label
+            ?id a owl:Class
+            FILTER(!isIRI(?id))
+            BIND("blanknode" AS ?nodeType)
+        }
+        UNION
+        {   
+            # COMPLEMENT 
+            ?id owl:complementOf ?target .
+            BIND("Complement" AS ?nodeType)
+        }
+        UNION
+        {   
+            # DEPRECATED CLASS
+            ?id a owl:DeprecatedClass .
+            BIND("DeprecatedClass" AS ?nodeType)
+        }
+        UNION
+        {   
+            #EQUILVALENT CLASS
+            ?id owl:equivalentClass ?target
             BIND("EquivalentClass" AS ?nodeType)
         }
-        # Edges
+        UNION
+        {   
+            # DISJONT UNION
+            ?id owl:disjointUnionOf ?list .
+            BIND("DisjointUnion" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify Intersections
+            # Any node (usually blank) that is the subject of an intersectionOf list
+            ?id owl:intersectionOf ?target .
+            BIND("IntersectionOf" AS ?nodeType)
+        }
+        UNION
+        {   
+            # THING
+            FILTER(?id = owl:Thing)
+            BIND("Thing" AS ?nodeType)
+        }
+        UNION
+        {   
+            # 3. Identify Unions
+            ?id owl:unionOf ?list .
+            BIND("UnionOf" AS ?nodeType)
+        }
+        UNION
+        {
+            # CLASS
+            ?id a rdfs:Class .
+            FILTER(?id != owl:Class)
+            BIND("Class" AS ?nodeType)
+        }
+        UNION
+        {
+            # LITERAL
+            FILTER(isLiteral(?id))
+            BIND("Literal" AS ?nodeType)
+        }
+        UNION
+        {
+            # RESOURCE
+            ?id a rdfs:Resource .
+            BIND("Resource" AS ?nodeType)
+        }
+        #########
+        # EDGES #
+        #########
         UNION
         {
             # 1. Identify RDF properties
-            ?id rdf:Property ?target
-            BIND("SubClass" AS ?nodeType)
-        }
-        UNION
-        {
-            # 2. Identify subclasses
-            ?id rdfs:SubClassOf ?target
-            BIND("SubClass" AS ?nodeType)
+            ?id rdf:Property ?target .
+            BIND("RdfProperty" AS ?nodeType)
         }
         UNION
         {
             # 3. Identify datatypes
-            ?id rdfs:Datatype ?target
+            ?id rdfs:Datatype ?target .
             BIND("Datatype" AS ?nodeType)
         }
         UNION
         {
+            # 2. Identify subclasses
+            ?id rdfs:subClassOf ?target .
+            BIND("SubClassOf" AS ?nodeType)
+        }
+        UNION
+        {
             # 4. Identify OWL datatype properties
-            ?id owl:DatatypeProperty ?target
+            ?id owl:DatatypeProperty ?target .
             BIND("DatatypeProperty" AS ?nodeType)
         }
         UNION
         {
             # 5. Identify OWL disjoint with
-            ?id owl:disjointWith ?target
+            ?id owl:disjointWith ?target .
             BIND("disjointWith" AS ?nodeType)
         }
+        UNION
+        {
+            # DEPRECATED PROPERTY
+            ?id owl:DeprecatedProperty ?target .
+            BIND(owl:DeprecatedProperty AS ?nodeType)
+        }
+        UNION
+        {
+            # INVERSE OF
+            ?id owl:inverseOf ?target .
+            BIND("InverseOf" AS ?nodeType)
+        }
+        UNION
+        {
+            # OBJECT PROPERTY
+            ?id owl:ObjectProperty ?target .
+            BIND("ObjectProperty" AS ?nodeType)
+        }
+        UNION
+        {
+            # VALUES FROM
+            {
+                ?id owl:someValuesFrom ?target .
+            }
+            UNION
+            {
+                ?id owl:allValuesFrom ?target .
+            }
+            BIND("ValuesFrom" AS ?nodeType)
+        }
+        ###########
+        # General #
+        ###########
+        UNION
+        {
+            # EXTERNALS
+            ?id xml:base ?base .
+            BIND(xml:base AS ?nodeType)
+        }
+        UNION
+        {
+            # DEPRECATED
+            ?id owl:deprecated ?target .
+            BIND(owl:deprecated AS ?nodeType)
+        }
     }
+
     ORDER BY ?nodeType
     "#;

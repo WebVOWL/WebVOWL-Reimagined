@@ -1,5 +1,5 @@
 use super::WorkbenchMenuItems;
-use crate::components::user_input::file_upload::*;
+use crate::components::{icon::Icon, user_input::file_upload::*};
 use crate::sparql_queries::testing::TESTING_QUERY;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
@@ -158,15 +158,18 @@ fn UploadInput() -> impl IntoView {
 #[component]
 fn FetchData() -> impl IntoView {
     view! {
-        <button on:click=move |_| {
-            spawn_local(async {
-                let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
-                match output_result {
-                    Ok(graph_data) => {
-                        EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
-                    Err(e) => error!("{}", e),
-                }})
-        }>"reload data"</button>
+        <div class="flex flex-col gap-2">
+            <button class="relative flex items-center justify-center p-1 mt-1 rounded text-xs bg-gray-200 text-[#000000]" 
+            on:click=move |_| {
+                spawn_local(async {
+                    let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                    match output_result {
+                        Ok(graph_data) => {
+                            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
+                        Err(e) => error!("{}", e),
+                    }})
+            }><Icon class="pr-0.5" icon=icondata::AiReloadOutlined/> "reload data"</button>
+        </div>
     }
 }
 
