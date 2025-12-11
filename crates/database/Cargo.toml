@@ -32,7 +32,7 @@
     [dependencies.grapher]
         # branch="new_nodetype"
         features=["webgl"]
-        # git="https://github.com/WebVOWL/WasmGrapher"
+        git="https://github.com/WebVOWL/WasmGrapher"
         # optional=true
-        path="../../../RustGrapher"
+        # path="../../../RustGrapher"
         # version="0.3"
