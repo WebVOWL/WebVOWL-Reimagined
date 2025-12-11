@@ -164,8 +164,10 @@ impl GraphDisplayDataSolutionSerializer {
     ) {
         data_buffer.elements.push(node_type);
         if let Some(label) = triple.label {
-            let index = data_buffer.elements.len() - 1;
-            data_buffer.labels.insert(index, label.to_string());
+            data_buffer.labels.push(label.to_string());
+        } else {
+            // Fallback label as all elements must have a label.
+            data_buffer.labels.push(node_type.to_string());
         }
         self.iricache
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
@@ -203,11 +205,10 @@ impl GraphDisplayDataSolutionSerializer {
                 .push([index_s.unwrap(), edge_index, index_o.unwrap()]);
             data_buffer.elements.push(edge_type);
 
-            let index = data_buffer.elements.len() - 1;
             if let Some(label) = &triple.label {
-                data_buffer.labels.insert(index, label.to_string());
+                data_buffer.labels.push(label.to_string());
             } else {
-                data_buffer.labels.insert(index, edge_type.to_string());
+                data_buffer.labels.push(edge_type.to_string());
             }
         }
     }
