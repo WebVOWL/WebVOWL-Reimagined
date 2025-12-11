@@ -69,10 +69,10 @@ impl<'a> GraphDisplayDataSolutionSerializer {
             self.write_node_triple(data_buffer, triple);
             count += 1;
         }
-        let finish_time = start_time
-            .checked_duration_since(Instant::now())
+        let finish_time = Instant::now()
+            .checked_duration_since(start_time)
             .unwrap_or(Duration::new(0, 0))
-            .as_secs();
+            .as_secs_f32();
         info!(
             "Serialization completed in {} s\n \
             \tTotal solutions: {count}\n \

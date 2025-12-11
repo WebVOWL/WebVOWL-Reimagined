@@ -289,54 +289,56 @@ impl UploadProgress {
         let interval_handle = Rc::clone(&self.interval_handle);
 
         spawn_local(async move {
-            match ontology_progress(key).await {
-                Ok(stream_result) => {
-                    debug!("Dispatching");
-                    dispatch();
-                    let mut stream = stream_result.into_inner();
-                    while let Some(result) = stream.next().await {
-                        match result {
-                            Ok(chunk) => {
-                                if let Ok(bytes) = chunk.trim().parse::<usize>() {
-                                    if let Some(total) = total_size {
-                                        let percent = (bytes as f64 / total as f64) * 100.0;
-                                        progress.set(percent as i32);
-                                    } else {
-                                        let current = progress.get();
-                                        progress.set((current + 5).min(95));
-                                        // progress.set(new_progress);
-                                    }
-                                }
-                            }
-                            Err(e) => error!("{}", e),
-                        }
-                    }
+            dispatch();
+            // Code below is progress bar and it only works on Chromium-based browsers (sometimes)
+            // match ontology_progress(key).await {
+            //     Ok(stream_result) => {
+            //         debug!("Dispatching");
+            //         dispatch();
+            //         let mut stream = stream_result.into_inner();
+            //         while let Some(result) = stream.next().await {
+            //             match result {
+            //                 Ok(chunk) => {
+            //                     if let Ok(bytes) = chunk.trim().parse::<usize>() {
+            //                         if let Some(total) = total_size {
+            //                             let percent = (bytes as f64 / total as f64) * 100.0;
+            //                             progress.set(percent as i32);
+            //                         } else {
+            //                             let current = progress.get();
+            //                             progress.set((current + 5).min(95));
+            //                             // progress.set(new_progress);
+            //                         }
+            //                     }
+            //                 }
+            //                 Err(e) => error!("{}", e),
+            //             }
+            //         }
 
-                    progress.set(100);
-                    status.set("Parsing".to_string());
+            //         progress.set(100);
+            //         status.set("Parsing".to_string());
 
-                    let interval = Interval::new(1500, move || {
-                        status.update(|s| {
-                            if s.ends_with("......") {
-                                *s = "Parsing".to_string();
-                            } else {
-                                s.push('.');
-                            }
-                        });
-                    });
+            //         let interval = Interval::new(1500, move || {
+            //             status.update(|s| {
+            //                 if s.ends_with("......") {
+            //                     *s = "Parsing".to_string();
+            //                 } else {
+            //                     s.push('.');
+            //                 }
+            //             });
+            //         });
 
-                    let mut handle = interval_handle.borrow_mut();
-                    if let Some(existing) = handle.take() {
-                        existing.cancel();
-                    }
-                    *handle = Some(interval);
-                    done.set(true);
-                }
-                Err(e) => {
-                    error!("Failed to connect to progress stream: {:?}", e);
-                    dispatch();
-                }
-            }
+            //         let mut handle = interval_handle.borrow_mut();
+            //         if let Some(existing) = handle.take() {
+            //             existing.cancel();
+            //         }
+            //         *handle = Some(interval);
+            //         done.set(true);
+            //     }
+            //     Err(e) => {
+            //         error!("Failed to connect to progress stream: {:?}", e);
+            //         dispatch();
+            //     }
+            // }
         });
     }
 
