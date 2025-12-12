@@ -58,7 +58,6 @@
     </owl:DatatypeProperty>
 
 
-
     <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -278,6 +277,14 @@
         </owl:disjointUnionOf>
     </owl:Class>
 
+    <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+            <rdfs:Class rdf:about="Agent"/>
+            <rdfs:Class rdf:about="Project"/>
+            <rdfs:Class rdf:about="Document"/>
+        </owl:unionOf>
+    </owl:Class>
+
 
     <!--
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -359,6 +366,27 @@
         <o:hasParent rdf:resource="http://www.example.com/owl1#grace"/>
     </owl:NamedIndividual>
 
+    <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Thing
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+    -->
+
+
+    <owl:Thing rdf:about="&dip;867">
+
+        <owl:sameAs rdf:resource="&sgd;S000002538"/>
+    </owl:Thing>
+    <owl:Thing rdf:about="&dip;876">
+
+        <owl:sameAs rdf:resource="&sgd;S000004647"/>
+    </owl:Thing>
+    <owl:Thing rdf:about="&dip;1265">
+
+        <owl:sameAs rdf:resource="&sgd;S000005305"/>
+    </owl:Thing>
 
     <!--
     ///////////////////////////////////////////////////////////////////////////////////////
