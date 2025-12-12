@@ -4,6 +4,7 @@ pub const DEFAULT_QUERY: &str = r#"
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     PREFIX webvowl: <http://www.example.com/iri#>
+    PREFIX xml: <http://www.w3.org/XML/1998/namespace>
 
     SELECT ?id ?nodeType ?target ?label
     WHERE {
@@ -18,7 +19,7 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
             ?id a owl:Restriction .
-            BIND("AnonymousClass" AS ?nodeType)
+            BIND(owl:Restriction AS ?nodeType)
         }
         UNION
         {
@@ -30,63 +31,63 @@ pub const DEFAULT_QUERY: &str = r#"
         {   
             # COMPLEMENT 
             ?id owl:complementOf ?target .
-            BIND("Complement" AS ?nodeType)
+            BIND(owl:complementOf AS ?nodeType)
         }
         UNION
         {   
             # DEPRECATED CLASS
             ?id a owl:DeprecatedClass .
-            BIND("DeprecatedClass" AS ?nodeType)
+            BIND(owl:DeprecatedClass AS ?nodeType)
         }
         UNION
         {   
             #EQUILVALENT CLASS
             ?id owl:equivalentClass ?target
-            BIND("EquivalentClass" AS ?nodeType)
+            BIND(owl:equivalentClass AS ?nodeType)
         }
         UNION
         {   
             # DISJONT UNION
             ?id owl:disjointUnionOf ?list .
-            BIND("DisjointUnion" AS ?nodeType)
+            BIND(owl:disjointUnionOf AS ?nodeType)
         }
         UNION
         {
             # 2. Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?target .
-            BIND("IntersectionOf" AS ?nodeType)
+            BIND(owl:intersectionOf AS ?nodeType)
         }
         UNION
         {   
             # THING
             FILTER(?id = owl:Thing)
-            BIND("Thing" AS ?nodeType)
+            BIND(owl:Thing AS ?nodeType)
         }
         UNION
         {   
             # 3. Identify Unions
             ?id owl:unionOf ?list .
-            BIND("UnionOf" AS ?nodeType)
+            BIND(owl:unionOf AS ?nodeType)
         }
         UNION
         {
             # CLASS
             ?id a rdfs:Class .
             FILTER(?id != owl:Class)
-            BIND("Class" AS ?nodeType)
+            BIND(owl:Class AS ?nodeType)
         }
         UNION
         {
             # LITERAL
             FILTER(isLiteral(?id))
-            BIND("Literal" AS ?nodeType)
+            BIND(rdfs:Literal AS ?nodeType)
         }
         UNION
         {
             # RESOURCE
             ?id a rdfs:Resource .
-            BIND("Resource" AS ?nodeType)
+            BIND(rdfs:Resource AS ?nodeType)
         }
         #########
         # EDGES #
@@ -95,31 +96,31 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             # 1. Identify RDF properties
             ?id rdf:Property ?target .
-            BIND("RdfProperty" AS ?nodeType)
+            BIND(rdf:Property AS ?nodeType)
         }
         UNION
         {
             # 3. Identify datatypes
             ?id rdfs:Datatype ?target .
-            BIND("Datatype" AS ?nodeType)
+            BIND(rdfs:Datatype AS ?nodeType)
         }
         UNION
         {
             # 2. Identify subclasses
             ?id rdfs:subClassOf ?target .
-            BIND("SubClassOf" AS ?nodeType)
+            BIND(rdfs:subClassOf AS ?nodeType)
         }
         UNION
         {
             # 4. Identify OWL datatype properties
             ?id owl:DatatypeProperty ?target .
-            BIND("DatatypeProperty" AS ?nodeType)
+            BIND(owl:DatatypeProperty AS ?nodeType)
         }
         UNION
         {
             # 5. Identify OWL disjoint with
             ?id owl:disjointWith ?target .
-            BIND("disjointWith" AS ?nodeType)
+            BIND(owl:disjointWith AS ?nodeType)
         }
         UNION
         {
@@ -131,13 +132,13 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             # INVERSE OF
             ?id owl:inverseOf ?target .
-            BIND("InverseOf" AS ?nodeType)
+            BIND(owl:inverseOf AS ?nodeType)
         }
         UNION
         {
             # OBJECT PROPERTY
             ?id owl:ObjectProperty ?target .
-            BIND("ObjectProperty" AS ?nodeType)
+            BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION
         {
