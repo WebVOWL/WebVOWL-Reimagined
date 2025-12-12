@@ -1,5 +1,5 @@
 use super::WorkbenchMenuItems;
-use crate::components::user_input::file_upload::*;
+use crate::{components::user_input::file_upload::*, sparql_queries::default::DEFAULT_QUERY};
 use crate::sparql_queries::testing::TESTING_QUERY;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
@@ -59,7 +59,7 @@ fn UploadInput() -> impl IntoView {
         if let Some(value) = loading_done.get() {
             match value {
                 Ok(_) => spawn_local(async {
-                    let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
                             EVENT_DISPATCHER
