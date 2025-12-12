@@ -1,10 +1,12 @@
 use crate::network::DataType;
 use futures::StreamExt;
 use gloo_timers::callback::Interval;
+use grapher::prelude::GraphDisplayData;
 use leptos::prelude::*;
 use leptos::server_fn::ServerFnError;
-use leptos::server_fn::codec::{MultipartData, MultipartFormData, StreamingText, TextStream};
+use leptos::server_fn::codec::{MultipartData, MultipartFormData, Rkyv, StreamingText, TextStream};
 use leptos::task::spawn_local;
+use log::{debug, error, info, warn};
 #[cfg(feature = "server")]
 use reqwest::Client;
 use std::cell::RefCell;
@@ -12,6 +14,8 @@ use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
 use web_sys::{FileList, FormData};
+#[cfg(feature = "server")]
+use webvowl_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
 #[cfg(feature = "server")]
 use webvowl_database::store::WebVOWLStore;
 
@@ -69,10 +73,14 @@ mod progress {
 
 #[server(output = StreamingText)]
 pub async fn ontology_progress(filename: String) -> Result<TextStream, ServerFnError> {
-    // println!("ontology_progress called for: {}", filename);
+    debug!("Initializing progress counter with file {filename}");
     let progress = progress::for_file(filename);
+    debug!("Mapping usize to String");
     let progress = progress.map(|bytes| Ok(format!("{bytes}\n")));
-    Ok(TextStream::new(progress))
+    debug!("Creating text stream");
+    let ts = TextStream::new(progress);
+    debug!("OK");
+    Ok(ts)
 }
 
 #[server(
@@ -87,6 +95,7 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
         let name = field.file_name().unwrap_or_default().to_string();
 
         if !name.is_empty() {
+            info!("Receiving file '{}'", name);
             progress::reset(&name);
             let _ = session.start_upload(&name).await;
 
@@ -95,12 +104,14 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
                 .and_then(|ext| ext.to_str())
                 .map(DataType::from_extension)
                 .unwrap_or(DataType::UNKNOWN);
+        } else {
+            warn!("Received empty file string");
         }
 
         while let Ok(Some(chunk)) = field.chunk().await {
-            println!("{}", chunk.len());
             let len = chunk.len();
             count += len;
+            eprint!("{}--", count);
             let _ = session.upload_chunk(&chunk).await;
             progress::add_chunk(&name, len).await;
         }
@@ -109,16 +120,16 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
             progress::remove(&name);
         }
     }
+
     let _ = session.complete_upload().await;
-    println!("Upload done. Total bytes uploaded: {count}");
     Ok((dtype, count))
 }
 
 /// Remote reads url and calls for the datatype label and returns (label, data content)
 #[server]
 pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnError> {
+    debug!("Sending request to remote: '{url}'");
     let client = Client::new();
-
     let resp = match client.get(&url).send().await {
         Ok(r) => r,
         Err(e) => {
@@ -223,6 +234,26 @@ pub async fn handle_sparql(
     Ok((dtype, total))
 }
 
+#[server (input = Rkyv, output = Rkyv)]
+pub async fn handle_internal_sparql(query: String) -> Result<GraphDisplayData, ServerFnError> {
+    let webvowl = WebVOWLStore::default();
+
+    let mut data_buffer = GraphDisplayData::new();
+    let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
+    let query_stream = webvowl.session.query(query.as_str()).await.unwrap();
+    if let QueryResults::Solutions(solutions) = query_stream {
+        solution_serializer
+            .serialize_nodes_stream(&mut data_buffer, solutions)
+            .await
+            .unwrap();
+    } else {
+        return Err(ServerFnError::ServerError(
+            "Query stream is not a solutions stream".to_string(),
+        ));
+    }
+    Ok(data_buffer)
+}
+
 pub struct UploadProgress {
     pub filename: RwSignal<String>,
     pub file_size: RwSignal<usize>,
@@ -258,50 +289,56 @@ impl UploadProgress {
         let interval_handle = Rc::clone(&self.interval_handle);
 
         spawn_local(async move {
-            match ontology_progress(key).await {
-                Ok(stream_result) => {
-                    dispatch();
-                    let mut stream = stream_result.into_inner();
-                    while let Some(result) = stream.next().await {
-                        if let Ok(chunk) = result {
-                            if let Ok(bytes) = chunk.trim().parse::<usize>() {
-                                if let Some(total) = total_size {
-                                    let percent = (bytes as f64 / total as f64) * 100.0;
-                                    progress.set(percent as i32);
-                                } else {
-                                    let current = progress.get();
-                                    progress.set((current + 5).min(95));
-                                    // progress.set(new_progress);
-                                }
-                            }
-                        }
-                    }
+            dispatch();
+            // Code below is progress bar and it only works on Chromium-based browsers (sometimes)
+            // match ontology_progress(key).await {
+            //     Ok(stream_result) => {
+            //         debug!("Dispatching");
+            //         dispatch();
+            //         let mut stream = stream_result.into_inner();
+            //         while let Some(result) = stream.next().await {
+            //             match result {
+            //                 Ok(chunk) => {
+            //                     if let Ok(bytes) = chunk.trim().parse::<usize>() {
+            //                         if let Some(total) = total_size {
+            //                             let percent = (bytes as f64 / total as f64) * 100.0;
+            //                             progress.set(percent as i32);
+            //                         } else {
+            //                             let current = progress.get();
+            //                             progress.set((current + 5).min(95));
+            //                             // progress.set(new_progress);
+            //                         }
+            //                     }
+            //                 }
+            //                 Err(e) => error!("{}", e),
+            //             }
+            //         }
 
-                    progress.set(100);
-                    status.set("Parsing".to_string());
+            //         progress.set(100);
+            //         status.set("Parsing".to_string());
 
-                    let interval = Interval::new(1500, move || {
-                        status.update(|s| {
-                            if s.ends_with("......") {
-                                *s = "Parsing".to_string();
-                            } else {
-                                s.push('.');
-                            }
-                        });
-                    });
+            //         let interval = Interval::new(1500, move || {
+            //             status.update(|s| {
+            //                 if s.ends_with("......") {
+            //                     *s = "Parsing".to_string();
+            //                 } else {
+            //                     s.push('.');
+            //                 }
+            //             });
+            //         });
 
-                    let mut handle = interval_handle.borrow_mut();
-                    if let Some(existing) = handle.take() {
-                        existing.cancel();
-                    }
-                    *handle = Some(interval);
-                    done.set(true);
-                }
-                Err(e) => {
-                    leptos::logging::error!("Failed to connect to progress stream: {:?}", e);
-                    dispatch();
-                }
-            }
+            //         let mut handle = interval_handle.borrow_mut();
+            //         if let Some(existing) = handle.take() {
+            //             existing.cancel();
+            //         }
+            //         *handle = Some(interval);
+            //         done.set(true);
+            //     }
+            //     Err(e) => {
+            //         error!("Failed to connect to progress stream: {:?}", e);
+            //         dispatch();
+            //     }
+            // }
         });
     }
 
@@ -311,6 +348,7 @@ impl UploadProgress {
     {
         let len = file_list.length();
         let form = FormData::new().unwrap();
+        info!("Preparing filelist with {len} files");
 
         // let mut total_size = 0;
         if let Some(file) = file_list.item(0) {
