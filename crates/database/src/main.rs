@@ -3,8 +3,9 @@ mod store;
 use grapher::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
-use webvowl_database::prelude::serializers::frontend::GraphDisplayDataSolutionSerializer;
-use webvowl_database::store::{DEFAULT_QUERY, WebVOWLStore};
+use webvowl_database::{prelude::GraphDisplayDataSolutionSerializer, store::{ WebVOWLStore}};
+
+use crate::store::DEFAULT_QUERY_1;
 
 #[tokio::main]
 pub async fn main() {
@@ -22,7 +23,7 @@ pub async fn main() {
     
     let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
-    let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
+    let query_stream = webvowl.session.query(DEFAULT_QUERY_1).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)

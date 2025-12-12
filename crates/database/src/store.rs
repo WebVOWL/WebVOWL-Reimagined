@@ -111,7 +111,7 @@ impl WebVOWLStore {
     }
 }
 
-pub const DEFAULT_QUERY: &str = r#"
+pub const DEFAULT_QUERY_1: &str = r#"
     PREFIX owl: <http://www.w3.org/2002/07/owl#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -129,6 +129,26 @@ pub const DEFAULT_QUERY: &str = r#"
         }
         UNION
         {
+            ?id rdf:type owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
+        }
+        UNION
+        {
+            ?id rdf:type owl:ObjectProperty .
+            BIND(owl:ObjectProperty AS ?nodeType)
+        }
+        UNION
+        {
+            ?id rdfs:domain ?label .
+            BIND(rdfs:domain AS ?nodeType)
+        }
+        UNION
+        {
+            ?id rdfs:range ?label .
+            BIND(rdfs:range AS ?nodeType)
+        }
+        UNION
+        {
             ?id a owl:Class
             FILTER(!isIRI(?id))
             BIND("blanknode" AS ?nodeType)
@@ -143,48 +163,48 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {
             # 3. Identify Unions
-            ?id owl:unionOf ?list .
+            ?id owl:unionOf ?label .
             BIND(owl:unionOf AS ?nodeType)
         }
         UNION
         {
-            ?id a owl:Restriction .
+            ?id owl:Restriction ?label .
             BIND(owl:Restriction AS ?nodeType)
         }
         UNION
         {
-            ?id owl:equivalentClass ?label
+            ?id owl:equivalentClass ?label .
             BIND(owl:equivalentClass AS ?nodeType)
         }
         # Edges
         UNION
         {
             # 1. Identify RDF properties
-            ?id rdf:Property ?label
+            ?id rdf:Property ?label .
             BIND("SubClass" AS ?nodeType)
         }
         UNION
         {
             # 2. Identify subclasses
-            ?id rdfs:subClassOf ?label
+            ?id rdfs:subClassOf ?label .
             BIND(rdfs:subClassOf AS ?nodeType)
         }
         UNION
         {
             # 3. Identify datatypes
-            ?id rdfs:datatype ?label
+            ?id rdfs:datatype ?label .
             BIND(owl:datatype AS ?nodeType)
         }
         UNION
         {
             # 4. Identify OWL datatype properties
-            ?id owl:DatatypeProperty ?target
+            ?id owl:DatatypeProperty ?label .
             BIND(owl:DatatypeProperty AS ?nodeType)
         }
         UNION
         {
             # 5. Identify OWL disjoint with
-            ?id owl:disjointWith ?target
+            ?id owl:disjointWith ?label
             BIND(owl:disjointWith AS ?nodeType)
         }
         UNION
