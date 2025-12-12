@@ -1,10 +1,12 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Formatter},
+    rc::Rc,
     time::{Duration, Instant},
 };
 
 use crate::vocab::owl;
+use fluent_uri::Iri;
 use futures::StreamExt;
 use grapher::prelude::{
     ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfsEdge, RdfsNode, RdfsType,
@@ -17,25 +19,22 @@ use rdf_fusion::{
 use webvowl_parser::errors::WebVowlStoreError;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
-pub struct TermCollection {
+pub struct Triple {
     /// The subject
     id: Term,
     /// The predicate
     node_type: Term,
     /// The object
     target: Option<Term>,
-    /// The label
-    label: Option<Term>,
 }
-impl Display for TermCollection {
+impl Display for Triple {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "TermsCollection {{\n /
+            "Triple {{\n /
             id: {}\n /
             element_type: {}\n /
             target: {}\n /
-            label: {}\n /
              }}",
             self.id,
             self.node_type,
@@ -43,10 +42,6 @@ impl Display for TermCollection {
                 .as_ref()
                 .map(|t| t.to_string())
                 .unwrap_or_default(),
-            self.label
-                .as_ref()
-                .map(|l| l.to_string())
-                .unwrap_or_default()
         )
     }
 }
@@ -54,7 +49,12 @@ pub struct GraphDisplayDataSolutionSerializer {
     blanknode_mapping: HashMap<String, String>,
     iricache: HashMap<String, usize>,
     mapped_to: HashMap<usize, HashSet<String>>,
-    unknown_buffer: HashSet<TermCollection>,
+    unknown_buffer: HashSet<Triple>,
+    /// Stores labels until a match has been found
+    ///
+    /// usize = element index in data_buffer.elements
+    /// String = label
+    labels: HashMap<String, String>,
 }
 
 impl GraphDisplayDataSolutionSerializer {
@@ -64,6 +64,7 @@ impl GraphDisplayDataSolutionSerializer {
             iricache: HashMap::new(),
             mapped_to: HashMap::new(),
             unknown_buffer: HashSet::new(),
+            labels: HashMap::new(),
         }
     }
 
@@ -81,13 +82,15 @@ impl GraphDisplayDataSolutionSerializer {
                 continue;
             };
             let Some(node_type_term) = solution.get("nodeType") else {
+                // Labels are a separate solution without nodetype
+                self.add_label(solution.get("label"), id_term);
                 continue;
             };
-            let triple: TermCollection = TermCollection {
+
+            let triple: Triple = Triple {
                 id: id_term.to_owned(),
                 node_type: node_type_term.to_owned(),
                 target: solution.get("target").map(|term| term.to_owned()),
-                label: solution.get("label").map(|term| term.to_owned()),
             };
             self.write_node_triple(data_buffer, triple);
             count += 1;
@@ -115,7 +118,6 @@ impl GraphDisplayDataSolutionSerializer {
         debug!("{}", data_buffer);
         Ok(())
     }
-
     /*
     pub fn insert_iri(
         &mut self,
@@ -132,6 +134,32 @@ impl GraphDisplayDataSolutionSerializer {
         self.iricache[&x]
     }*/
 
+    fn add_label(&mut self, label: Option<&Term>, id_term: &Term) {
+        let iri = id_term.to_string();
+        let result = match label {
+            Some(label) => {
+                if label.to_string() != "" {
+                    Ok(self.labels.insert(id_term.to_string(), label.to_string()))
+                } else {
+                    Err(())
+                }
+            }
+            None => match Iri::parse(iri.clone()) {
+                Ok(id_iri) => match id_iri.fragment() {
+                    Some(frag) => Ok(self.labels.insert(id_iri.to_string(), frag.to_string())),
+                    None => Err(()),
+                },
+                Err(_) => Err(()),
+            },
+        };
+        match result {
+            Ok(_) => {}
+            Err(_) => {
+                self.labels.insert(iri.clone(), iri);
+            }
+        }
+    }
+
     pub fn resolve(&mut self, data_buffer: &mut GraphDisplayData, x: &String) -> Option<usize> {
         if self.blanknode_mapping.contains_key(x) {
             return self.resolve(data_buffer, &self.blanknode_mapping[x].clone());
@@ -143,7 +171,7 @@ impl GraphDisplayDataSolutionSerializer {
     pub fn resolve_so(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        triple: &TermCollection,
+        triple: &Triple,
     ) -> (Option<usize>, Option<usize>) {
         let resolved_subject = self.resolve(data_buffer, &triple.id.to_string());
         let resolved_object = match &triple.target {
@@ -159,16 +187,11 @@ impl GraphDisplayDataSolutionSerializer {
     fn insert_node(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        triple: TermCollection,
+        triple: Triple,
         node_type: ElementType,
     ) {
         data_buffer.elements.push(node_type);
-        if let Some(label) = triple.label {
-            data_buffer.labels.push(label.to_string());
-        } else {
-            // Fallback label as all elements must have a label.
-            data_buffer.labels.push(node_type.to_string());
-        }
+        self.insert_label(data_buffer, &triple, &node_type);
         self.iricache
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
         self.check_insert_unknowns(data_buffer);
@@ -191,7 +214,7 @@ impl GraphDisplayDataSolutionSerializer {
     fn insert_edge(
         &mut self,
         data_buffer: &mut GraphDisplayData,
-        triple: &TermCollection,
+        triple: &Triple,
         edge_type: ElementType,
     ) {
         trace!("insert_edge: {:?}", triple);
@@ -204,12 +227,24 @@ impl GraphDisplayDataSolutionSerializer {
                 .edges
                 .push([index_s.unwrap(), edge_index, index_o.unwrap()]);
             data_buffer.elements.push(edge_type);
+            self.insert_label(data_buffer, &triple, &edge_type);
+        }
+    }
 
-            if let Some(label) = &triple.label {
-                data_buffer.labels.push(label.to_string());
-            } else {
-                data_buffer.labels.push(edge_type.to_string());
-            }
+    /// Create a label for an element.
+    ///
+    /// Note: must be called AFTER adding the element to `databuffer.elements`.
+    fn insert_label(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        triple: &Triple,
+        element_type: &ElementType,
+    ) {
+        if let Some(label) = self.labels.remove(&triple.id.to_string()) {
+            data_buffer.labels.push(label);
+        } else {
+            // Fallback label as all elements must have a label.
+            data_buffer.labels.push(element_type.to_string());
         }
     }
 
@@ -236,7 +271,7 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
-    fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: TermCollection) {
+    fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
         // TODO: Collect errors and show to frontend
         let node_type = triple.node_type.clone();
         match node_type {
@@ -583,7 +618,6 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 }
-
 impl Display for GraphDisplayDataSolutionSerializer {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for (index, (element, label)) in self.iricache.iter().enumerate() {
