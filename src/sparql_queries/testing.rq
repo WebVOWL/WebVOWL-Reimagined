@@ -10,7 +10,18 @@
             # 1. Identify Named Classes
             ?id a owl:Class .
             FILTER(isIRI(?id))
-            BIND(owl:Class AS ?nodeType)  
+            BIND(owl:Class AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
@@ -24,22 +35,66 @@
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?target .
             BIND(owl:intersectionOf AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 3. Identify Unions
             ?id owl:unionOf ?list .
             BIND(owl:unionOf AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             ?id a owl:Restriction .
             BIND(owl:Restriction AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             ?id owl:equivalentClass ?target
             BIND(owl:equivalentClass AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         # Edges
         UNION
@@ -47,65 +102,131 @@
             # 1. Identify RDF properties
             ?id rdf:Property ?target
             BIND("SubClass" AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 2. Identify subclasses
             ?id rdfs:subClassOf ?target
             BIND(rdfs:subClassOf AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 3. Identify datatypes
             ?id rdfs:datatype ?target
             BIND(owl:datatype AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 4. Identify OWL datatype properties
             ?id owl:DatatypeProperty ?target
             BIND(owl:DatatypeProperty AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 5. Identify OWL disjoint with
             ?id owl:disjointWith ?target
             BIND(owl:disjointWith AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
         UNION
         {
             # 6. WIP Identify OWL deprecated properties
             ?id owl:deprecated "true"^^<http://www.w3.org/2001/XMLSchema#boolean>
             BIND("DeprecatedProperty" AS ?nodeType)
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
         }
-        UNION
-        {
-                # Find labels for elements in the following order:
-                # SPARQL
-                # 1. Use rdfs:label, if exists.
-                #    https://www.w3.org/TR/rdf-schema/#ch_label
-                # 2. Use rdf:resource, if exists.
-                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-empty-property-elements
-                # 3. Use rdf:ID, if exists.
-                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
-                # SERIALIZER
-                # 4. Use fragment identifier of rdf:about, if exists.
-                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-node-property-elements
-                # 5. If fragment not found but rdf:about exists, use whole string.
-                #    TODO: Insert link to docs about using prefix notation.
-                # 6. Create a fallback label from the ElementType.
-                OPTIONAL { ?id rdfs:label ?theLabel }
-                OPTIONAL { ?id rdf:resource ?resLabel }
-                OPTIONAL { ?id rdf:ID ?idLabel }
-                BIND (
-                    COALESCE(
-                        IF( BOUND(?theLabel), ?theLabel, 1/0 ),
-                        IF( BOUND(?resLabel), ?resLabel, 1/0 ),
-                        IF( BOUND(?idLabel), ?idLabel, 1/0 ),
-                        ""
-                    ) AS ?label
-                ) 
-            }
+        # UNION
+        # {
+        #         # Find labels for elements in the following order:
+        #         # SPARQL
+        #         # 1. Use rdfs:label, if exists.
+        #         #    https://www.w3.org/TR/rdf-schema/#ch_label
+        #         # 2. Use rdf:resource, if exists.
+        #         #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-empty-property-elements
+        #         # 3. Use rdf:ID, if exists.
+        #         #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
+        #         # SERIALIZER
+        #         # 4. Use fragment identifier of rdf:about, if exists.
+        #         #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-node-property-elements
+        #         # 5. If fragment not found but rdf:about exists, use whole string.
+        #         #    TODO: Insert link to docs about using prefix notation.
+        #         # 6. Create a fallback label from the ElementType.
+        #         OPTIONAL { ?id rdfs:label ?theLabel }
+        #         OPTIONAL { ?id rdf:resource ?resLabel }
+        #         OPTIONAL { ?id rdf:ID ?idLabel }
+        #         BIND (
+        #             COALESCE(
+        #                 IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+        #                 IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+        #                 IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+        #                 ""
+        #             ) AS ?label
+        #         )
+        #     }
         BIND(
             IF(?nodeType = owl:Class, 1, 2)
             AS ?weight)
