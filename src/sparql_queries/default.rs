@@ -62,7 +62,6 @@ pub const DEFAULT_QUERY: &str = r#"
         {   
             # THING
             ?id a owl:Thing .
-            FILTER(?id = owl:Thing)
             BIND(owl:Thing AS ?nodeType)
         }
         UNION
@@ -81,6 +80,7 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {
             # LITERAL
+            ?id a rdfs:Literal .
             FILTER(isLiteral(?id))
             BIND(rdfs:Literal AS ?nodeType)
         }
@@ -116,19 +116,22 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {
             # 4. Identify OWL datatype properties
-            ?id owl:DatatypeProperty ?target .
+            ?id a owl:DatatypeProperty .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(owl:DatatypeProperty AS ?nodeType)
         }
         UNION
         {
             # 5. Identify OWL disjoint with
-            ?id owl:disjointWith ?target .
+            ?id a owl:disjointWith .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(owl:disjointWith AS ?nodeType)
         }
         UNION
         {
             # DEPRECATED PROPERTY
-            ?id owl:DeprecatedProperty ?target .
+            ?id a owl:DeprecatedProperty .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(owl:DeprecatedProperty AS ?nodeType)
         }
         UNION
