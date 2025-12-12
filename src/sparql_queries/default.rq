@@ -1,4 +1,3 @@
-pub const DEFAULT_QUERY: &str = r#"
     PREFIX owl: <http://www.w3.org/2002/07/owl#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -13,7 +12,6 @@ pub const DEFAULT_QUERY: &str = r#"
             ?id a owl:Class .
             FILTER(isIRI(?id))
             BIND(owl:Class AS ?nodeType)
-            OPTIONAL { ?id rdfs:label ?label }
         }
         UNION
         {
@@ -28,25 +26,25 @@ pub const DEFAULT_QUERY: &str = r#"
             BIND("blanknode" AS ?nodeType)
         }
         UNION
-        {   
-            # COMPLEMENT 
+        {
+            # COMPLEMENT
             ?id owl:complementOf ?target .
             BIND(owl:complementOf AS ?nodeType)
         }
         UNION
-        {   
+        {
             # DEPRECATED CLASS
             ?id a owl:DeprecatedClass .
             BIND(owl:DeprecatedClass AS ?nodeType)
         }
         UNION
-        {   
+        {
             #EQUILVALENT CLASS
             ?id owl:equivalentClass ?target
             BIND(owl:equivalentClass AS ?nodeType)
         }
         UNION
-        {   
+        {
             # DISJONT UNION
             ?id owl:disjointUnionOf ?list .
             BIND(owl:disjointUnionOf AS ?nodeType)
@@ -59,13 +57,13 @@ pub const DEFAULT_QUERY: &str = r#"
             BIND(owl:intersectionOf AS ?nodeType)
         }
         UNION
-        {   
+        {
             # THING
             ?id a owl:Thing .
             BIND(owl:Thing AS ?nodeType)
         }
         UNION
-        {   
+        {
             # 3. Identify Unions
             ?id owl:unionOf ?list .
             BIND(owl:unionOf AS ?nodeType)
@@ -177,4 +175,3 @@ pub const DEFAULT_QUERY: &str = r#"
     }
 
     ORDER BY ?nodeType
-    "#;

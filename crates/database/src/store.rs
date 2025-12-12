@@ -138,55 +138,54 @@ pub const DEFAULT_QUERY: &str = r#"
             # 2. Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?label .
-            BIND("IntersectionOf" AS ?nodeType)
+            BIND(owl:intersectionOf AS ?nodeType)
         }
         UNION
         {
             # 3. Identify Unions
             ?id owl:unionOf ?list .
-            BIND("UnionOf" AS ?nodeType)
+            BIND(owl:unionOf AS ?nodeType)
         }
         UNION
         {
-            # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
             ?id a owl:Restriction .
-            BIND("AnonymousClass" AS ?nodeType)
+            BIND(owl:Restriction AS ?nodeType)
         }
         UNION
         {
             ?id owl:equivalentClass ?label
-            BIND("EquivalentClass" AS ?nodeType)
+            BIND(owl:equivalentClass AS ?nodeType)
         }
         # Edges
         UNION
         {
             # 1. Identify RDF properties
-            ?id rdf:Property ?target
+            ?id rdf:Property ?label
             BIND("SubClass" AS ?nodeType)
         }
         UNION
         {
             # 2. Identify subclasses
-            ?id rdfs:SubClassOf ?target
-            BIND("SubClass" AS ?nodeType)
+            ?id rdfs:subClassOf ?label
+            BIND(rdfs:subClassOf AS ?nodeType)
         }
         UNION
         {
             # 3. Identify datatypes
-            ?id rdfs:Datatype ?target
-            BIND("Datatype" AS ?nodeType)
+            ?id rdfs:datatype ?label
+            BIND(owl:datatype AS ?nodeType)
         }
         UNION
         {
             # 4. Identify OWL datatype properties
             ?id owl:DatatypeProperty ?target
-            BIND("DatatypeProperty" AS ?nodeType)
+            BIND(owl:DatatypeProperty AS ?nodeType)
         }
         UNION
         {
             # 5. Identify OWL disjoint with
             ?id owl:disjointWith ?target
-            BIND("disjointWith" AS ?nodeType)
+            BIND(owl:disjointWith AS ?nodeType)
         }
         UNION
         {
@@ -194,8 +193,11 @@ pub const DEFAULT_QUERY: &str = r#"
             ?id owl:deprecated "true"^^<http://www.w3.org/2001/XMLSchema#boolean>
             BIND("DeprecatedProperty" AS ?nodeType)
         }
+        BIND(
+            IF(?nodeType = owl:Class, 1, 2)
+            AS ?weight)
     }
-    ORDER BY ?nodeType
+    ORDER BY ?weight
     "#;
 
 #[cfg(test)]
