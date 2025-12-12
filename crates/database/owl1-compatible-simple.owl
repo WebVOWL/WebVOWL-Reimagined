@@ -96,6 +96,13 @@
         </owl:equivalentClass>
     </owl:Class>
 
+    <!-- http://www.example.com/owl1#ChildlessPerson -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#ChildlessPerson">
+        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Person"/>
+        <owl:disjointWith rdf:resource="http://www.example.com/owl1#Parent"/>
+    </owl:Class>
+
     <!-- http://www.example.com/owl1#Mother -->
 
     <owl:Class rdf:about="http://www.example.com/owl1#Mother">
