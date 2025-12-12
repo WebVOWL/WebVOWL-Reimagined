@@ -1,15 +1,15 @@
 mod about_menu;
 mod export_menu;
-// mod filter_menu;
+mod filter_menu;
 mod ontology_menu;
 mod options_menu;
-// mod search_menu;
-
+// mod search_menu;1
 use crate::components::lists::{ListDetails, ListElement};
 use crate::components::menu::vertical_menu::VerticalMenu;
 use about_menu::AboutMenu;
 use export_menu::ExportMenu;
-// use filter_menu::FilterMenu;
+use filter_menu::FilterMenu;
+use grapher::prelude::GraphDisplayData;
 use leptos::prelude::*;
 use ontology_menu::OntologyMenu;
 use options_menu::OptionsMenu;
@@ -29,19 +29,22 @@ fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl I
 
 #[component]
 pub fn NewWorkbench() -> impl IntoView {
+    let graph_data = RwSignal::new(GraphDisplayData::new());
+    let total_graph_data = RwSignal::new(GraphDisplayData::new());
+
     view! {
         <VerticalMenu>
             <ListElement title="Load Ontology" icon=icondata::BiMenuRegular>
-                <OntologyMenu />
+                <OntologyMenu graph_data=graph_data total_graph_data=total_graph_data />
             </ListElement>
 
             // <ListElement title="Search" icon=icondata::BiMenuRegular>
             //     <SearchMenu />
             // </ListElement>
 
-            // <ListElement title="Filter" icon=icondata::BiMenuRegular>
-            //     <FilterMenu />
-            // </ListElement>
+            <ListElement title="Filter" icon=icondata::BiMenuRegular>
+                <FilterMenu graph_data=graph_data total_graph_data=total_graph_data />
+            </ListElement>
 
             <ListElement title="Export" icon=icondata::BiMenuRegular>
                 <ExportMenu />

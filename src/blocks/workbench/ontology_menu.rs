@@ -1,6 +1,7 @@
 use super::WorkbenchMenuItems;
-use crate::components::user_input::file_upload::*;
+use crate::components::user_input::file_upload::{FileUpload, handle_internal_sparql};
 use crate::sparql_queries::testing::TESTING_QUERY;
+use grapher::prelude::GraphDisplayData;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -46,8 +47,11 @@ fn SelectStaticInput() -> impl IntoView {
 }
 
 #[component]
-fn UploadInput() -> impl IntoView {
-    let upload = FileUpload::new();
+fn UploadInput(
+    graph_data: RwSignal<GraphDisplayData>,
+    total_graph_data: RwSignal<GraphDisplayData>,
+) -> impl IntoView {
+    let upload = FileUpload::new(graph_data.clone());
     let loading_done = upload.local_action.value();
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
@@ -58,13 +62,15 @@ fn UploadInput() -> impl IntoView {
     Effect::new(move || {
         if let Some(value) = loading_done.get() {
             match value {
-                Ok(_) => spawn_local(async {
+                Ok(_) => spawn_local(async move {
                     let output_result = handle_internal_sparql(TESTING_QUERY.to_string()).await;
                     match output_result {
-                        Ok(graph_data) => {
+                        Ok(new_graph_data) => {
+                            graph_data.set(new_graph_data.clone());
+                            total_graph_data.set(new_graph_data.clone());
                             EVENT_DISPATCHER
                                 .rend_write_chan
-                                .send(RenderEvent::LoadGraph(graph_data));
+                                .send(RenderEvent::LoadGraph(new_graph_data));
                         }
                         Err(e) => error!("{}", e),
                     }
@@ -171,8 +177,11 @@ fn FetchData() -> impl IntoView {
 }
 
 #[component]
-fn Sparql() -> impl IntoView {
-    let upload = FileUpload::new();
+fn Sparql(
+    graph_data: RwSignal<GraphDisplayData>,
+    total_graph_data: RwSignal<GraphDisplayData>,
+) -> impl IntoView {
+    let upload = FileUpload::new(graph_data.clone());
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
     let parsing_done = upload.tracker.parsing_done.clone();
@@ -273,12 +282,21 @@ fn Sparql() -> impl IntoView {
 }
 
 #[component]
-pub fn OntologyMenu() -> impl IntoView {
+pub fn OntologyMenu(
+    graph_data: RwSignal<GraphDisplayData>,
+    total_graph_data: RwSignal<GraphDisplayData>,
+) -> impl IntoView {
     view! {
         <WorkbenchMenuItems title="Load Ontology">
             <SelectStaticInput />
-            <UploadInput />
-            <Sparql />
+            <UploadInput
+                graph_data=graph_data.clone()
+                total_graph_data=total_graph_data.clone()
+            />
+            <Sparql
+                graph_data=graph_data.clone()
+                total_graph_data=total_graph_data.clone()
+            />
             <FetchData />
         </WorkbenchMenuItems>
     }
