@@ -61,6 +61,7 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {   
             # THING
+            ?id a owl:Thing .
             FILTER(?id = owl:Thing)
             BIND(owl:Thing AS ?nodeType)
         }
@@ -95,13 +96,15 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {
             # 1. Identify RDF properties
-            ?id rdf:Property ?target .
+            ?id a rdf:Property .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(rdf:Property AS ?nodeType)
         }
         UNION
         {
             # 3. Identify datatypes
-            ?id rdfs:Datatype ?target .
+            ?id a rdfs:Datatype .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(rdfs:Datatype AS ?nodeType)
         }
         UNION
@@ -137,7 +140,8 @@ pub const DEFAULT_QUERY: &str = r#"
         UNION
         {
             # OBJECT PROPERTY
-            ?id owl:ObjectProperty ?target .
+            ?id a owl:ObjectProperty .
+            OPTIONAL {?id rdfs:range ?target}
             BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION
