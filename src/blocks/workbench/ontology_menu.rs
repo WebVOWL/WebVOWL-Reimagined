@@ -62,7 +62,7 @@ fn UploadInput() -> impl IntoView {
                     let output_result = handle_internal_sparql(TESTING.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
-                            EVENT_DISPATCHER
+                            let _ = EVENT_DISPATCHER
                                 .rend_write_chan
                                 .send(RenderEvent::LoadGraph(graph_data));
                         }
@@ -165,7 +165,7 @@ fn FetchData() -> impl IntoView {
                     let output_result = handle_internal_sparql(TESTING.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
-                            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
+                            let _ = EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},
                         Err(e) => error!("{}", e),
                     }})
             }><Icon class="pr-0.5" icon=icondata::AiReloadOutlined/> "reload data"</button>
