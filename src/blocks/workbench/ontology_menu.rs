@@ -1,6 +1,7 @@
-use super::WorkbenchMenuItems;
+use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::{icon::Icon, user_input::file_upload::*};
 use crate::sparql_queries::TESTING;
+use grapher::prelude::GraphDisplayData;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -47,6 +48,10 @@ fn SelectStaticInput() -> impl IntoView {
 
 #[component]
 fn UploadInput() -> impl IntoView {
+    let GraphDataContext {
+        graph_data,
+        total_graph_data,
+    } = expect_context::<GraphDataContext>();
     let upload = FileUpload::new();
     let loading_done = upload.local_action.value();
     let upload_progress = upload.tracker.upload_progress.clone();
@@ -58,13 +63,15 @@ fn UploadInput() -> impl IntoView {
     Effect::new(move || {
         if let Some(value) = loading_done.get() {
             match value {
-                Ok(_) => spawn_local(async {
+                Ok(_) => spawn_local(async move {
                     let output_result = handle_internal_sparql(TESTING.to_string()).await;
                     match output_result {
-                        Ok(graph_data) => {
-                            let _ = EVENT_DISPATCHER
+                        Ok(new_graph_data) => {
+                            graph_data.set(new_graph_data.clone());
+                            total_graph_data.set(new_graph_data.clone());
+                            EVENT_DISPATCHER
                                 .rend_write_chan
-                                .send(RenderEvent::LoadGraph(graph_data));
+                                .send(RenderEvent::LoadGraph(new_graph_data));
                         }
                         Err(e) => error!("{}", e),
                     }
