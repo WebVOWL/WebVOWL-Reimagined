@@ -84,11 +84,34 @@
         UNION
         {
             # LITERAL
-            ?id rdfs:label ?target.
-            FILTER(isLiteral(?target))
+            ?id rdfs:label ?label.
+            FILTER(isLiteral(?label))
             BIND(rdfs:Literal AS ?nodeType)
-            # OPTIONAL {?id rdfs:comment ?target}
+            # OPTIONAL {?id rdfs:comment ?label}
             
+        }
+        UNION
+        {
+            # 3. Identify datatypes
+            #SELECT ?dt ?nodeType (STR(?dt) AS ?label) 
+            #WHERE{
+            VALUES ?dt{
+                rdf:HTML rdf:PlainLiteral rdf:XMLLiteral xsd:anySimpleType 
+                xsd:anyURI xsd:base64Binary xsd:boolean xsd:byte xsd:date 
+                xsd:dateTime xsd:decimal xsd:double xsd:duration xsd:ENTITY
+                xsd:float xsd:gDay xsd:gMonth xsd:gMonthDay xsd:gYear
+                xsd:gYearMonth xsd:hexBinary xsd:ID xsd:IDREF xsd:int xsd:integer
+                xsd:language xsd:long xsd:Name xsd:NCName xsd:negativeInteger
+                xsd:NMTOKEN xsd:nonNegativeInteger xsd:nonPositiveInteger 
+                xsd:normalizedString xsd:NOTATION xsd:positiveInteger xsd:QName 
+                xsd:short xsd:string xsd:time xsd:token xsd:unsignedByte 
+                xsd:unsignedInt xsd:unsignedLong xsd:unsignedShort
+            }
+            BIND(rdfs:Datatype AS ?nodeType)
+            BIND(?dt AS ?labelIRI)
+            BIND(?dt AS ?label)
+
+            #}
         }
         UNION
         {
@@ -124,27 +147,6 @@
             FILTER NOT EXISTS {?id a owl:DatatypeProperty}
             OPTIONAL {?id rdfs:range ?target}
             BIND(rdf:Property AS ?nodeType)
-        }
-        UNION
-        {
-            # 3. Identify datatypes
-            SELECT ?dt ?nodeType ?target 
-            WHERE{
-                VALUES ?dt{
-                    rdf:HTML rdf:PlainLiteral rdf:XMLLiteral xsd:anySimpleType 
-                    xsd:anyURI xsd:base64Binary xsd:boolean xsd:byte xsd:date 
-                    xsd:dateTime xsd:decimal xsd:double xsd:duration xsd:ENTITY
-                    xsd:float xsd:gDay xsd:gMonth xsd:gMonthDay xsd:gYear
-                    xsd:gYearMonth xsd:hexBinary xsd:ID xsd:IDREF xsd:int xsd:integer
-                    xsd:language xsd:long xsd:Name xsd:NCName xsd:negativeInteger
-                    xsd:NMTOKEN xsd:nonNegativeInteger xsd:nonPositiveInteger 
-                    xsd:normalizedString xsd:NOTATION xsd:positiveInteger xsd:QName 
-                    xsd:short xsd:string xsd:time xsd:token xsd:unsignedByte 
-                    xsd:unsignedInt xsd:unsignedLong xsd:unsignedShort
-                }
-                BIND(rdfs:Datatype AS ?nodeType)
-                OPTIONAL{?dt rdfs:range ?target}
-            }
         }
         UNION
         {
