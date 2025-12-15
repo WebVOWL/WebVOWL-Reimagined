@@ -60,12 +60,6 @@ pub const DEFAULT_QUERY: &str = r#"
         # Edges
         UNION
         {
-            # 1. Identify RDF properties
-            ?id rdf:Property ?label .
-            BIND("SubClass" AS ?nodeType)
-        }
-        UNION
-        {
             # 2. Identify subclasses
             ?id rdfs:subClassOf ?label .
             BIND(rdfs:subClassOf AS ?nodeType)
