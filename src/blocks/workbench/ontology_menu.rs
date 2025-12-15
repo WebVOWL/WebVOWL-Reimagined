@@ -1,10 +1,10 @@
 use super::WorkbenchMenuItems;
-use crate::{components::user_input::file_upload::*, sparql_queries::default::DEFAULT_QUERY};
-use crate::sparql_queries::testing::TESTING_QUERY;
+use crate::components::user_input::file_upload::*;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
+use sparql_queries::{default::DEFAULT_QUERY, testing::TESTING_QUERY};
 use web_sys::HtmlInputElement;
 
 #[component]

@@ -1,0 +1,14 @@
+[package]
+name = "sparql_queries"
+version = "0.0.1"
+edition = "2024"
+description = "Shared SPARQL query strings for WebVOWL-Reimagined (WASM-safe)."
+license = "MIT OR Apache-2.0"
+
+[lib]
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+

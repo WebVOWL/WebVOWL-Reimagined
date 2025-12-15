@@ -1,5 +1,5 @@
 pub const DEFAULT_QUERY: &str = r#"
-    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -8,38 +8,31 @@ pub const DEFAULT_QUERY: &str = r#"
     SELECT ?id ?nodeType ?label
     WHERE {
         {
-            ?id rdf:type owl:Ontology .
-            BIND(owl:Ontology AS ?nodeType)
-            
-        }
-        UNION
-        {
             # 1. Identify Named Classes
             ?id a owl:Class .
             FILTER(isIRI(?id))
             BIND(owl:Class AS ?nodeType)
             OPTIONAL { ?id rdfs:label ?label }
         }
-        UNION 
+        UNION
         {
-            ?id rdf:type owl:ObjectProperty .   
-            BIND(owl:ObjectProperty AS ?nodeType)
-        }
-        UNION 
-        {
-            ?id rdfs:domain ?label .   
-            BIND(rdfs:domain AS ?nodeType)
-        }
-        UNION 
-        {
-            ?id rdfs:range ?label .   
-            BIND(rdfs:range AS ?nodeType)
+            ?id rdf:type owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
         }
         UNION
         {
-            ?id a owl:Class
-            FILTER(!isIRI(?id))
-            BIND("blanknode" AS ?nodeType)
+            ?id rdf:type owl:ObjectProperty .
+            BIND(owl:ObjectProperty AS ?nodeType)
+        }
+        UNION
+        {
+            ?id rdfs:domain ?label .
+            BIND(rdfs:domain AS ?nodeType)
+        }
+        UNION
+        {
+            ?id rdfs:range ?label .
+            BIND(rdfs:range AS ?nodeType)
         }
         UNION
         {
@@ -76,6 +69,21 @@ pub const DEFAULT_QUERY: &str = r#"
             # 2. Identify subclasses
             ?id rdfs:subClassOf ?label .
             BIND(rdfs:subClassOf AS ?nodeType)
+        }
+        UNION {
+            # BRIDGE: Start at the Named Class, jump to the intermediate node
+            ?id ?connector ?intermediateNode .
+            FILTER(isIRI(?id)) 
+
+            # Match the logic property (unionOf, etc) on the intermediate node
+            ?intermediateNode ?nodeType ?blanknode .
+
+            # Flatten the list from the blanknode
+            ?blanknode rdf:rest*/rdf:first ?label .
+
+            # Filter for Logic Types
+            FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf))
+            FILTER(?label != rdf:nil)
         }
         UNION
         {

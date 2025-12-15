@@ -4,8 +4,9 @@ use grapher::prelude::GraphDisplayData;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
 use webvowl_database::{prelude::GraphDisplayDataSolutionSerializer, store::{ WebVOWLStore}};
+use webvowl_database::sparql_queries::default::DEFAULT_QUERY;
+use std::env;
 
-use crate::store::DEFAULT_QUERY_1;
 
 #[tokio::main]
 pub async fn main() {
@@ -13,7 +14,13 @@ pub async fn main() {
     let session = Store::default();
     println!("Loaded {} quads", session.len().await.unwrap());
     // let path = Path::new("crates/database/owl1-compatible.owl");
-    let path = Path::new("crates/database/owl1-compatible.owl");
+    let args = env::args().collect::<Vec<String>>();
+    let path;
+    if args.len() > 1 {
+        path = Path::new(&args[1]);
+    } else {
+        path = Path::new("crates/database/owl1-unions-simple.owl");
+    }
     let webvowl = WebVOWLStore::new(session);
     webvowl
         .insert_file(&path, false)
@@ -23,7 +30,7 @@ pub async fn main() {
     
     let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
-    let query_stream = webvowl.session.query(DEFAULT_QUERY_1).await.unwrap();
+    let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)

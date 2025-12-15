@@ -189,6 +189,26 @@ pub const DEFAULT_QUERY_1: &str = r#"
             ?id rdfs:subClassOf ?label .
             BIND(rdfs:subClassOf AS ?nodeType)
         }
+        UNION {
+            # 1. Find ANY subject/property that points to the start of a list
+            ?subject ?nodeType ?id .
+
+            # 2. Verify ?listHead is actually the start of a list (it must have an rdf:first)
+            ?id rdf:first ?anyFirst .
+
+            # 3. FLATTEN THE LIST
+            # Traverse from the list head to find every member
+            ?id rdf:rest*/rdf:first ?label .
+
+            # 4. (Optional) Safety Filter
+            # Ensure we only expand relevant OWL logic operators, not random RDF lists.
+            FILTER(?property IN (
+                owl:intersectionOf, 
+                owl:unionOf, 
+                owl:oneOf, 
+                owl:disjointUnionOf
+            ))
+        }
         UNION
         {
             # 3. Identify datatypes
