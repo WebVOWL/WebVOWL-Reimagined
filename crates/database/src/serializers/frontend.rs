@@ -286,66 +286,9 @@ impl GraphDisplayDataSolutionSerializer {
             Term::Literal(literal) => {
                 // NOTE: Any string literal goes here, e.g. 'EquivalentClass'.
                 // That is, every BIND("someString" AS ?nodeType)
-                //info!("Is literal: '{}'", literal.value());
                 let value = literal.value();
                 match value {
                     // "blanknode" => {}
-                    // "IntersectionOf" => {
-                    //     self.insert_node(
-                    //         data_buffer,
-                    //         triple,
-                    //         ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
-                    //     );
-                    // }
-                    // "UnionOf" => {
-                    //     self.insert_node(
-                    //         data_buffer,
-                    //         triple,
-                    //         ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
-                    //     );
-                    // }
-                    // "AnonymousClass" => {
-                    //     self.insert_node(
-                    //         data_buffer,
-                    //         triple,
-                    //         ElementType::Owl(OwlType::Node(OwlNode::AnonymousClass)),
-                    //     );
-                    // }
-                    // "EquivalentClass" => {
-                    //     self.insert_node(
-                    //         data_buffer,
-                    //         triple,
-                    //         ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)),
-                    //     );
-                    // }
-                    // "SubClass" => {
-                    //     self.insert_edge(
-                    //         data_buffer,
-                    //         &triple,
-                    //         ElementType::Rdfs(RdfsType::Edge(RdfsEdge::SubclassOf)),
-                    //     );
-                    // }
-                    // "Datatype" => {
-                    //     self.insert_edge(
-                    //         data_buffer,
-                    //         &triple,
-                    //         ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
-                    //     );
-                    // }
-                    // "DatatypeProperty" => {
-                    //     self.insert_edge(
-                    //         data_buffer,
-                    //         &triple,
-                    //         ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)),
-                    //     );
-                    // }
-                    // "disjointWith" => {
-                    //     self.insert_edge(
-                    //         data_buffer,
-                    //         &triple,
-                    //         ElementType::Owl(OwlType::Edge(OwlEdge::DisjointWith)),
-                    //     );
-                    // }
                     &_ => {
                         warn!("Visualization of literal '{value}' is not supported");
                     }
@@ -353,13 +296,6 @@ impl GraphDisplayDataSolutionSerializer {
             }
             Term::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
-                // info!("Is named node: '{}'", uri);
-                // TODO: Finding external classes/properties:
-                // 1. Elements whose base URI differs from that of the visualized ontology.
-                // 2. A base URI is EITHER `xml:base` OR that of the document.
-                // SOURCE (save this for the paper and documentation):
-                // 1. p. 6 of https://www.semantic-web-journal.net/system/files/swj1114.pdf
-                // 2. https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
                 match uri.as_ref() {
                     // ----------- RDF ----------- //
 
@@ -397,13 +333,9 @@ impl GraphDisplayDataSolutionSerializer {
                             ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
                         );
                     }
-                    rdfs::DOMAIN => {
-                        // TODO: Implement
-                    }
+                    // rdfs::DOMAIN => {}
                     // rdfs::IS_DEFINED_BY => {}
-                    rdfs::LABEL => {
-                        // TODO: Implement
-                    }
+                    // rdfs::LABEL => {}
                     rdfs::LITERAL => {
                         self.insert_node(
                             data_buffer,
@@ -412,9 +344,7 @@ impl GraphDisplayDataSolutionSerializer {
                         );
                     }
                     // rdfs::MEMBER => {}
-                    rdfs::RANGE => {
-                        // TODO: Implement
-                    }
+                    // rdfs::RANGE => {}
                     // rdfs::RESOURCE => {}
                     // rdfs::SEE_ALSO => {}
                     rdfs::SUB_CLASS_OF => self.insert_edge(
@@ -447,15 +377,14 @@ impl GraphDisplayDataSolutionSerializer {
                         triple,
                         ElementType::Owl(OwlType::Node(OwlNode::Class)),
                     ),
-                    // ComplementOf missing, oversight?
-                    owl::COMPLEMENT_OF => {
-                        // self.insert_edge(
-                        // data_buffer,
-                        // triple,
-                        // ElementType::Owl(OwlType::Edge(OwlEdge::ComplementOf)),
-                        // TODO: Implement
-                    }
-                    owl::DATATYPE_COMPLEMENT_OF => {}
+                    // owl::COMPLEMENT_OF => {
+                    //     // self.insert_edge(
+                    //     // data_buffer,
+                    //     // triple,
+                    //     // ElementType::Owl(OwlType::Edge(OwlEdge::ComplementOf)),
+                    //     // TODO: Implement
+                    // }
+                    // owl::DATATYPE_COMPLEMENT_OF => {}
                     owl::DATATYPE_PROPERTY => self.insert_edge(
                         data_buffer,
                         &triple,
@@ -513,7 +442,7 @@ impl GraphDisplayDataSolutionSerializer {
                         self.map_to(target, index);
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
-                    owl::FUNCTIONAL_PROPERTY => {}
+                    // owl::FUNCTIONAL_PROPERTY => {}
                     // owl::HAS_KEY => {}
                     // owl::HAS_SELF => {}
                     // owl::HAS_VALUE => {}
@@ -551,7 +480,7 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::MEMBERS => {}
                     // owl::MIN_CARDINALITY => {}
                     // owl::MIN_QUALIFIED_CARDINALITY => {}
-                    owl::NAMED_INDIVIDUAL => {}
+                    // owl::NAMED_INDIVIDUAL => {}
                     // owl::NEGATIVE_PROPERTY_ASSERTION => {}
                     owl::NOTHING => {}
                     owl::OBJECT_PROPERTY => self.insert_edge(
@@ -571,12 +500,12 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::PROPERTY_CHAIN_AXIOM => {}
                     // owl::PROPERTY_DISJOINT_WITH => {}
                     // owl::QUALIFIED_CARDINALITY => {}
-                    owl::REFLEXIVE_PROPERTY => {}
+                    // owl::REFLEXIVE_PROPERTY => {}
                     // owl::RESTRICTION => {}
                     // owl::SAME_AS => {}
                     // owl::SOME_VALUES_FROM => {}
                     // owl::SOURCE_INDIVIDUAL => {}
-                    owl::SYMMETRIC_PROPERTY => {}
+                    // owl::SYMMETRIC_PROPERTY => {}
                     // owl::TARGET_INDIVIDUAL => {}
                     // owl::TARGET_VALUE => {}
                     owl::THING => self.insert_node(
@@ -586,15 +515,15 @@ impl GraphDisplayDataSolutionSerializer {
                     ),
                     // owl::TOP_DATA_PROPERTY => {}
                     // owl::TOP_OBJECT_PROPERTY => {}
-                    owl::TRANSITIVE_PROPERTY => {
-                        // self.try_insert_characteristic(
-                        // data_buffer,
-                        // term,
-                        // Characteristic::Transitive)
-                        //
-                        // TODO: Implement
-                    }
-                    owl::UNION_OF => {}
+                    // owl::TRANSITIVE_PROPERTY => {
+                    //     // self.try_insert_characteristic(
+                    //     // data_buffer,
+                    //     // term,
+                    //     // Characteristic::Transitive)
+                    //     //
+                    //     // TODO: Implement
+                    // }
+                    // owl::UNION_OF => {}
                     // owl::VERSION_INFO => {}
                     // owl::VERSION_IRI => {}
                     // owl::WITH_RESTRICTIONS => {}
