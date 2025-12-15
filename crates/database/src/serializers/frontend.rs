@@ -458,11 +458,9 @@ impl GraphDisplayDataSolutionSerializer {
                         // Characteristic::InverseFunctionalProperty)
                         // TODO: Implement
                     }
-                    owl::INVERSE_OF => self.insert_edge(
-                        data_buffer,
-                        &triple,
-                        ElementType::Owl(OwlType::Edge(OwlEdge::InverseOf)),
-                    ),
+                    owl::INVERSE_OF => {
+                        
+                    },
                     // owl::IRREFLEXIVE_PROPERTY => {}
                     // owl::MAX_CARDINALITY => {}
                     // owl::MAX_QUALIFIED_CARDINALITY => {}
