@@ -395,6 +395,7 @@ pub struct FileUpload {
         Action<(String, String, Option<String>), Result<(DataType, usize), ServerFnError>>,
     pub tracker: Rc<UploadProgress>,
 }
+
 impl FileUpload {
     pub fn new() -> Self {
         let mode = RwSignal::new("local".to_string());

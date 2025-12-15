@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Formatter},
-    rc::Rc,
     time::{Duration, Instant},
 };
 
@@ -23,26 +22,24 @@ pub struct Triple {
     /// The subject
     id: Term,
     /// The predicate
-    node_type: Term,
+    element_type: Term,
     /// The object
     target: Option<Term>,
 }
 impl Display for Triple {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Triple {{")?;
+        writeln!(f, "\tsubject: {}", self.id)?;
+        writeln!(f, "\telement_type: {}", self.element_type,)?;
         writeln!(
             f,
-            "Triple {{\n /
-            id: {}\n /
-            element_type: {}\n /
-            target: {}\n /
-             }}",
-            self.id,
-            self.node_type,
+            "\tobject: {}",
             self.target
                 .as_ref()
                 .map(|t| t.to_string())
                 .unwrap_or_default(),
-        )
+        )?;
+        writeln!(f, "}}")
     }
 }
 pub struct GraphDisplayDataSolutionSerializer {
@@ -89,7 +86,7 @@ impl GraphDisplayDataSolutionSerializer {
 
             let triple: Triple = Triple {
                 id: id_term.to_owned(),
-                node_type: node_type_term.to_owned(),
+                element_type: node_type_term.to_owned(),
                 target: solution.get("target").map(|term| term.to_owned()),
             };
             self.write_node_triple(data_buffer, triple);
@@ -177,7 +174,7 @@ impl GraphDisplayDataSolutionSerializer {
         let resolved_object = match &triple.target {
             Some(target) => self.resolve(data_buffer, &target.to_string()),
             None => {
-                warn!("Cannot resolve object of triple: {}", triple);
+                warn!("Cannot resolve object of triple:\n {}", triple);
                 None
             }
         };
@@ -248,6 +245,17 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    fn upgrade_node_type(
+        &self,
+        data_buffer: &mut GraphDisplayData,
+        index: usize,
+        node_type: ElementType,
+    ) {
+        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
+            data_buffer.elements[index] = node_type;
+        }
+    }
+
     fn replace_node(&mut self, _data_buffer: &mut GraphDisplayData, old: usize, new: usize) {
         //let old = data_buffer.labels[old];
         let iter = self.mapped_to.remove(&old);
@@ -273,7 +281,7 @@ impl GraphDisplayDataSolutionSerializer {
 
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
         // TODO: Collect errors and show to frontend
-        let node_type = triple.node_type.clone();
+        let node_type = triple.element_type.clone();
         match node_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
@@ -533,17 +541,6 @@ impl GraphDisplayDataSolutionSerializer {
                     }
                 };
             }
-        }
-    }
-
-    fn upgrade_node_type(
-        &self,
-        data_buffer: &mut GraphDisplayData,
-        index: usize,
-        node_type: ElementType,
-    ) {
-        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            data_buffer.elements[index] = node_type;
         }
     }
 }
