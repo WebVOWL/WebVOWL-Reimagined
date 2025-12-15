@@ -1,6 +1,6 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
-use crate::components::user_input::file_upload::{FileUpload, handle_internal_sparql};
-use crate::sparql_queries::testing::TESTING_QUERY;
+use crate::components::{icon::Icon, user_input::file_upload::*};
+use crate::sparql_queries::TESTING;
 use grapher::prelude::GraphDisplayData;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
@@ -63,7 +63,7 @@ fn UploadInput() -> impl IntoView {
     Effect::new(move || {
         if let Some(value) = loading_done.get() {
             match value {
-                Ok(_) => spawn_local(async {
+                Ok(_) => spawn_local(async move {
                     let output_result = handle_internal_sparql(TESTING.to_string()).await;
                     match output_result {
                         Ok(new_graph_data) => {
