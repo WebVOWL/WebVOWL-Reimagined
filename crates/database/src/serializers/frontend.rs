@@ -394,7 +394,15 @@ impl GraphDisplayDataSolutionSerializer {
                         ElementType::Owl(OwlType::Edge(OwlEdge::DeprecatedProperty)),
                     ),
                     // owl::DIFFERENT_FROM => {}
-                    // owl::DISJOINT_UNION_OF => {}
+                    owl::DISJOINT_UNION_OF => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                        self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::DisjointUnion)));
+                        }
+                    }
                     owl::DISJOINT_WITH => self.insert_edge(
                         data_buffer,
                         &triple,
