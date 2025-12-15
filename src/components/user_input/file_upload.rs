@@ -389,7 +389,6 @@ impl UploadProgress {
 #[derive(Clone)]
 pub struct FileUpload {
     pub mode: RwSignal<String>,
-    pub graph_data: RwSignal<GraphDisplayData>,
     pub local_action: Action<FormData, Result<(DataType, usize), ServerFnError>>,
     pub remote_action: Action<String, Result<(DataType, usize), ServerFnError>>,
     pub sparql_action:
@@ -398,7 +397,7 @@ pub struct FileUpload {
 }
 
 impl FileUpload {
-    pub fn new(graph_data: RwSignal<GraphDisplayData>) -> Self {
+    pub fn new() -> Self {
         let mode = RwSignal::new("local".to_string());
 
         let local_action =
@@ -422,7 +421,6 @@ impl FileUpload {
 
         Self {
             mode,
-            graph_data,
             local_action,
             remote_action,
             sparql_action,

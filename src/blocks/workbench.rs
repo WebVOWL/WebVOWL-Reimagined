@@ -15,6 +15,12 @@ use ontology_menu::OntologyMenu;
 use options_menu::OptionsMenu;
 // use search_menu::SearchMenu;
 
+#[derive(Clone)]
+pub struct GraphDataContext {
+    pub graph_data: RwSignal<GraphDisplayData>,
+    pub total_graph_data: RwSignal<GraphDisplayData>,
+}
+
 #[component]
 fn WorkbenchMenuItems(#[prop(into)] title: String, children: Children) -> impl IntoView {
     view! {
@@ -32,10 +38,15 @@ pub fn NewWorkbench() -> impl IntoView {
     let graph_data = RwSignal::new(GraphDisplayData::new());
     let total_graph_data = RwSignal::new(GraphDisplayData::new());
 
+    provide_context(GraphDataContext {
+        graph_data: graph_data.clone(),
+        total_graph_data: total_graph_data.clone(),
+    });
+
     view! {
         <VerticalMenu>
             <ListElement title="Load Ontology" icon=icondata::BiMenuRegular>
-                <OntologyMenu graph_data=graph_data total_graph_data=total_graph_data />
+                <OntologyMenu />
             </ListElement>
 
             // <ListElement title="Search" icon=icondata::BiMenuRegular>
@@ -43,7 +54,7 @@ pub fn NewWorkbench() -> impl IntoView {
             // </ListElement>
 
             <ListElement title="Filter" icon=icondata::BiMenuRegular>
-                <FilterMenu graph_data=graph_data total_graph_data=total_graph_data />
+                <FilterMenu />
             </ListElement>
 
             <ListElement title="Export" icon=icondata::BiMenuRegular>

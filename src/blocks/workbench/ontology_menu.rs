@@ -1,4 +1,4 @@
-use super::WorkbenchMenuItems;
+use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::user_input::file_upload::{FileUpload, handle_internal_sparql};
 use crate::sparql_queries::testing::TESTING_QUERY;
 use grapher::prelude::GraphDisplayData;
@@ -47,11 +47,12 @@ fn SelectStaticInput() -> impl IntoView {
 }
 
 #[component]
-fn UploadInput(
-    graph_data: RwSignal<GraphDisplayData>,
-    total_graph_data: RwSignal<GraphDisplayData>,
-) -> impl IntoView {
-    let upload = FileUpload::new(graph_data.clone());
+fn UploadInput() -> impl IntoView {
+    let GraphDataContext {
+        graph_data,
+        total_graph_data,
+    } = expect_context::<GraphDataContext>();
+    let upload = FileUpload::new();
     let loading_done = upload.local_action.value();
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
@@ -177,11 +178,8 @@ fn FetchData() -> impl IntoView {
 }
 
 #[component]
-fn Sparql(
-    graph_data: RwSignal<GraphDisplayData>,
-    total_graph_data: RwSignal<GraphDisplayData>,
-) -> impl IntoView {
-    let upload = FileUpload::new(graph_data.clone());
+fn Sparql() -> impl IntoView {
+    let upload = FileUpload::new();
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
     let parsing_done = upload.tracker.parsing_done.clone();
@@ -282,21 +280,12 @@ fn Sparql(
 }
 
 #[component]
-pub fn OntologyMenu(
-    graph_data: RwSignal<GraphDisplayData>,
-    total_graph_data: RwSignal<GraphDisplayData>,
-) -> impl IntoView {
+pub fn OntologyMenu() -> impl IntoView {
     view! {
         <WorkbenchMenuItems title="Load Ontology">
             <SelectStaticInput />
-            <UploadInput
-                graph_data=graph_data.clone()
-                total_graph_data=total_graph_data.clone()
-            />
-            <Sparql
-                graph_data=graph_data.clone()
-                total_graph_data=total_graph_data.clone()
-            />
+            <UploadInput />
+            <Sparql />
             <FetchData />
         </WorkbenchMenuItems>
     }
