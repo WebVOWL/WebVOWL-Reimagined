@@ -270,7 +270,7 @@
         </owl:complementOf>
     </owl:Class>
 
-    <owl:CLass>
+    <owl:Class>
         <owl:disjointUnionOf rdf:parseType="Collection">
             <owl:Class rdf:ID="Male"/>
             <owl:Class rdf:ID="Female"/>
