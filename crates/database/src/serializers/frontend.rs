@@ -46,8 +46,12 @@ pub struct GraphDisplayDataSolutionSerializer {
     blanknode_mapping: HashMap<String, String>,
     iricache: HashMap<String, usize>,
     mapped_to: HashMap<usize, HashSet<String>>,
-    unknown_buffer: HashSet<Triple>,
-    /// Stores labels until a match has been found
+    /// Stores indices of element instances.
+    ///
+    /// Used in cases where multiple elements should refer to a particular instance.
+    /// E.g. multiple properties referring to the same instance of owl:Thing.
+    global_element_mappings: HashMap<ElementType, usize>,
+    /// Stores labels until it's corresponding class/property has been found.
     ///
     /// usize = element index in data_buffer.elements
     /// String = label
@@ -60,7 +64,7 @@ impl GraphDisplayDataSolutionSerializer {
             blanknode_mapping: HashMap::new(),
             iricache: HashMap::new(),
             mapped_to: HashMap::new(),
-            unknown_buffer: HashSet::new(),
+            global_element_mappings: HashMap::new(),
             labels: HashMap::new(),
         }
     }
@@ -80,9 +84,12 @@ impl GraphDisplayDataSolutionSerializer {
             };
             let Some(node_type_term) = solution.get("nodeType") else {
                 // Labels are a separate solution without nodetype
-                self.add_label(solution.get("label"), id_term);
+                self.extract_label(solution.get("label"), id_term);
                 continue;
             };
+
+            // Handle cases where label is, in fact, not a separate solution.
+            self.extract_label(solution.get("label"), id_term);
 
             let triple: Triple = Triple {
                 id: id_term.to_owned(),
@@ -131,7 +138,10 @@ impl GraphDisplayDataSolutionSerializer {
         self.iricache[&x]
     }*/
 
-    fn add_label(&mut self, label: Option<&Term>, id_term: &Term) {
+    /// Extract label info from the query solution and store for later use.
+    /// This is necessary as labels are currently emitted in a solution separate
+    /// from the triple they belong to.
+    fn extract_label(&mut self, label: Option<&Term>, id_term: &Term) {
         let iri = id_term.to_string();
         let result = match label {
             Some(label) => {
@@ -144,6 +154,7 @@ impl GraphDisplayDataSolutionSerializer {
             None => match Iri::parse(iri.clone()) {
                 Ok(id_iri) => match id_iri.fragment() {
                     Some(frag) => Ok(self.labels.insert(id_iri.to_string(), frag.to_string())),
+                    // TODO: Handle path component (see label docs in this codebase)
                     None => Err(()),
                 },
                 Err(_) => Err(()),
@@ -191,41 +202,47 @@ impl GraphDisplayDataSolutionSerializer {
         self.insert_label(data_buffer, &triple, &node_type);
         self.iricache
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
-        self.check_insert_unknowns(data_buffer);
     }
 
-    fn check_insert_unknowns(&mut self, data_buffer: &mut GraphDisplayData) {
-        let unknown_buffer = std::mem::take(&mut self.unknown_buffer);
-        for node_triple in unknown_buffer.iter() {
-            match self.resolve_so(data_buffer, node_triple) {
-                (Some(_), Some(_)) => {
-                    self.write_node_triple(data_buffer, node_triple.clone());
-                }
-                _ => {
-                    warn!("Failed to resolve triple {}", node_triple);
-                }
-            }
-        }
-    }
-
+    /// If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
+    /// EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
+    ///
+    /// Procedure:
+    /// If NOT rdfs:Datatype:
+    /// - Property missing domain OR range:
+    ///   - Create new owl:Thing for this property.
+    /// - Property missing domain AND range:
+    ///   - Create a new owl:Thing (if not created previously) and use this instance for ALL edges in this category.
+    /// IF rdfs:Datatype:
+    /// - Property missing domain AND/OR range:
+    ///   - Create new rdfs:Literal for this property
     fn insert_edge(
         &mut self,
         data_buffer: &mut GraphDisplayData,
         triple: &Triple,
         edge_type: ElementType,
     ) {
-        trace!("insert_edge: {:?}", triple);
-        let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
-        if index_s.is_none() || index_o.is_none() {
-            self.unknown_buffer.insert(triple.clone());
-        } else {
-            let edge_index = data_buffer.elements.len();
-            data_buffer
-                .edges
-                .push([index_s.unwrap(), edge_index, index_o.unwrap()]);
-            data_buffer.elements.push(edge_type);
-            self.insert_label(data_buffer, &triple, &edge_type);
-        }
+        let (subject_index, object_index) = self.resolve_so(data_buffer, &triple);
+        // let mut edge: [usize; 3] = [];
+
+        // if subject_index.is_none() {}
+        // if object_index.is_none() {
+        //     if let Some(thing) = self
+        //         .global_element_mappings
+        //         .get(ElementType::Owl(OwlType::Node(OwlNode::Thing)))
+        //     {
+        //         edge[1] = *thing;
+        //     } else {
+        //         edge[1] = subject_index.unwrap();
+        //     }
+        // }
+
+        let edge_index = data_buffer.elements.len();
+        data_buffer
+            .edges
+            .push([subject_index.unwrap(), edge_index, object_index.unwrap()]);
+        data_buffer.elements.push(edge_type);
+        self.insert_label(data_buffer, &triple, &edge_type);
     }
 
     /// Create a label for an element.
@@ -244,6 +261,46 @@ impl GraphDisplayDataSolutionSerializer {
             data_buffer.labels.push(element_type.to_string());
         }
     }
+
+    /// Creates nodes as targets for edges without one in the solution.
+    // fn handle_missing_edges(
+    //     &mut self,
+    //     data_buffer: &mut GraphDisplayData,
+    //     edge_type: ElementType,
+    //     subject_index: Option<usize>,
+    //     object_index: Option<usize>,
+    // ) -> [usize; 3] {
+    //     match edge_type {
+    //         ElementType::Rdfs(RdfsType::Node(RdfsNode::Datatype)) => {}
+    //         _ => {
+    //             let thing = ElementType::Owl(OwlType::Node(OwlNode::Thing));
+
+    //             // Case: NOT rdfs:Datatype missing domain AND range
+    //             if subject_index.is_none() && object_index.is_none() {
+    //                 if let Some(thing_idx) = self.global_element_mappings.get(&thing) {
+    //                     [*thing_idx, 0, *thing_idx]
+    //                 } else {
+    //                     let thing_idx = data_buffer.elements.len();
+    //                     data_buffer.labels.push(thing.to_string());
+    //                     data_buffer.elements.push(thing);
+    //                     [thing_idx, 0, thing_idx]
+    //                 }
+    //             }
+
+    //             // Case: NOT rdfs:Datatype missing domain OR range
+    //             if let Some(sub_idx) = subject_index {
+    //                 edge[0] = sub_idx;
+    //             } else {
+    //                 // TODO: Create owl:Thing
+    //             }
+    //             if let Some(obj_idx) = object_index {
+    //                 edge[1] = obj_idx;
+    //             } else {
+    //                 // TODO: Create owl:Thing
+    //             }
+    //         }
+    //     }
+    // }
 
     fn upgrade_node_type(
         &self,
@@ -338,7 +395,7 @@ impl GraphDisplayDataSolutionSerializer {
                         self.insert_edge(
                             data_buffer,
                             &triple,
-                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
+                            ElementType::Rdfs(RdfsType::Node(RdfsNode::Datatype)),
                         );
                     }
                     // rdfs::DOMAIN => {}
