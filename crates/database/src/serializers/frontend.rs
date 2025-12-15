@@ -208,10 +208,10 @@ impl GraphDisplayDataSolutionSerializer {
         } else {
             let edge = [index_s.unwrap(), data_buffer.elements.len(), index_o.unwrap()];
             if !self.edges.contains(&edge) {
-            data_buffer
-                .edges
+                data_buffer
+                    .edges
                     .push(edge.clone());
-            data_buffer.elements.push(edge_type);
+                data_buffer.elements.push(edge_type);
                 self.edges.insert(edge);
             }
         }
@@ -434,6 +434,7 @@ impl GraphDisplayDataSolutionSerializer {
                             .expect("Target is required")
                             .to_string();
                         self.map_to(target, index);
+
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
                     owl::FUNCTIONAL_PROPERTY => {}
