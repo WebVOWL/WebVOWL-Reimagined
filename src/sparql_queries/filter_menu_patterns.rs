@@ -1,3 +1,4 @@
+use crate::sparql_queries::{default, general};
 use grapher::prelude::{
     Characteristic, GenericEdge, GenericNode, OwlEdge, OwlNode, RdfEdge, RdfsEdge, RdfsNode,
 };
@@ -41,137 +42,57 @@ impl std::fmt::Display for FilterEdge {
 
 fn get_node_pattern(node: &FilterNode) -> Option<String> {
     match node {
-        FilterNode::Owl(OwlNode::Class) => Some(
-            r#"{
-            ?id a owl:Class .
-            FILTER(isIRI(?id))
-            BIND(owl:Class AS ?nodeType)
-            OPTIONAL { ?id rdfs:label ?label }
-            }"#
-            .to_string(),
-        ),
-        // FilterNode::Owl(OwlNode::ExternalClass) => Some(
-        //     "{ ?externalClass rdf:type owl:Class . ?externalClass rdfs:isDefinedBy ?definedBy . OPTIONAL { ?externalClass rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        FilterNode::Owl(OwlNode::EquivalentClass) => Some(
-            r#"{
-            ?id owl:equivalentClass ?label
-            BIND("EquivalentClass" AS ?nodeType)
-            }"#
-            .to_string(),
-        ),
-        // FilterNode::Owl(OwlNode::DeprecatedClass) => Some(
-        //     "{ ?deprecatedClass rdf:type owl:Class . ?deprecatedClass owl:deprecated true . OPTIONAL { ?deprecatedClass rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        FilterNode::Owl(OwlNode::AnonymousClass) => Some(
-            r#"{
-            ?id a owl:Class
-            FILTER(!isIRI(?id))
-            BIND("AnonymousClass" AS ?nodeType)
-            OPTIONAL { ?id rdfs:label ?label }
-            }"#
-            .to_string(),
-        ),
-        // FilterNode::Owl(OwlNode::Thing) => Some("{ VALUES ?thing { <http://www.w3.org/2002/07/owl#Thing> } }".to_string()),
-        // FilterNode::Rdfs(RdfsNode::Class) => Some(
-        //     "{ ?rdfsClass rdf:type rdfs:Class . OPTIONAL { ?rdfsClass rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterNode::Rdfs(RdfsNode::Resource) => Some(
-        //     "{ ?rdfsResource rdf:type rdfs:Resource . OPTIONAL { ?rdfsResource rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterNode::Rdfs(RdfsNode::Literal) => Some(
-        //     "{ ?literal rdf:type rdfs:Datatype . OPTIONAL { ?literal rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        FilterNode::Owl(OwlNode::UnionOf) => Some(
-            r#"{
-            ?id owl:unionOf ?label .
-            BIND("UnionOf" AS ?nodeType)
-            }"#
-            .to_string(),
-        ),
-        FilterNode::Owl(OwlNode::IntersectionOf) => Some(
-            r#"{
-            ?id owl:intersectionOf ?label .
-            BIND("IntersectionOf" AS ?nodeType)
-            }"#
-            .to_string(),
-        ),
-        // FilterNode::Owl(OwlNode::Complement) => Some(
-        //     "{ ?complementOf rdf:type owl:Class . FILTER(EXISTS { ?complementOf owl:complementOf ?v }) . OPTIONAL { ?complementOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?complementOf . ?owner rdfs:label ?ownerLabel } }"
-        //         .to_string(),
-        // ),
-        // FilterNode::Owl(OwlNode::DisjointUnion) => Some(
-        //     "{ ?disjointUnionOf rdf:type owl:Class . FILTER(EXISTS { ?disjointUnionOf owl:disjointUnionOf ?v }) . OPTIONAL { ?disjointUnionOf rdfs:label ?label } . OPTIONAL { ?owner owl:equivalentClass ?disjointUnionOf . ?owner rdfs:label ?ownerLabel } }"
-        //         .to_string(),
-        // ),
+        FilterNode::Owl(OwlNode::Class) => Some(default::NAMED_CLASS.to_string()),
+        FilterNode::Owl(OwlNode::ExternalClass) => Some(default::EXTERNAL_CLASS.to_string()),
+        FilterNode::Owl(OwlNode::EquivalentClass) => Some(default::EQUIVALENT_CLASS.to_string()),
+        FilterNode::Owl(OwlNode::DeprecatedClass) => Some(default::DEPRECATED_CLASS.to_string()),
+        FilterNode::Owl(OwlNode::AnonymousClass) => Some(default::ANONYMOUS_CLASS.to_string()),
+        FilterNode::Owl(OwlNode::Thing) => Some(default::THING.to_string()),
+        FilterNode::Owl(OwlNode::UnionOf) => Some(default::UNION_OF.to_string()),
+        FilterNode::Owl(OwlNode::IntersectionOf) => Some(default::INTERSECTION_OF.to_string()),
+        FilterNode::Owl(OwlNode::Complement) => Some(default::COMPLEMENT.to_string()),
+        FilterNode::Owl(OwlNode::DisjointUnion) => Some(default::DISJOINT_UNION.to_string()),
+        FilterNode::Rdfs(RdfsNode::Class) => Some(default::RDFS_CLASS.to_string()),
+        FilterNode::Rdfs(RdfsNode::Resource) => Some(default::RDFS_RESOURCE.to_string()),
+        FilterNode::Rdfs(RdfsNode::Literal) => Some(default::RDFS_LITERAL.to_string()),
         _ => None,
     }
 }
 
 fn get_edge_pattern(edge: &FilterEdge) -> Option<String> {
     match edge {
-        //  FilterEdge::Owl(OwlEdge::ObjectProperty) => Some(
-        //     "{ ?objectProperty rdf:type owl:ObjectProperty . OPTIONAL { ?objectProperty rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::DatatypeProperty) => Some(
-        //     "{ ?datatypeProperty rdf:type owl:DatatypeProperty . OPTIONAL { ?datatypeProperty rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Rdfs(RdfsEdge::SubclassOf) => Some(
-        //     "{ ?subClassOf rdf:type owl:Class . FILTER(EXISTS { ?subClassOf rdfs:subClassOf ?v }) }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::InverseOf) => Some(
-        //     "{ ?inverseOf rdf:type owl:ObjectProperty . FILTER(EXISTS { ?inverseOf owl:inverseOf ?v }) }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::DisjointWith) => Some(
-        //     "{ ?disjointWith rdf:type owl:Class . FILTER(EXISTS { ?disjointWith owl:disjointWith ?v }) }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Rdf(RdfEdge::RdfProperty) => Some(
-        //     "{ ?rdfProperty rdf:type rdf:Property . OPTIONAL { ?rdfProperty rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::DeprecatedProperty) => Some(
-        //     "{ ?deprecatedProperty rdf:type owl:DeprecatedProperty . OPTIONAL { ?deprecatedProperty rdfs:comment ?comment } }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::ExternalProperty) => Some(
-        //     "{ ?externalProperty rdf:type owl:Property . ?externalProperty rdfs:isDefinedBy ?definedBy . OPTIONAL { ?externalProperty rdfs:label ?label } }"
-        //         .to_string(),
-        // ),
-        // FilterEdge::Owl(OwlEdge::ValuesFrom) => Some(
-        //     "{ ?valuesFrom rdf:type owl:Restriction . FILTER (EXISTS { ?valuesFrom owl:someValuesFrom ?v }) . ?valuesFrom owl:someValuesFrom ?someValuesFrom }"
-        //         .to_string(),
-        // ),
+        FilterEdge::Owl(OwlEdge::ObjectProperty) => Some(default::OBJECTPROPERTY.to_string()),
+        FilterEdge::Owl(OwlEdge::DatatypeProperty) => Some(default::DATATYPEPROPERTY.to_string()),
+        FilterEdge::Owl(OwlEdge::InverseOf) => Some(default::INVERSEOF.to_string()),
+        FilterEdge::Owl(OwlEdge::DisjointWith) => Some(default::DISJOINTWITH.to_string()),
+        FilterEdge::Owl(OwlEdge::DeprecatedProperty) => {
+            Some(default::DEPRECATEDPROPERTY.to_string())
+        }
+        FilterEdge::Owl(OwlEdge::ExternalProperty) => Some(default::EXTERNALPROPERTY.to_string()),
+        FilterEdge::Owl(OwlEdge::ValuesFrom) => Some(default::VALUESFROM.to_string()),
+        FilterEdge::Rdf(RdfEdge::RdfProperty) => Some(default::RDFPROPERTY.to_string()),
+        FilterEdge::Rdfs(RdfsEdge::SubclassOf) => Some(default::SUBCLASSOF.to_string()),
         _ => None,
     }
 }
 
 // TODO: Define actual patterns for characteristics.
-fn get_characteristic_pattern(characteristic: &Characteristic) -> Option<String> {
-    match characteristic {
-        // Characteristic::Transitive => Some("{ ?p rdf:type owl:TransitiveProperty }".to_string()),
-        // Characteristic::FunctionalProperty => {
-        //     Some("{ ?p rdf:type owl:FunctionalProperty }".to_string())
-        // }
-        // Characteristic::InverseFunctionalProperty => {
-        //     Some("{ ?p rdf:type owl:InverseFunctionalProperty }".to_string())
-        // }
-        // Characteristic::Symmetric => Some("{ ?p rdf:type owl:SymmetricProperty }".to_string()),
-        // Characteristic::Asymmetric => Some("{ ?p rdf:type owl:AsymmetricProperty }".to_string()),
-        // Characteristic::Reflexive => Some("{ ?p rdf:type owl:ReflexiveProperty }".to_string()),
-        // Characteristic::Irreflexive => Some("{ ?p rdf:type owl:IrreflexiveProperty }".to_string()),
-        _ => None,
-    }
-}
+// fn get_characteristic_pattern(characteristic: &Characteristic) -> Option<String> {
+//     match characteristic {
+//         Characteristic::Transitive => Some("{ ?p rdf:type owl:TransitiveProperty }".to_string()),
+//         Characteristic::FunctionalProperty => {
+//             Some("{ ?p rdf:type owl:FunctionalProperty }".to_string())
+//         }
+//         Characteristic::InverseFunctionalProperty => {
+//             Some("{ ?p rdf:type owl:InverseFunctionalProperty }".to_string())
+//         }
+//         Characteristic::Symmetric => Some("{ ?p rdf:type owl:SymmetricProperty }".to_string()),
+//         Characteristic::Asymmetric => Some("{ ?p rdf:type owl:AsymmetricProperty }".to_string()),
+//         Characteristic::Reflexive => Some("{ ?p rdf:type owl:ReflexiveProperty }".to_string()),
+//         Characteristic::Irreflexive => Some("{ ?p rdf:type owl:IrreflexiveProperty }".to_string()),
+//         _ => None,
+//     }
+// }
 
 pub fn generate_sparql_query(
     node_checks: &HashMap<FilterNode, bool>,
@@ -196,18 +117,19 @@ pub fn generate_sparql_query(
         }
     }
 
-    for (char, &checked) in char_checks.iter() {
-        if checked {
-            if let Some(pattern) = get_characteristic_pattern(char) {
-                patterns.push(pattern);
-            }
-        }
-    }
+    // for (char, &checked) in char_checks.iter() {
+    //     if checked {
+    //         if let Some(pattern) = get_characteristic_pattern(char) {
+    //             patterns.push(pattern);
+    //         }
+    //     }
+    // }
 
     let union_clause = if patterns.is_empty() {
         r#"
             BIND(<http://example.org/nothing> AS ?id)
             BIND(<http://example.org/nothing> AS ?nodeType)
+            BIND(<http://example.org/nothing> AS ?target)
             BIND("" AS ?label)
             FILTER(false)
         "#
@@ -221,14 +143,38 @@ pub fn generate_sparql_query(
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX webvowl: <http://www.example.com/iri#>
+        PREFIX xml: <http://www.w3.org/XML/1998/namespace>
 
-        SELECT ?id ?nodeType ?label
-        {{
-            {}
+        SELECT *
+        WHERE {{
+            {{
+                {}
+            }}
+            UNION
+            {{
+                {}
+            }}
+            UNION
+            {{
+                {}
+            }}
+            UNION
+            {{
+                {}
+            }}
+
+            BIND(
+                IF(?nodeType = owl:Class, 1, 2)
+                AS ?weight)
         }}
-        ORDER BY ?nodeType
+        ORDER BY ?weight
         "#,
-        union_clause
+        union_clause,
+        general::EXTERNALS,
+        general::DEPRECATED,
+        general::LABEL
     )
     .to_string()
 }
