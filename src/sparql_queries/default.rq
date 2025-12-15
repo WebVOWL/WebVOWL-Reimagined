@@ -15,15 +15,27 @@
         }
         UNION
         {
-            # 4. Identify Restrictions (Anonymous Classes in WebVOWL)
-            ?id a owl:Restriction .
-            BIND(owl:Restriction AS ?nodeType)
-        }
-        UNION
-        {
             ?id a owl:Class
             FILTER(!isIRI(?id))
             BIND("blanknode" AS ?nodeType)
+        }
+        UNION
+        {
+            # 2. Identify Intersections
+            # Any node (usually blank) that is the subject of an intersectionOf list
+            ?id owl:intersectionOf ?target .
+            BIND(owl:intersectionOf AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify Unions
+            ?id owl:unionOf ?list .
+            BIND(owl:unionOf AS ?nodeType)
+        }
+        UNION
+        {
+            ?id a owl:Restriction .
+            BIND(owl:Restriction AS ?nodeType)
         }
         UNION
         {
@@ -64,12 +76,6 @@
         }
         UNION
         {
-            # 3. Identify Unions
-            ?id owl:unionOf ?list .
-            BIND(owl:unionOf AS ?nodeType)
-        }
-        UNION
-        {
             # CLASS
             ?id a rdfs:Class .
             FILTER(?id != owl:Class)
@@ -91,6 +97,8 @@
         #########
         # EDGES #
         #########
+        # NOTE: If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
+        #       EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
         UNION
         {
             # 1. Identify RDF properties
@@ -163,6 +171,10 @@
         UNION
         {
             # EXTERNALS
+            # 1. Elements whose base URI differs from that of the visualized ontology.
+            #    p. 6 of https://www.semantic-web-journal.net/system/files/swj1114.pdf
+            # 2. A base URI is EITHER `xml:base` OR that of the document.
+            #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
             ?id xml:base ?base .
             BIND(xml:base AS ?nodeType)
         }
@@ -172,6 +184,36 @@
             ?id owl:deprecated ?target .
             BIND(owl:deprecated AS ?nodeType)
         }
+        UNION
+        {
+                # Find labels for elements in the following order:
+                # SPARQL
+                # 1. Use rdfs:label, if exists.
+                #    https://www.w3.org/TR/rdf-schema/#ch_label
+                # 2. Use rdf:resource, if exists.
+                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-empty-property-elements
+                # 3. Use rdf:ID, if exists.
+                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
+                # SERIALIZER
+                # 4. Use fragment identifier of rdf:about, if exists.
+                #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-node-property-elements
+                # 5. If fragment not found but rdf:about exists, use string after final slash ('/').
+                #    TODO: Insert link to docs about using prefix notation.
+                # 6. Create a fallback label from the ElementType.
+                OPTIONAL { ?id rdfs:label ?theLabel }
+                OPTIONAL { ?id rdf:resource ?resLabel }
+                OPTIONAL { ?id rdf:ID ?idLabel }
+                BIND (
+                    COALESCE(
+                        IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                        IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                        IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                        ""
+                    ) AS ?label
+                )
+            }
+        BIND(
+            IF(?nodeType = owl:Class, 1, 2)
+            AS ?weight)
     }
-
-    ORDER BY ?nodeType
+    ORDER BY ?weight
