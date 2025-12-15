@@ -443,15 +443,12 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::IMPORTS => {}
                     // owl::INCOMPATIBLE_WITH => {}
                     owl::INTERSECTION_OF => {
-                        let index = self.resolve(data_buffer, &triple.id.to_string());
-
-                        let target = triple.target.as_ref().expect("Target is required");
-
-                        if let Some(index) = index {
-                            self.map_to(target.to_string(), index);
-                        } else {
-                            self.blanknode_mapping
-                                .insert(triple.id.to_string(), target.to_string());
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                        self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)));
                         }
                     }
                     owl::INVERSE_FUNCTIONAL_PROPERTY => {
