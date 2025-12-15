@@ -161,7 +161,7 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer.labels.push(label);
         data_buffer.elements.push(node_type);
         self.iricache.insert(iri, data_buffer.labels.len() - 1);
-        //self.check_insert_unknowns(data_buffer);
+        self.check_insert_unknowns(data_buffer);
     }
 
     fn label_from_iri(&self, iri: &str) -> String {
@@ -243,7 +243,7 @@ impl GraphDisplayDataSolutionSerializer {
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: NodeTriple) {
         // TODO: Collect errors and show to frontend
         let node_type = triple.node_type.clone();
-        println!("{}", triple);
+        //println!("{}", triple);
         match node_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
@@ -301,15 +301,10 @@ impl GraphDisplayDataSolutionSerializer {
                     // rdfs::CONTAINER => {}
                     // rdfs::CONTAINER_MEMBERSHIP_PROPERTY => {}
                     rdfs::DATATYPE => {
-                        self.insert_edge(
-                            data_buffer,
-                            &triple,
-                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
-                        );
-                        println!("{}", triple);
+                        
                     }
                     rdfs::DOMAIN => {
-                        println!("{}", triple);
+                        //println!("{}", triple);
                         if let Some(index) = self.object_properties.get(&triple.id.to_string()) {
                             self.insert_edge(
                                 data_buffer,
@@ -472,8 +467,7 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::NEGATIVE_PROPERTY_ASSERTION => {}
                     owl::NOTHING => {}
                     owl::OBJECT_PROPERTY => {
-                        self.map_to(triple.id.to_string(), data_buffer.elements.len() - 1);
-                        println!("{}", triple);
+                    
                         
                     },
                     // owl::ONE_OF => {}
