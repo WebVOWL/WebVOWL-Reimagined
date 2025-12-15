@@ -8,17 +8,16 @@ pub const DEFAULT_QUERY: &str = r#"
     SELECT ?id ?nodeType ?label
     WHERE {
         {
-            ?id rdf:type owl:Ontology .
-            BIND(owl:Ontology AS ?nodeType)
-            
-        }
-        UNION
-        {
             # 1. Identify Named Classes
             ?id a owl:Class .
             FILTER(isIRI(?id))
             BIND(owl:Class AS ?nodeType)
             OPTIONAL { ?id rdfs:label ?label }
+        }
+        UNION
+        {
+            ?id rdf:type owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
         }
         UNION 
         {
@@ -34,12 +33,6 @@ pub const DEFAULT_QUERY: &str = r#"
         {
             ?id rdfs:range ?label .   
             BIND(rdfs:range AS ?nodeType)
-        }
-        UNION
-        {
-            ?id a owl:Class
-            FILTER(!isIRI(?id))
-            BIND("blanknode" AS ?nodeType)
         }
         UNION
         {
