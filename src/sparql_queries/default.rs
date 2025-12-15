@@ -19,19 +19,19 @@ pub const DEFAULT_QUERY: &str = r#"
             ?id rdf:type owl:Ontology .
             BIND(owl:Ontology AS ?nodeType)
         }
-        UNION 
+        UNION
         {
-            ?id rdf:type owl:ObjectProperty .   
+            ?id rdf:type owl:ObjectProperty .
             BIND(owl:ObjectProperty AS ?nodeType)
         }
-        UNION 
+        UNION
         {
-            ?id rdfs:domain ?label .   
+            ?id rdfs:domain ?label .
             BIND(rdfs:domain AS ?nodeType)
         }
-        UNION 
+        UNION
         {
-            ?id rdfs:range ?label .   
+            ?id rdfs:range ?label .
             BIND(rdfs:range AS ?nodeType)
         }
         UNION
