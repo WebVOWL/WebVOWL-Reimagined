@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Formatter},
-    rc::Rc,
     time::{Duration, Instant},
 };
 
