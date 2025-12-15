@@ -47,6 +47,6 @@ pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
         println!("{index}: {element:?} -> {label}");
     }
     for edge in data_buffer.edges.iter() {
-        println!("{edge:?}");
+        println!("{} -> {} -> {}", data_buffer.labels[edge[0]], data_buffer.elements[edge[1]], data_buffer.labels[edge[2]]);
     }
 }
