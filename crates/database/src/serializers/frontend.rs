@@ -161,7 +161,7 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer.labels.push(label);
         data_buffer.elements.push(node_type);
         self.iricache.insert(iri, data_buffer.labels.len() - 1);
-        self.check_insert_unknowns(data_buffer);
+        //self.check_insert_unknowns(data_buffer);
     }
 
     fn label_from_iri(&self, iri: &str) -> String {
@@ -257,69 +257,9 @@ impl GraphDisplayDataSolutionSerializer {
                 // NOTE: Any string literal goes here, e.g. 'EquivalentClass'.
                 // That is, every BIND("someString" AS ?nodeType)
                 //info!("Is literal: '{}'", literal.value());
-                let value = literal.value();
-                match value {
-                    "blanknode" => {}
-                    "IntersectionOf" => {
-                        self.insert_node(
-                            data_buffer,
-                            triple,
-                            ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
-                        );
-                    }
-                    "UnionOf" => {
-                        self.insert_node(
-                            data_buffer,
-                            triple,
-                            ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
-                        );
-                    }
-                    "AnonymousClass" => {
-                        self.insert_node(
-                            data_buffer,
-                            triple,
-                            ElementType::Owl(OwlType::Node(OwlNode::AnonymousClass)),
-                        );
-                    }
-                    "EquivalentClass" => {
-                        self.insert_node(
-                            data_buffer,
-                            triple,
-                            ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)),
-                        );
-                    }
-                    "SubClass" => {
-                        self.insert_edge(
-                            data_buffer,
-                            &triple,
-                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::SubclassOf)),
-                        );
-                    }
-                    "Datatype" => {
-                        self.insert_edge(
-                            data_buffer,
-                            &triple,
-                            ElementType::Rdfs(RdfsType::Edge(RdfsEdge::Datatype)),
-                        );
-                    }
-                    "DatatypeProperty" => {
-                        self.insert_edge(
-                            data_buffer,
-                            &triple,
-                            ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)),
-                        );
-                    }
-                    "disjointWith" => {
-                        self.insert_edge(
-                            data_buffer,
-                            &triple,
-                            ElementType::Owl(OwlType::Edge(OwlEdge::DisjointWith)),
-                        );
-                    }
-                    &_ => {
-                        warn!("Visualization of literal '{value}' is not supported");
-                    }
-                }
+                
+                warn!("Visualization of literal '{}' is not supported", literal.value());
+                    
             }
             Term::NamedNode(uri) => {
                 // NOTE: Only supports RDF 1.1
