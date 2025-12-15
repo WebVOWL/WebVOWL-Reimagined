@@ -248,6 +248,17 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    fn upgrade_node_type(
+        &self,
+        data_buffer: &mut GraphDisplayData,
+        index: usize,
+        node_type: ElementType,
+    ) {
+        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
+            data_buffer.elements[index] = node_type;
+        }
+    }
+
     fn replace_node(&mut self, _data_buffer: &mut GraphDisplayData, old: usize, new: usize) {
         //let old = data_buffer.labels[old];
         let iter = self.mapped_to.remove(&old);
@@ -533,17 +544,6 @@ impl GraphDisplayDataSolutionSerializer {
                     }
                 };
             }
-        }
-    }
-
-    fn upgrade_node_type(
-        &self,
-        data_buffer: &mut GraphDisplayData,
-        index: usize,
-        node_type: ElementType,
-    ) {
-        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            data_buffer.elements[index] = node_type;
         }
     }
 }
