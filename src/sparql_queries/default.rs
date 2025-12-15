@@ -82,6 +82,21 @@ pub const DEFAULT_QUERY: &str = r#"
             ?id owl:disjointWith ?label
             BIND(owl:disjointWith AS ?nodeType)
         }
+        UNION {
+            # BRIDGE: Start at the Named Class, jump to the intermediate node
+            ?id ?connector ?intermediateNode .
+            FILTER(isIRI(?id)) 
+
+            # Match the logic property (unionOf, etc) on the intermediate node
+            ?intermediateNode ?nodeType ?blanknode .
+
+            # Flatten the list from the blanknode
+            ?blanknode rdf:rest*/rdf:first ?label .
+
+            # Filter for Logic Types
+            # FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf))
+            FILTER(?label != rdf:nil)
+        }
         UNION
         {
             # 6. WIP Identify OWL deprecated properties
