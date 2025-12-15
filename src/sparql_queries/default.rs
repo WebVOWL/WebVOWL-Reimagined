@@ -16,8 +16,8 @@ pub const EXTERNAL_CLASS: &str =
 
 pub const DEPRECATED_CLASS: &str = 
             r#"{
-                ?id owl:deprecated ?target .
-                BIND(owl:deprecated AS ?nodeType)
+                ?id a owl:DeprecatedClass .
+                BIND(owl:DeprecatedClass AS ?nodeType)
             }"#;
 
 pub const EQUIVALENT_CLASS: &str = 
@@ -42,7 +42,7 @@ pub const RDFS_CLASS: &str =
             r#"{
                 ?id a rdfs:Class .
                 FILTER(?id != owl:Class)
-                BIND(owl:Class AS ?nodeType)
+                BIND(rdfs:Class AS ?nodeType)
             }"#;
 
 pub const RDFS_RESOURCE: &str = 
@@ -53,8 +53,8 @@ pub const RDFS_RESOURCE: &str =
 
 pub const RDFS_LITERAL: &str = 
             r#"{
-                ?id a rdfs:Literal .
-                FILTER(isLiteral(?id))
+                ?id rdfs:label ?target.
+                FILTER(isLiteral(?target))
                 BIND(rdfs:Literal AS ?nodeType)
             }"#;
 
