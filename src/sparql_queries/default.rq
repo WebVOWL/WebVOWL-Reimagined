@@ -79,19 +79,22 @@
             # CLASS
             ?id a rdfs:Class .
             FILTER(?id != owl:Class)
-            BIND(owl:Class AS ?nodeType)
+            BIND(rdfs:Class AS ?nodeType)
         }
         UNION
         {
             # LITERAL
-            ?id a rdfs:Literal .
-            FILTER(isLiteral(?id))
+            ?id rdfs:label ?target.
+            FILTER(isLiteral(?target))
             BIND(rdfs:Literal AS ?nodeType)
+            # OPTIONAL {?id rdfs:comment ?target}
+            
         }
         UNION
         {
             # RESOURCE
-            ?id a rdfs:Resource .
+            ?id ?p ?o.
+            FILTER(isIRI(?id) || isBlank(?id))
             BIND(rdfs:Resource AS ?nodeType)
         }
         #########
@@ -101,23 +104,10 @@
         #       EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
         UNION
         {
-            # 1. Identify RDF properties
-            ?id a rdf:Property .
+            # OBJECT PROPERTY
+            ?id a owl:ObjectProperty .
             OPTIONAL {?id rdfs:range ?target}
-            BIND(rdf:Property AS ?nodeType)
-        }
-        UNION
-        {
-            # 3. Identify datatypes
-            ?id a rdfs:Datatype .
-            OPTIONAL {?id rdfs:range ?target}
-            BIND(rdfs:Datatype AS ?nodeType)
-        }
-        UNION
-        {
-            # 2. Identify subclasses
-            ?id rdfs:subClassOf ?target .
-            BIND(rdfs:subClassOf AS ?nodeType)
+            BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION
         {
@@ -128,9 +118,44 @@
         }
         UNION
         {
-            # 5. Identify OWL disjoint with
-            ?id a owl:disjointWith .
+            # 1. Identify RDF properties
+            ?id a rdf:Property .
+            FILTER NOT EXISTS {?id a owl:ObjectProperty}
+            FILTER NOT EXISTS {?id a owl:DatatypeProperty}
             OPTIONAL {?id rdfs:range ?target}
+            BIND(rdf:Property AS ?nodeType)
+        }
+        UNION
+        {
+            # 3. Identify datatypes
+            SELECT ?dt ?nodeType ?target 
+            WHERE{
+                VALUES ?dt{
+                    rdf:HTML rdf:PlainLiteral rdf:XMLLiteral xsd:anySimpleType 
+                    xsd:anyURI xsd:base64Binary xsd:boolean xsd:byte xsd:date 
+                    xsd:dateTime xsd:decimal xsd:double xsd:duration xsd:ENTITY
+                    xsd:float xsd:gDay xsd:gMonth xsd:gMonthDay xsd:gYear
+                    xsd:gYearMonth xsd:hexBinary xsd:ID xsd:IDREF xsd:int xsd:integer
+                    xsd:language xsd:long xsd:Name xsd:NCName xsd:negativeInteger
+                    xsd:NMTOKEN xsd:nonNegativeInteger xsd:nonPositiveInteger 
+                    xsd:normalizedString xsd:NOTATION xsd:positiveInteger xsd:QName 
+                    xsd:short xsd:string xsd:time xsd:token xsd:unsignedByte 
+                    xsd:unsignedInt xsd:unsignedLong xsd:unsignedShort
+                }
+                BIND(rdfs:Datatype AS ?nodeType)
+                OPTIONAL{?dt rdfs:range ?target}
+            }
+        }
+        UNION
+        {
+            # 2. Identify subclasses
+            ?id rdfs:subClassOf ?target .
+            BIND(rdfs:subClassOf AS ?nodeType)
+        }
+        UNION
+        {
+            # 5. Identify OWL disjoint with
+            ?id owl:disjointWith ?target.
             BIND(owl:disjointWith AS ?nodeType)
         }
         UNION
@@ -145,13 +170,6 @@
             # INVERSE OF
             ?id owl:inverseOf ?target .
             BIND(owl:inverseOf AS ?nodeType)
-        }
-        UNION
-        {
-            # OBJECT PROPERTY
-            ?id a owl:ObjectProperty .
-            OPTIONAL {?id rdfs:range ?target}
-            BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION
         {
