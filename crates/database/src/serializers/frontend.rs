@@ -7,7 +7,7 @@ use std::{
 use crate::vocab::owl;
 use futures::StreamExt;
 use grapher::prelude::{
-    ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfsEdge, RdfsNode, RdfsType,
+    ElementType, GenericEdge, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfsEdge, RdfsNode, RdfsType
 };
 use log::{info, warn};
 use rdf_fusion::{
@@ -42,6 +42,7 @@ pub struct GraphDisplayDataSolutionSerializer {
     mapped_to: HashMap<usize, HashSet<String>>,
     unknown_buffer: HashSet<NodeTriple>,
     object_properties: HashMap<String, usize>,
+    edges: HashSet<[usize; 3]>,
     doc_iri: String,
 }
 
@@ -53,6 +54,7 @@ impl GraphDisplayDataSolutionSerializer {
             mapped_to: HashMap::new(),
             object_properties: HashMap::new(),
             unknown_buffer: HashSet::new(),
+            edges: HashSet::new(),
             doc_iri: String::new(),
         }
     }
@@ -204,11 +206,14 @@ impl GraphDisplayDataSolutionSerializer {
         if index_s.is_none() || index_o.is_none() {
             self.unknown_buffer.insert(triple.clone());
         } else {
-            let edge_index = data_buffer.elements.len();
+            let edge = [index_s.unwrap(), data_buffer.elements.len(), index_o.unwrap()];
+            if !self.edges.contains(&edge) {
             data_buffer
                 .edges
-                .push([index_s.unwrap(), edge_index, index_o.unwrap()]);
+                    .push(edge.clone());
             data_buffer.elements.push(edge_type);
+                self.edges.insert(edge);
+            }
         }
     }
 
