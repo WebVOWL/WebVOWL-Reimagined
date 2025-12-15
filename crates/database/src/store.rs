@@ -149,12 +149,6 @@ pub const DEFAULT_QUERY_1: &str = r#"
         }
         UNION
         {
-            ?id a owl:Class
-            FILTER(!isIRI(?id))
-            BIND("blanknode" AS ?nodeType)
-        }
-        UNION
-        {
             # 2. Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?label .
@@ -179,12 +173,6 @@ pub const DEFAULT_QUERY_1: &str = r#"
         # Edges
         UNION
         {
-            # 1. Identify RDF properties
-            ?id rdf:Property ?label .
-            BIND("SubClass" AS ?nodeType)
-        }
-        UNION
-        {
             # 2. Identify subclasses
             ?id rdfs:subClassOf ?label .
             BIND(rdfs:subClassOf AS ?nodeType)
@@ -206,6 +194,21 @@ pub const DEFAULT_QUERY_1: &str = r#"
             # 5. Identify OWL disjoint with
             ?id owl:disjointWith ?label
             BIND(owl:disjointWith AS ?nodeType)
+        }
+        UNION {
+            # BRIDGE: Start at the Named Class, jump to the intermediate node
+            ?id ?connector ?intermediateNode .
+            FILTER(isIRI(?id)) 
+
+            # Match the logic property (unionOf, etc) on the intermediate node
+            ?intermediateNode ?nodeType ?blanknode .
+
+            # Flatten the list from the blanknode
+            ?blanknode rdf:rest*/rdf:first ?label .
+
+            # Filter for Logic Types
+            # FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf))
+            FILTER(?label != rdf:nil)
         }
         UNION
         {
