@@ -512,7 +512,15 @@ impl GraphDisplayDataSolutionSerializer {
                         //
                         // TODO: Implement
                     }
-                    owl::UNION_OF => {}
+                    owl::UNION_OF => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                        self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::UnionOf)));
+                        }
+                    }
                     // owl::VERSION_INFO => {}
                     // owl::VERSION_IRI => {}
                     // owl::WITH_RESTRICTIONS => {}
