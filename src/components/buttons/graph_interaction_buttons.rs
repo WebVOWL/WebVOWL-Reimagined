@@ -10,10 +10,10 @@ pub fn PauseButton() -> impl IntoView {
     let toggle_pause = move |_| {
         let currently_paused = paused.get();
         if currently_paused {
-            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Resumed);
+            let _ = EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Resumed);
             paused.set(false);
         } else {
-            EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Paused);
+            let _  =EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::Paused);
             paused.set(true);
         }
     };
@@ -56,7 +56,7 @@ pub fn ZoomInButton() -> impl IntoView {
             class="w-[35px] h-[35px] bg-white flex items-center justify-center text-black border border-black cursor-pointer hover:bg-[#dd9900] transition-colors"
             title="Zoom in on the graph"
             on:click=move |_| {
-                EVENT_DISPATCHER
+                let _ =EVENT_DISPATCHER
                     .rend_write_chan.send(RenderEvent::Zoomed(20.0));
             }
         >
@@ -72,7 +72,7 @@ pub fn ZoomOutButton() -> impl IntoView {
             class="w-[35px] h-[35px] bg-white flex items-center justify-center text-black border border-black cursor-pointer hover:bg-[#dd9900] transition-colors"
             title="Zoom out on the graph"
             on:click=move |_| {
-                EVENT_DISPATCHER
+               let _ = EVENT_DISPATCHER
                     .rend_write_chan.send(RenderEvent::Zoomed(-20.0));
             }
         >
@@ -88,7 +88,7 @@ pub fn CenterGraphButton() -> impl IntoView {
             class="w-[35px] h-[35px] bg-white flex items-center justify-center text-black border border-black cursor-pointer hover:bg-[#dd9900] transition-colors"
             title="Center the graph"
             on:click=move |_| {
-                EVENT_DISPATCHER
+               let _ = EVENT_DISPATCHER
                     .rend_write_chan.send(RenderEvent::CenterGraph);
             }
         >
