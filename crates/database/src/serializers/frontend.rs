@@ -204,43 +204,32 @@ impl GraphDisplayDataSolutionSerializer {
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
     }
 
-    /// If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
-    /// EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
-    ///
-    /// Procedure:
-    /// If NOT rdfs:Datatype:
-    /// - Property missing domain OR range:
-    ///   - Create new owl:Thing for this property.
-    /// - Property missing domain AND range:
-    ///   - Create a new owl:Thing (if not created previously) and use this instance for ALL edges in this category.
-    /// IF rdfs:Datatype:
-    /// - Property missing domain AND/OR range:
-    ///   - Create new rdfs:Literal for this property
     fn insert_edge(
         &mut self,
         data_buffer: &mut GraphDisplayData,
         triple: &Triple,
         edge_type: ElementType,
     ) {
-        let (subject_index, object_index) = self.resolve_so(data_buffer, &triple);
-        // let mut edge: [usize; 3] = [];
+        let (maybe_sub_idx, maybe_obj_idx) = self.resolve_so(data_buffer, &triple);
 
-        // if subject_index.is_none() {}
-        // if object_index.is_none() {
-        //     if let Some(thing) = self
-        //         .global_element_mappings
-        //         .get(ElementType::Owl(OwlType::Node(OwlNode::Thing)))
-        //     {
-        //         edge[1] = *thing;
-        //     } else {
-        //         edge[1] = subject_index.unwrap();
-        //     }
-        // }
+        let mut edge = match edge_type {
+            ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)) => self
+                .handle_missing_edges(
+                    data_buffer,
+                    ElementType::Rdfs(RdfsType::Node(RdfsNode::Literal)),
+                    maybe_sub_idx,
+                    maybe_obj_idx,
+                ),
+            _ => self.handle_missing_edges(
+                data_buffer,
+                ElementType::Owl(OwlType::Node(OwlNode::Thing)),
+                maybe_sub_idx,
+                maybe_obj_idx,
+            ),
+        };
+        edge[1] = data_buffer.elements.len();
 
-        let edge_index = data_buffer.elements.len();
-        data_buffer
-            .edges
-            .push([subject_index.unwrap(), edge_index, object_index.unwrap()]);
+        data_buffer.edges.push(edge);
         data_buffer.elements.push(edge_type);
         self.insert_label(data_buffer, &triple, &edge_type);
     }
@@ -263,44 +252,74 @@ impl GraphDisplayDataSolutionSerializer {
     }
 
     /// Creates nodes as targets for edges without one in the solution.
-    // fn handle_missing_edges(
-    //     &mut self,
-    //     data_buffer: &mut GraphDisplayData,
-    //     edge_type: ElementType,
-    //     subject_index: Option<usize>,
-    //     object_index: Option<usize>,
-    // ) -> [usize; 3] {
-    //     match edge_type {
-    //         ElementType::Rdfs(RdfsType::Node(RdfsNode::Datatype)) => {}
-    //         _ => {
-    //             let thing = ElementType::Owl(OwlType::Node(OwlNode::Thing));
+    ///
+    /// If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
+    /// EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
+    ///
+    /// Procedure:
+    /// If NOT rdfs:Datatype:
+    /// - Property missing domain OR range:
+    ///   - Create new owl:Thing for this property.
+    /// - Property missing domain AND range:
+    ///   - Create a new owl:Thing (if not created previously) and use this instance for ALL edges in this category.
+    /// IF rdfs:Datatype:
+    /// - Property missing domain AND/OR range:
+    ///   - Create new rdfs:Literal for this property
+    fn handle_missing_edges(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        node_to_create: ElementType,
+        maybe_sub_idx: Option<usize>,
+        maybe_obj_idx: Option<usize>,
+    ) -> [usize; 3] {
+        // Case: missing domain AND range
+        if maybe_sub_idx.is_none() && maybe_obj_idx.is_none() {
+            if let Some(global_idx) = self.global_element_mappings.get(&node_to_create) {
+                [*global_idx, 0, *global_idx]
+            } else {
+                // Create global node type
+                let global_idx = self.insert_global(data_buffer, node_to_create);
+                [global_idx, 0, global_idx]
+            }
+        // Case: missing domain OR range
+        } else {
+            let sub_idx = maybe_sub_idx.unwrap_or(self.insert_local(data_buffer, node_to_create));
+            let obj_idx = maybe_obj_idx.unwrap_or(self.insert_local(data_buffer, node_to_create));
+            [sub_idx, 0, obj_idx]
+        }
+    }
 
-    //             // Case: NOT rdfs:Datatype missing domain AND range
-    //             if subject_index.is_none() && object_index.is_none() {
-    //                 if let Some(thing_idx) = self.global_element_mappings.get(&thing) {
-    //                     [*thing_idx, 0, *thing_idx]
-    //                 } else {
-    //                     let thing_idx = data_buffer.elements.len();
-    //                     data_buffer.labels.push(thing.to_string());
-    //                     data_buffer.elements.push(thing);
-    //                     [thing_idx, 0, thing_idx]
-    //                 }
-    //             }
+    /// Insert an ElementType into the global element mapping.
+    ///
+    /// May only be called once for each ElementType!
+    ///
+    /// Use [`insert_local`] if multiple calls are required for each ElementType.
+    fn insert_global(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        element_to_create: ElementType,
+    ) -> usize {
+        let elem_idx = data_buffer.elements.len();
+        self.global_element_mappings
+            .insert(element_to_create, elem_idx);
+        data_buffer.labels.push(element_to_create.to_string());
+        data_buffer.elements.push(element_to_create);
+        elem_idx
+    }
 
-    //             // Case: NOT rdfs:Datatype missing domain OR range
-    //             if let Some(sub_idx) = subject_index {
-    //                 edge[0] = sub_idx;
-    //             } else {
-    //                 // TODO: Create owl:Thing
-    //             }
-    //             if let Some(obj_idx) = object_index {
-    //                 edge[1] = obj_idx;
-    //             } else {
-    //                 // TODO: Create owl:Thing
-    //             }
-    //         }
-    //     }
-    // }
+    /// Create an ElementType for use in one solution.
+    ///
+    /// No call restrictions!
+    fn insert_local(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        element_to_create: ElementType,
+    ) -> usize {
+        let elem_idx = data_buffer.elements.len();
+        data_buffer.labels.push(element_to_create.to_string());
+        data_buffer.elements.push(element_to_create);
+        elem_idx
+    }
 
     fn upgrade_node_type(
         &self,
