@@ -288,16 +288,16 @@ pub fn FilterMenu() -> impl IntoView {
                 on_change=update_query
             />
 
-             <FilterGroup
-                name="Characteristics"
-                is_open=open_chars
-                set_open=set_open_chars
-                items=characteristics
-                checks=char_checks.into()
-                set_checks=set_char_checks
-                counts=char_counts.into()
-                on_change=update_query
-            />
+            //  <FilterGroup
+            //     name="Characteristics"
+            //     is_open=open_chars
+            //     set_open=set_open_chars
+            //     items=characteristics
+            //     checks=char_checks.into()
+            //     set_checks=set_char_checks
+            //     counts=char_counts.into()
+            //     on_change=update_query
+            // />
 
         </WorkbenchMenuItems>
     }
