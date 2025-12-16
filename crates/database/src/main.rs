@@ -5,7 +5,9 @@ use log::info;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::path::Path;
 use webvowl_database::prelude::GraphDisplayDataSolutionSerializer;
-use webvowl_database::store::{DEFAULT_QUERY, WebVOWLStore};
+use webvowl_database::store::WebVOWLStore;
+use webvowl_sparql_queries::DEFAULT_QUERY;
+use std::env;
 
 #[tokio::main]
 pub async fn main() {
