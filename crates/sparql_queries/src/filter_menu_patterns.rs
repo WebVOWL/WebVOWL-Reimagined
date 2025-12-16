@@ -55,6 +55,7 @@ fn get_node_pattern(node: &FilterNode) -> Option<String> {
         FilterNode::Rdfs(RdfsNode::Class) => Some(default::RDFS_CLASS.to_string()),
         FilterNode::Rdfs(RdfsNode::Resource) => Some(default::RDFS_RESOURCE.to_string()),
         FilterNode::Rdfs(RdfsNode::Literal) => Some(default::RDFS_LITERAL.to_string()),
+        FilterNode::Rdfs(RdfsNode::Datatype) => Some(default::RDFS_DATATYPE.to_string()),
         _ => None,
     }
 }

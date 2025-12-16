@@ -116,6 +116,7 @@ pub fn FilterMenu() -> impl IntoView {
         FilterNode::Rdfs(RdfsNode::Class),
         FilterNode::Rdfs(RdfsNode::Resource),
         FilterNode::Rdfs(RdfsNode::Literal),
+        FilterNode::Rdfs(RdfsNode::Datatype),
     ];
     for n in &all_nodes {
         initial_node_checks.insert(n.clone(), true);
@@ -176,6 +177,7 @@ pub fn FilterMenu() -> impl IntoView {
         FilterNode::Rdfs(RdfsNode::Class),
         FilterNode::Rdfs(RdfsNode::Resource),
         FilterNode::Rdfs(RdfsNode::Literal),
+        FilterNode::Rdfs(RdfsNode::Datatype),
     ];
 
     // 3. Set Operators

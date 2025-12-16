@@ -1,16 +1,16 @@
 pub const EXTERNALS : &str = 
-            r#"
+            r#"{
                 ?id xml:base ?base .
                 BIND(xml:base AS ?nodeType)         
-            "#;
+            }"#;
 
 pub const DEPRECATED : &str = 
-            r#"
+            r#"{
                 ?id owl:deprecated ?target .
                 BIND(owl:deprecated AS ?nodeType)
-            "#;
+            }"#;
 pub const LABEL : &str = 
-            r#"
+            r#"{
                 OPTIONAL { ?id rdfs:label ?theLabel }
                 OPTIONAL { ?id rdf:resource ?resLabel }
                 OPTIONAL { ?id rdf:ID ?idLabel }
@@ -22,4 +22,4 @@ pub const LABEL : &str =
                         ""
                     ) AS ?label
                 )
-            "#;
+            }"#;
