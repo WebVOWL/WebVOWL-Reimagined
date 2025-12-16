@@ -23,7 +23,7 @@
     oxrdf="0.3.1"
     rdf-fusion="0.1.0"
     rkyv="0.8.12"
-    sparql_queries={path="../sparql_queries"}
+    webvowl-sparql-queries={path="../sparql_queries"}
     smallvec={version="1.15.1", features=["union"]}
     tempfile="3.10"
     test-generator="^0.3"

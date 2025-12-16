@@ -5,4 +5,7 @@
 //! - the client/wasm side (via `webvowl-reimagined`)
 
 pub mod default;
-pub mod testing;
+pub mod general;
+pub mod filter_menu_patterns;
+
+pub const DEFAULT_QUERY: &str = include_str!("default.rq");

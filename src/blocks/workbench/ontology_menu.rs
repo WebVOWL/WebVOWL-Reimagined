@@ -1,12 +1,11 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::{icon::Icon, user_input::file_upload::*};
-use crate::sparql_queries::DEFAULT;
 use grapher::prelude::GraphDisplayData;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
-use sparql_queries::{default::DEFAULT_QUERY, testing::TESTING_QUERY};
+use webvowl_sparql_queries::{DEFAULT_QUERY};
 use web_sys::HtmlInputElement;
 
 #[component]
@@ -65,7 +64,7 @@ fn UploadInput() -> impl IntoView {
         if let Some(value) = loading_done.get() {
             match value {
                 Ok(_) => spawn_local(async move {
-                    let output_result = handle_internal_sparql(DEFAULT.to_string()).await;
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
                     match output_result {
                         Ok(new_graph_data) => {
                             graph_data.set(new_graph_data.clone());
@@ -170,7 +169,7 @@ fn FetchData() -> impl IntoView {
             <button class="relative flex items-center justify-center p-1 mt-1 rounded text-xs bg-gray-200 text-[#000000]"
             on:click=move |_| {
                 spawn_local(async {
-                    let output_result = handle_internal_sparql(DEFAULT.to_string()).await;
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
                             let _ = EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},

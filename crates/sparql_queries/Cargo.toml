@@ -1,5 +1,5 @@
 [package]
-name = "sparql_queries"
+name = "webvowl-sparql-queries"
 version = "0.0.1"
 edition = "2024"
 description = "Shared SPARQL query strings for WebVOWL-Reimagined (WASM-safe)."
@@ -10,5 +10,15 @@ path = "src/lib.rs"
 
 [lints]
 workspace = true
+
+[dependencies]
+
+    [dependencies.grapher]
+        # branch="new_nodetype"
+        features=["webgl"]
+        git="https://github.com/WebVOWL/WasmGrapher"
+        # optional=true
+        # path="../../../RustGrapher"
+        # version="0.3"
 
 

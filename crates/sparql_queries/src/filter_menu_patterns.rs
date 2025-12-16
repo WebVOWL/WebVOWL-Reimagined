@@ -1,4 +1,4 @@
-use crate::sparql_queries::{default, general};
+use crate::{default, general};
 use grapher::prelude::{
     Characteristic, GenericEdge, GenericNode, OwlEdge, OwlNode, RdfEdge, RdfsEdge, RdfsNode,
 };

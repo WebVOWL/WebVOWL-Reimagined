@@ -1,6 +1,6 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::user_input::file_upload::handle_internal_sparql;
-use crate::sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
+use webvowl_sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
 use grapher::prelude::{
     Characteristic, ElementType, GenericType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge,
     RdfType, RdfsEdge, RdfsNode, RdfsType,

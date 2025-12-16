@@ -1,6 +1,6 @@
 mod serializers;
 pub mod store;
-pub use ::sparql_queries;
+pub use webvowl_sparql_queries;
 mod vocab;
 pub mod prelude {
     pub use crate::serializers::frontend::GraphDisplayDataSolutionSerializer;
