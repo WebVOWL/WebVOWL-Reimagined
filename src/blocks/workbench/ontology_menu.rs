@@ -1,11 +1,12 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::{icon::Icon, user_input::file_upload::*};
-use crate::sparql_queries::default_query::get_default_query;
-use crate::sparql_queries::DEFAULT;
+use grapher::prelude::GraphDisplayData;
+use webvowl_sparql_queries::default_query::get_default_query;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
+use webvowl_sparql_queries::{DEFAULT_QUERY};
 use web_sys::HtmlInputElement;
 
 #[component]
@@ -64,8 +65,7 @@ fn UploadInput() -> impl IntoView {
         if let Some(value) = loading_done.get() {
             match value {
                 Ok(_) => spawn_local(async move {
-                    let output_result =
-                        handle_internal_sparql(get_default_query()).await;
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
                     match output_result {
                         Ok(new_graph_data) => {
                             graph_data.set(new_graph_data.clone());

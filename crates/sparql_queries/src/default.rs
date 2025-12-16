@@ -116,6 +116,22 @@ pub const DISJOINTWITH: &str = r#"{
                 ?id owl:disjointWith ?target.
                 BIND(owl:disjointWith AS ?nodeType)
             }"#;
+pub const COLLECTIONS: &str = 
+            r#"{
+                # BRIDGE: Start at the Named Class, jump to the intermediate node
+                ?id ?connector ?intermediateNode .
+                FILTER(isIRI(?id)) 
+
+                # Match the logic property (unionOf, etc) on the intermediate node
+                ?intermediateNode ?nodeType ?blanknode .
+
+                # Flatten the list from the blanknode
+                ?blanknode rdf:rest*/rdf:first ?target .
+
+                # Filter for Logic Types
+                FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf, owl:disjointUnionOf, owl:disjointWith))
+                FILTER(?target != rdf:nil)
+            }"#;
 
 pub const RDFPROPERTY: &str = r#"{
                 ?id a rdf:Property .

@@ -8,7 +8,7 @@ use crate::vocab::owl;
 use fluent_uri::Iri;
 use futures::StreamExt;
 use grapher::prelude::{
-    ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfsEdge, RdfsNode, RdfsType,
+    Characteristic, ElementType, GenericEdge, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfsEdge, RdfsNode, RdfsType
 };
 use log::{debug, info, trace, warn};
 use rdf_fusion::{
@@ -56,6 +56,9 @@ pub struct GraphDisplayDataSolutionSerializer {
     /// usize = element index in data_buffer.elements
     /// String = label
     labels: HashMap<String, String>,
+    object_properties: HashMap<String, usize>,
+    edges: HashSet<(usize, ElementType, usize)>,
+    doc_iri: String,
 }
 
 impl GraphDisplayDataSolutionSerializer {
@@ -64,8 +67,11 @@ impl GraphDisplayDataSolutionSerializer {
             blanknode_mapping: HashMap::new(),
             iricache: HashMap::new(),
             mapped_to: HashMap::new(),
+            object_properties: HashMap::new(),
             global_element_mappings: HashMap::new(),
             labels: HashMap::new(),
+            edges: HashSet::new(),
+            doc_iri: String::new(),
         }
     }
 
@@ -89,7 +95,7 @@ impl GraphDisplayDataSolutionSerializer {
             };
 
             // Handle cases where label is, in fact, not a separate solution.
-            self.extract_label(solution.get("label"), id_term);
+            //self.extract_label(solution.get("label"), id_term);
 
             let triple: Triple = Triple {
                 id: id_term.to_owned(),
@@ -122,21 +128,6 @@ impl GraphDisplayDataSolutionSerializer {
         debug!("{}", data_buffer);
         Ok(())
     }
-    /*
-    pub fn insert_iri(
-        &mut self,
-        data_buffer: &mut GraphDisplayData,
-        x: &TermRef<'a>
-    ) -> usize {
-        if self.resolve(data_buffer, &x).is_none() {
-            let present = self.iricache.contains_key(&x);
-            if !present {
-                self.iricache.insert(x.clone(), data_buffer.irivec.len() as usize);
-                data_buffer.irivec.push(x.clone());
-            }
-        }
-        self.iricache[&x]
-    }*/
 
     /// Extract label info from the query solution and store for later use.
     /// This is necessary as labels are currently emitted in a solution separate
@@ -181,6 +172,9 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer: &mut GraphDisplayData,
         triple: &Triple,
     ) -> (Option<usize>, Option<usize>) {
+        if triple.target.is_none() {
+            warn!("Target is required for edge: {:?}", triple);
+        }
         let resolved_subject = self.resolve(data_buffer, &triple.id.to_string());
         let resolved_object = match &triple.target {
             Some(target) => self.resolve(data_buffer, &target.to_string()),
@@ -202,6 +196,26 @@ impl GraphDisplayDataSolutionSerializer {
         self.insert_label(data_buffer, &triple, &node_type);
         self.iricache
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
+    }
+
+    fn label_from_iri(&self, iri: &str) -> String {
+        let cleaned_iri = iri.trim_matches(['<', '>']);
+        let cleaned_doc_iri = self.doc_iri.trim_matches(['<', '>']);
+
+        if !cleaned_doc_iri.is_empty() {
+            if let Some(suffix) = cleaned_iri.strip_prefix(cleaned_doc_iri) {
+                let trimmed = suffix.trim_start_matches(['#', '/']);
+                if !trimmed.is_empty() {
+                    return trimmed.to_string();
+                }
+            }
+        }
+
+        cleaned_iri
+            .rsplit(['#', '/'])
+            .next()
+            .unwrap_or(cleaned_iri)
+            .to_string()
     }
 
     fn insert_edge(
@@ -228,10 +242,16 @@ impl GraphDisplayDataSolutionSerializer {
             ),
         };
         edge[1] = data_buffer.elements.len();
+        if !self.edges.contains(&(edge[0], edge_type, edge[2])) {
+            data_buffer
+                .edges
+                .push(edge);
 
-        data_buffer.edges.push(edge);
-        data_buffer.elements.push(edge_type);
-        self.insert_label(data_buffer, &triple, &edge_type);
+            data_buffer.elements.push(edge_type);
+            self.edges.insert((edge[0], edge_type, edge[2]));
+            self.insert_label(data_buffer, &triple, &edge_type);
+        }
+        
     }
 
     /// Create a label for an element.
@@ -321,17 +341,6 @@ impl GraphDisplayDataSolutionSerializer {
         elem_idx
     }
 
-    fn upgrade_node_type(
-        &self,
-        data_buffer: &mut GraphDisplayData,
-        index: usize,
-        node_type: ElementType,
-    ) {
-        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            data_buffer.elements[index] = node_type;
-        }
-    }
-
     fn replace_node(&mut self, _data_buffer: &mut GraphDisplayData, old: usize, new: usize) {
         //let old = data_buffer.labels[old];
         let iter = self.mapped_to.remove(&old);
@@ -346,13 +355,32 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
-    fn map_to(&mut self, k: String, v: usize) {
+    fn upgrade_node_type(
+        &self,
+        data_buffer: &mut GraphDisplayData,
+        index: usize,
+        node_type: ElementType,
+    ) {
+        info!("upgrading {}", node_type);
+        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
+            debug!("upgrading node: {} to {}", data_buffer.labels[index], node_type);
+            data_buffer.elements[index] = node_type;
+        }
+    }
+
+    fn map_to(&mut self, data_buffer: &mut GraphDisplayData, k: String, v: usize) {
         self.iricache.insert(k.clone(), v);
         if self.mapped_to.contains_key(&v) {
             self.mapped_to.get_mut(&v).unwrap().insert(k.clone());
         } else {
             self.mapped_to.insert(v, HashSet::from([k]));
         }
+        //self.check_insert_unknowns(data_buffer);
+    }
+
+    fn map_bnode(&mut self, data_buffer: &mut GraphDisplayData, k: Term, v: Term) {
+        self.blanknode_mapping.insert(k.to_string(), v.to_string());
+        //self.check_insert_unknowns(data_buffer);
     }
 
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
@@ -411,12 +439,21 @@ impl GraphDisplayDataSolutionSerializer {
                     // rdfs::CONTAINER => {}
                     // rdfs::CONTAINER_MEMBERSHIP_PROPERTY => {}
                     rdfs::DATATYPE => {
-                        self.insert_edge(
+                        self.insert_node(
                             data_buffer,
-                            &triple,
+                            triple,
                             ElementType::Rdfs(RdfsType::Node(RdfsNode::Datatype)),
                         );
                     }
+                    // TODO: 
+                    // - in sparql query, sort domain before range
+                    // - add domain to domain_map HashMap<String, String>, key is subject, value is object
+                    // - add range to range_map HashMap<String, String>, key is subject, value is object
+                    // - when matching ie. TransitiveProperty, check if domain and range are available, 
+                    //   if so create edge with characteristics
+                    //   otherwise, add to unknown_buffer
+                    // - At the end of serialization, unknown_buffer is handled, inserting missing node sources/targets as Things
+                    //  (call handle_missing_edges) 
                     // rdfs::DOMAIN => {}
                     // rdfs::IS_DEFINED_BY => {}
                     // rdfs::LABEL => {}
@@ -461,14 +498,19 @@ impl GraphDisplayDataSolutionSerializer {
                         triple,
                         ElementType::Owl(OwlType::Node(OwlNode::Class)),
                     ),
-                    // owl::COMPLEMENT_OF => {
-                    //     // self.insert_edge(
-                    //     // data_buffer,
-                    //     // triple,
-                    //     // ElementType::Owl(OwlType::Edge(OwlEdge::ComplementOf)),
-                    //     // TODO: Implement
-                    // }
-                    // owl::DATATYPE_COMPLEMENT_OF => {}
+                    owl::COMPLEMENT_OF => {
+                        let (index_s, index_o)  = self.resolve_so(data_buffer, &triple);
+                        match (index_s, index_o) {
+                            (Some(index), Some(_)) => {
+                                self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::Complement)));
+                                self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
+                            }
+                            _ => {
+                                //self.unknown_buffer.insert(triple.clone());
+                            }
+                        }
+                    }
+                    owl::DATATYPE_COMPLEMENT_OF => {}
                     owl::DATATYPE_PROPERTY => self.insert_edge(
                         data_buffer,
                         &triple,
@@ -487,21 +529,61 @@ impl GraphDisplayDataSolutionSerializer {
                         ElementType::Owl(OwlType::Edge(OwlEdge::DeprecatedProperty)),
                     ),
                     // owl::DIFFERENT_FROM => {}
-                    // owl::DISJOINT_UNION_OF => {}
+                    owl::DISJOINT_UNION_OF => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                        self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::DisjointUnion)));
+                        }
+                    }
                     owl::DISJOINT_WITH => self.insert_edge(
                         data_buffer,
                         &triple,
                         ElementType::Owl(OwlType::Edge(OwlEdge::DisjointWith)),
                     ),
                     // owl::DISTINCT_MEMBERS => {}
+                    
                     owl::EQUIVALENT_CLASS => {
-                        trace!("blanknode_mapping | {:?}", self.blanknode_mapping);
-                        trace!("mapped_to | {:?}", self.mapped_to);
-                        trace!("iricache | {:?}", self.iricache);
-                        trace!("triple: {:?}", triple);
+                        info!("blanknode_mapping | {:?}", self.blanknode_mapping);
+                        info!("mapped_to | {:?}", self.mapped_to);
+                        info!("iricache | {:?}", self.iricache);
+                        info!("triple: {:?}", triple);
                         let index = self
                             .resolve(data_buffer, &triple.id.to_string())
                             .expect("Couldnt resolve for id");
+                        /* 
+                        match triple.target.as_ref() {
+                            Some(Term::NamedNode(nn)) => {
+                                let target_index = self.resolve(data_buffer, &nn.to_string());
+                                match target_index {
+                                    Some(target_index) => {
+                                        self.map_to(data_buffer, nn.to_string(), target_index);
+
+                                    }
+                                    None => {
+                                        warn!("Target is required for: {:?}", triple);
+                                    }
+                                }
+                            }
+                            Some(Term::BlankNode(bn)) => {
+                                let target_index = self.resolve(data_buffer, &bn.to_string());
+                                match target_index {
+                                    Some(target_index) => {
+                                        self.map_to(data_buffer, bn.to_string(), target_index);
+                                    }
+                                    None => {
+                                        warn!("Target is required for: {:?}", triple);
+                                    }
+                                }
+                                self.map_to(data_buffer, bn.to_string(), target_index);
+                            }
+                            _ => {
+                                warn!("Target is required for: {:?}", triple);
+                            }
+                        }*/
+                        let target_index = self.resolve(data_buffer, &triple.target.as_ref().unwrap().to_string());
 
                         if matches!(triple.target.as_ref(), Some(Term::NamedNode(_))) {
                             self.upgrade_node_type(
@@ -515,15 +597,20 @@ impl GraphDisplayDataSolutionSerializer {
                                 {
                                     trace!("target_index: {:?}", target_index);
                                     self.replace_node(data_buffer, index, target_index);
+                                } else {
+                                    self.map_to(data_buffer, target.to_string(), index);
                                 }
                             }
+                        } else if matches!(triple.target.as_ref(), Some(Term::BlankNode(_))) {
+                            self.map_bnode(data_buffer, triple.target.clone().unwrap(), triple.id.clone());
                         }
                         let target = triple
                             .target
                             .as_ref()
                             .expect("Target is required")
                             .to_string();
-                        self.map_to(target, index);
+                        self.map_to(data_buffer, target, index);
+
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
                     // owl::FUNCTIONAL_PROPERTY => {}
@@ -533,17 +620,12 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::IMPORTS => {}
                     // owl::INCOMPATIBLE_WITH => {}
                     owl::INTERSECTION_OF => {
-                        trace!("{}", triple);
-                        trace!("{}", self);
-                        let index = self.resolve(data_buffer, &triple.id.to_string());
-
-                        let target = triple.target.as_ref().expect("Target is required");
-
-                        if let Some(index) = index {
-                            self.map_to(target.to_string(), index);
-                        } else {
-                            self.blanknode_mapping
-                                .insert(triple.id.to_string(), target.to_string());
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                            self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)));
                         }
                     }
                     owl::INVERSE_FUNCTIONAL_PROPERTY => {
@@ -553,11 +635,9 @@ impl GraphDisplayDataSolutionSerializer {
                         // Characteristic::InverseFunctionalProperty)
                         // TODO: Implement
                     }
-                    owl::INVERSE_OF => self.insert_edge(
-                        data_buffer,
-                        &triple,
-                        ElementType::Owl(OwlType::Edge(OwlEdge::InverseOf)),
-                    ),
+                    owl::INVERSE_OF => {
+                        
+                    },
                     // owl::IRREFLEXIVE_PROPERTY => {}
                     // owl::MAX_CARDINALITY => {}
                     // owl::MAX_QUALIFIED_CARDINALITY => {}
@@ -567,13 +647,14 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::NAMED_INDIVIDUAL => {}
                     // owl::NEGATIVE_PROPERTY_ASSERTION => {}
                     owl::NOTHING => {}
-                    owl::OBJECT_PROPERTY => self.insert_edge(
-                        data_buffer,
-                        &triple,
-                        ElementType::Owl(OwlType::Edge(OwlEdge::ObjectProperty)),
-                    ),
+                    owl::OBJECT_PROPERTY => {
+                    
+                        
+                    },
                     // owl::ONE_OF => {}
-                    // owl::ONTOLOGY => {}
+                    owl::ONTOLOGY => {
+                        self.doc_iri = uri.to_string();
+                    }
                     // owl::ONTOLOGY_PROPERTY => {}
                     // owl::ON_CLASS => {}
                     // owl::ON_DATARANGE => {}
@@ -599,15 +680,22 @@ impl GraphDisplayDataSolutionSerializer {
                     ),
                     // owl::TOP_DATA_PROPERTY => {}
                     // owl::TOP_OBJECT_PROPERTY => {}
-                    // owl::TRANSITIVE_PROPERTY => {
-                    //     // self.try_insert_characteristic(
-                    //     // data_buffer,
-                    //     // term,
-                    //     // Characteristic::Transitive)
-                    //     //
-                    //     // TODO: Implement
-                    // }
-                    // owl::UNION_OF => {}
+                    owl::TRANSITIVE_PROPERTY => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        data_buffer.characteristics.insert(data_buffer.elements.len() - 1, Characteristic::Transitive.to_string());
+                    }
+                    owl::UNION_OF => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::NoDraw);
+                        if let Some(index) = self.resolve(data_buffer, &triple.id.to_string()) {
+                            self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::UnionOf)));
+                        }
+                    }
                     // owl::VERSION_INFO => {}
                     // owl::VERSION_IRI => {}
                     // owl::WITH_RESTRICTIONS => {}
@@ -620,9 +708,16 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 }
+
 impl Display for GraphDisplayDataSolutionSerializer {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for (index, (element, label)) in self.iricache.iter().enumerate() {
+            write!(f, "{index}: {element:?} -> {label}\n")?;
+        }
+        for (index, (element, label)) in self.blanknode_mapping.iter().enumerate() {
+            write!(f, "{index}: {element:?} -> {label}\n")?;
+        }
+        for (index, (element, label)) in self.object_properties.iter().enumerate() {
             write!(f, "{index}: {element:?} -> {label}\n")?;
         }
         Ok(())
