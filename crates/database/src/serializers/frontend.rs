@@ -420,7 +420,13 @@ impl GraphDisplayDataSolutionSerializer {
                     // rdf::NIL => {}
                     // rdf::OBJECT => {}
                     // rdf::PREDICATE => {}
-                    // rdf::PROPERTY => {}
+                    rdf::PROPERTY => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::Rdf(RdfType::Edge(RdfEdge::RdfProperty)),
+                        );
+                    }
                     // rdf::REST => {}
                     // rdf::SEQ => {}
                     // rdf::STATEMENT => {}
