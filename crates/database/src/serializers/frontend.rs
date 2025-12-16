@@ -198,7 +198,7 @@ impl GraphDisplayDataSolutionSerializer {
                     .edges
                     .push(edge.clone());
                 data_buffer.elements.push(edge_type);
-                data_buffer.labels.push("");
+                data_buffer.labels.push("".to_string());
                 self.edges.insert((index_s.unwrap(), edge_type, index_o.unwrap()));
             }
         }
