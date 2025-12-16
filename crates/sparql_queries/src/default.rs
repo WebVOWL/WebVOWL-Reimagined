@@ -109,7 +109,7 @@ pub const DEFAULT_QUERY: &str = r#"
             ?blanknode rdf:rest*/rdf:first ?label .
 
             # Filter for Logic Types
-            # FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf))
+            FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf))
             FILTER(?label != rdf:nil)
         }
         UNION

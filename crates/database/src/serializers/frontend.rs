@@ -43,7 +43,7 @@ pub struct GraphDisplayDataSolutionSerializer {
     mapped_to: HashMap<usize, HashSet<String>>,
     unknown_buffer: HashSet<NodeTriple>,
     object_properties: HashMap<String, usize>,
-    edges: HashSet<[usize; 3]>,
+    edges: HashSet<(usize, ElementType, usize)>,
     doc_iri: String,
 }
 
@@ -106,22 +106,6 @@ impl GraphDisplayDataSolutionSerializer {
         );
         Ok(())
     }
-
-    /*
-    pub fn insert_iri(
-        &mut self,
-        data_buffer: &mut GraphDisplayData,
-        x: &TermRef<'a>
-    ) -> usize {
-        if self.resolve(data_buffer, &x).is_none() {
-            let present = self.iricache.contains_key(&x);
-            if !present {
-                self.iricache.insert(x.clone(), data_buffer.irivec.len() as usize);
-                data_buffer.irivec.push(x.clone());
-            }
-        }
-        self.iricache[&x]
-    }*/
 
     pub fn resolve(&mut self, data_buffer: &mut GraphDisplayData, x: &String) -> Option<usize> {
         if self.blanknode_mapping.contains_key(x) {
@@ -209,12 +193,13 @@ impl GraphDisplayDataSolutionSerializer {
             self.unknown_buffer.insert(triple.clone());
         } else {
             let edge = [index_s.unwrap(), data_buffer.elements.len(), index_o.unwrap()];
-            if !self.edges.contains(&edge) {
+            if !self.edges.contains(&(index_s.unwrap(), edge_type, index_o.unwrap())) {
                 data_buffer
                     .edges
                     .push(edge.clone());
                 data_buffer.elements.push(edge_type);
-                self.edges.insert(edge);
+                data_buffer.labels.push("");
+                self.edges.insert((index_s.unwrap(), edge_type, index_o.unwrap()));
             }
         }
     }
@@ -322,7 +307,7 @@ impl GraphDisplayDataSolutionSerializer {
                             );
                         } else {
                             self.unknown_buffer.insert(triple.clone());
-                        } */
+                        } 
                     }
                     // rdfs::IS_DEFINED_BY => {}
                     rdfs::LABEL => {
@@ -448,7 +433,7 @@ impl GraphDisplayDataSolutionSerializer {
                             .as_ref()
                             .expect("Target is required")
                             .to_string();
-                        self.map_to(target, index);
+                        self.map_to(data_buffer, target, index);
 
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
