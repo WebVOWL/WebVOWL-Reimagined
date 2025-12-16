@@ -27,7 +27,7 @@ pub fn SimulatorSettings() -> impl IntoView {
             SimulatorEvent::FreezeThresholdUpdated(freeze_thresh.get() as f32),
         ];
         for msg in messages {
-            EVENT_DISPATCHER.sim_write_chan.send(msg);
+            let _ = EVENT_DISPATCHER.sim_write_chan.send(msg);
         }
     });
 

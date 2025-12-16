@@ -55,8 +55,8 @@
     leptos_router={version="0.8.6", features=["nightly"]}
     log="0.4"
     rayon="1.10"
-    rkyv="0.8.12"
     reqwest={version="0.12.24", optional=true, features=["json", "stream"]}
+    rkyv="0.8.12"
     serde={version="1.0", features=["derive"]}
     serde_json="1.0"
     strum="0.27"
@@ -82,14 +82,6 @@
     [dependencies.leptos-use]
         features=["on_click_outside", "use_preferred_dark"]
         version="0.16.3"
-
-
-        # [dependencies.thaw]
-        #     features=["nightly"]
-        #     # path="../thaw/thaw"
-        #     branch="generic_tooltip"
-        #     git="https://github.com/WebVOWL/thaw"
-        #     version="0.5.0-beta"
 
     [dependencies.grapher]
         #branch="render_test"
@@ -117,11 +109,7 @@
 
 [features]
     csr=["leptos/csr"]
-    hydrate=[
-        "leptos/hydrate",
-        #"thaw/hydrate",
-        "nonce",
-    ]
+    hydrate=["leptos/hydrate", "nonce"]
     nonce=["leptos/nonce"]
     server=[
         "dep:env_logger",
@@ -139,7 +127,6 @@
         "leptos_meta/ssr",
         "leptos_router/ssr",
         "leptos-use/ssr",
-        # "thaw/ssr",
     ]
     wasm=[
         "dep:console_error_panic_hook",
