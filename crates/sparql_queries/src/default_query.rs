@@ -1,4 +1,4 @@
-use crate::sparql_queries::{default, general};
+use crate::{default, general};
 
 pub fn get_default_query() -> String {
     let patterns = vec![

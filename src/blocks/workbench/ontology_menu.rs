@@ -2,7 +2,6 @@ use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::{icon::Icon, user_input::file_upload::*};
 use grapher::prelude::GraphDisplayData;
 use webvowl_sparql_queries::default_query::get_default_query;
-use webvowl_sparql_queries::DEFAULT;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
