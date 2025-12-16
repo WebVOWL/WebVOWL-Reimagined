@@ -252,6 +252,7 @@ impl GraphDisplayDataSolutionSerializer {
 
             data_buffer.elements.push(edge_type);
             self.edges.insert((edge[0], edge_type, edge[2]));
+        }
         self.insert_label(data_buffer, &triple, &edge_type);
     }
 
@@ -342,17 +343,6 @@ impl GraphDisplayDataSolutionSerializer {
         elem_idx
     }
 
-    fn upgrade_node_type(
-        &self,
-        data_buffer: &mut GraphDisplayData,
-        index: usize,
-        node_type: ElementType,
-    ) {
-        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            data_buffer.elements[index] = node_type;
-        }
-    }
-
     fn replace_node(&mut self, _data_buffer: &mut GraphDisplayData, old: usize, new: usize) {
         //let old = data_buffer.labels[old];
         let iter = self.mapped_to.remove(&old);
@@ -367,6 +357,18 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    fn upgrade_node_type(
+        &self,
+        data_buffer: &mut GraphDisplayData,
+        index: usize,
+        node_type: ElementType,
+    ) {
+        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
+            debug!("upgrading node: {} to {}", data_buffer.labels[index], node_type);
+            data_buffer.elements[index] = node_type;
+        }
+    }
+
     fn map_to(&mut self, data_buffer: &mut GraphDisplayData, k: String, v: usize) {
         self.iricache.insert(k.clone(), v);
         if self.mapped_to.contains_key(&v) {
@@ -374,12 +376,12 @@ impl GraphDisplayDataSolutionSerializer {
         } else {
             self.mapped_to.insert(v, HashSet::from([k]));
         }
-        self.check_insert_unknowns(data_buffer);
+        //self.check_insert_unknowns(data_buffer);
     }
 
     fn map_bnode(&mut self, data_buffer: &mut GraphDisplayData, k: Term, v: Term) {
         self.blanknode_mapping.insert(k.to_string(), v.to_string());
-        self.check_insert_unknowns(data_buffer);
+        //self.check_insert_unknowns(data_buffer);
     }
 
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
@@ -440,7 +442,7 @@ impl GraphDisplayDataSolutionSerializer {
                     rdfs::DATATYPE => {
                         self.insert_node(
                             data_buffer,
-                            &triple,
+                            triple,
                             ElementType::Rdfs(RdfsType::Node(RdfsNode::Datatype)),
                         );
                     }
@@ -497,7 +499,7 @@ impl GraphDisplayDataSolutionSerializer {
                                 self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
                             }
                             _ => {
-                                self.unknown_buffer.insert(triple.clone());
+                                //self.unknown_buffer.insert(triple.clone());
                             }
                         }
                     }
@@ -659,18 +661,6 @@ impl GraphDisplayDataSolutionSerializer {
             }
         }
     }
-
-    fn upgrade_node_type(
-        &self,
-        data_buffer: &mut GraphDisplayData,
-        index: usize,
-        node_type: ElementType,
-    ) {
-        if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            debug!("upgrading node: {} to {}", data_buffer.labels[index], node_type);
-            data_buffer.elements[index] = node_type;
-        }
-    }
 }
 
 impl Display for GraphDisplayDataSolutionSerializer {
@@ -683,9 +673,6 @@ impl Display for GraphDisplayDataSolutionSerializer {
         }
         for (index, (element, label)) in self.object_properties.iter().enumerate() {
             write!(f, "{index}: {element:?} -> {label}\n")?;
-        }
-        for element in self.unknown_buffer.iter() {
-            write!(f, "{element:?}\n")?;
         }
         Ok(())
     }
