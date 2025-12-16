@@ -3,15 +3,15 @@ use env_logger::Env;
 use grapher::prelude::GraphDisplayData;
 use log::info;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
+use std::env;
 use std::path::Path;
 use webvowl_database::prelude::GraphDisplayDataSolutionSerializer;
 use webvowl_database::store::WebVOWLStore;
 use webvowl_sparql_queries::DEFAULT_QUERY;
-use std::env;
 
 #[tokio::main]
 pub async fn main() {
-    env_logger::Builder::from_env(Env::default().default_filter_or("trace")).init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let session = Store::default();
     let args = env::args().collect::<Vec<String>>();
     let path;
@@ -54,6 +54,9 @@ pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
         info!("{index}: {element:?} -> {label}");
     }
     for edge in data_buffer.edges.iter() {
-        info!("{} -> {:?} -> {}", data_buffer.labels[edge[0]], data_buffer.elements[edge[1]], data_buffer.labels[edge[2]]);
+        info!(
+            "{} -> {:?} -> {}",
+            data_buffer.labels[edge[0]], data_buffer.elements[edge[1]], data_buffer.labels[edge[2]]
+        );
     }
 }
