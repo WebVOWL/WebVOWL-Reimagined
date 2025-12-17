@@ -77,7 +77,7 @@
 
 
     <owl:Class rdf:ID="Winery"/>
-    <owl:Class rdf:ID="Region"/> 
+    <owl:Class rdf:ID="Region"/>
     <owl:Class rdf:ID="ConsumableThing"/>
 
 
@@ -442,12 +442,17 @@
     <!-- External -->
     <owl:Class rdf:about="http://purl.obolibrary.org/obo/ENVO_03501340">
         <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/ENVO_00000073"/>
+        <rdfs:subClassOf rdf:resource="http://www.example.com/owl1#Tree"/>
         <obo:IAO_0000115 xml:lang="en">A public building in which health, recreation or other public services to a local community are provided.</obo:IAO_0000115>
         <oboInOwl:created_by rdf:resource="https://orcid.org/0000-0002-9578-0788"/>
         <oboInOwl:creation_date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-03-15T04:00:01.750Z</oboInOwl:creation_date>
         <rdfs:label xml:lang="en">community service centre</rdfs:label>
     </owl:Class>
 
+    <!-- rdfs:Resource -->
+    <rdfs:Resource rdf:about="http://www.example.com/owl1#Tree">
+        <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    </rdfs:Resource>
 
 </rdf:RDF>
 
