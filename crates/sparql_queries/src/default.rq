@@ -221,6 +221,23 @@
         }
         UNION
         {
+            # Characteristics
+            VALUES ?char {
+                owl:TransitiveProperty
+                owl:FunctionalProperty
+                owl:InverseFunctionalProperty
+                owl:ReflexiveProperty
+                owl:IrreflexiveProperty
+                owl:SymmetricProperty
+                owl:AsymmetricProperty
+                owl:hasKey
+            }
+            ?id a ?char .
+            OPTIONAL {?id rdfs:range ?target}
+            BIND(?char as ?nodeType)
+        }
+        UNION
+        {
                 # Find labels for elements in the following order:
                 # SPARQL
                 # 1. Use rdfs:label, if exists.
