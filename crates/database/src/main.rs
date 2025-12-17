@@ -7,7 +7,7 @@ use std::env;
 use std::path::Path;
 use webvowl_database::prelude::GraphDisplayDataSolutionSerializer;
 use webvowl_database::store::WebVOWLStore;
-use webvowl_sparql_queries::DEFAULT_QUERY;
+use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
 
 #[tokio::main]
 pub async fn main() {

@@ -163,6 +163,12 @@
             <owl:Class rdf:about="http://www.example.com/owl1#ParentalGuardian"/>
         </owl:equivalentClass>
     </owl:Class>
+    <owl:Class rdf:about="http://www.example.com/owl1#Warden">
+        <owl:equivalentClass rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+            <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+        </owl:equivalentClass>
+    </owl:Class>
 
 
 

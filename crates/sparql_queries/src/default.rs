@@ -4,7 +4,11 @@ pub const NAMED_CLASS: &str = r#"{
                 FILTER(isIRI(?id))
                 BIND(owl:Class AS ?nodeType)
             }"#;
-
+pub const ANONYMOUS_CLASS: &str = r#"{
+                ?id a owl:Class .
+                FILTER(!isIRI(?id))
+                BIND("blanknode" AS ?nodeType)
+            }"#;
 pub const EXTERNAL_CLASS: &str = r#"{
                 # SPARQL query not defined
                 BIND(<http://example.org/nothing> AS ?id)
@@ -21,11 +25,6 @@ pub const DEPRECATED_CLASS: &str = r#"{
 pub const EQUIVALENT_CLASS: &str = r#"{
                 ?id owl:equivalentClass ?target
                 BIND(owl:equivalentClass AS ?nodeType)
-            }"#;
-
-pub const ANONYMOUS_CLASS: &str = r#"{
-                FILTER(!isIRI(?id))
-                BIND("blanknode" AS ?nodeType)
             }"#;
 
 pub const THING: &str = r#"{

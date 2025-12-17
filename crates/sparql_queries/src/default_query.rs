@@ -24,6 +24,8 @@ pub const DEFAULT_QUERY: &str = formatcp!(
     concatcp!(
         default::NAMED_CLASS,
         " UNION ",
+        default::ANONYMOUS_CLASS,
+        " UNION ",
         default::EXTERNAL_CLASS,
         " UNION ",
         default::DEPRECATED_CLASS,

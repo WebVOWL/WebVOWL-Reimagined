@@ -37,3 +37,6 @@
         # optional=true
         # path="../../../RustGrapher"
         # version="0.3"
+    
+    [dev-dependencies]
+    env_logger = "*"
