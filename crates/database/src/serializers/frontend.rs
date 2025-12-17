@@ -224,7 +224,7 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer.elements.push(node_type);
         self.insert_label(data_buffer, &triple, &node_type);
         self.iricache
-            .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
+            .insert(triple.id.to_string(), data_buffer.elements.len() - 1);
     }
 
     /// Declare an edge in the `data_buffer`.
