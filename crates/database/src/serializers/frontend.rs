@@ -46,8 +46,14 @@ impl Display for Triple {
 }
 pub struct GraphDisplayDataSolutionSerializer {
     blanknode_mapping: HashMap<String, String>,
+    /// Label to index in data_buffer 
     iricache: HashMap<String, usize>,
+    /// Reverse iricache, namely which labels are mapped to each index
+    /// used to remap when nodes are merges
     mapped_to: HashMap<usize, HashSet<String>>,
+    /// Maps from element index to the indices of the edges that include it
+    /// used to remap when nodes are merges
+    edges_include_map: HashMap<usize, HashSet<usize>>,
     /// Stores indices of element instances.
     ///
     /// Used in cases where multiple elements should refer to a particular instance.
@@ -59,6 +65,7 @@ pub struct GraphDisplayDataSolutionSerializer {
     /// String = label
     labels: HashMap<String, String>,
     object_properties: HashMap<String, usize>,
+    /// Edges in graph, to avoid duplicates
     edges: HashSet<(usize, ElementType, usize)>,
     /// The base IRI of the document.
     ///
@@ -72,6 +79,7 @@ impl GraphDisplayDataSolutionSerializer {
             blanknode_mapping: HashMap::new(),
             iricache: HashMap::new(),
             mapped_to: HashMap::new(),
+            edges_include_map: HashMap::new(),
             object_properties: HashMap::new(),
             global_element_mappings: HashMap::new(),
             labels: HashMap::new(),
@@ -207,6 +215,14 @@ impl GraphDisplayDataSolutionSerializer {
         (resolved_subject, resolved_object)
     }
 
+    pub fn insert_edge_include(&mut self, data_buffer: &mut GraphDisplayData, edge_index: usize, element_index: usize) {
+        if self.edges_include_map.contains_key(&element_index) {
+            self.edges_include_map.get_mut(&element_index).unwrap().insert(edge_index);
+        } else {
+            self.edges_include_map.insert(element_index, HashSet::from([edge_index]));
+        }
+    }
+
     fn insert_node(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -248,6 +264,8 @@ impl GraphDisplayDataSolutionSerializer {
 
             data_buffer.elements.push(edge_type);
             self.edges.insert((edge[0], edge_type, edge[2]));
+            self.insert_edge_include(data_buffer, data_buffer.edges.len() - 1, edge[0]);
+            self.insert_edge_include(data_buffer, data_buffer.edges.len() - 1, edge[2]);
             self.insert_label(data_buffer, &triple, &edge_type);
         }
     }
@@ -345,7 +363,7 @@ impl GraphDisplayDataSolutionSerializer {
         match iter {
             Some(iter) => {
                 self.mapped_to.insert(new, iter.clone());
-                for index in iter.clone() {
+                for index in iter {
                     self.iricache.insert(index.clone(), new);
                 }
             }
@@ -359,10 +377,10 @@ impl GraphDisplayDataSolutionSerializer {
         index: usize,
         node_type: ElementType,
     ) {
-        info!("upgrading {}", node_type);
+        debug!("upgrading {}", node_type);
         if data_buffer.elements[index] == ElementType::Owl(OwlType::Node(OwlNode::Class)) {
-            debug!(
-                "upgrading node: {} to {}",
+            info!(
+                "upgrading from: {} to {}",
                 data_buffer.labels[index], node_type
             );
             data_buffer.elements[index] = node_type;
@@ -382,6 +400,10 @@ impl GraphDisplayDataSolutionSerializer {
     fn map_bnode(&mut self, data_buffer: &mut GraphDisplayData, k: Term, v: Term) {
         self.blanknode_mapping.insert(k.to_string(), v.to_string());
         //self.check_insert_unknowns(data_buffer);
+    }
+
+    fn extend_label(&mut self, data_buffer: &mut GraphDisplayData, index: usize, label: String) {
+        data_buffer.labels[index].push_str(format!("\n{}", label).as_str());
     }
 
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
@@ -560,72 +582,57 @@ impl GraphDisplayDataSolutionSerializer {
                         info!("blanknode_mapping | {:?}", self.blanknode_mapping);
                         info!("mapped_to | {:?}", self.mapped_to);
                         info!("iricache | {:?}", self.iricache);
-                        info!("triple: {:?}", triple);
-                        let index = self
-                            .resolve(data_buffer, &triple.id.to_string())
-                            .expect("Couldnt resolve for id");
-                        /*
-                        match triple.target.as_ref() {
-                            Some(Term::NamedNode(nn)) => {
-                                let target_index = self.resolve(data_buffer, &nn.to_string());
-                                match target_index {
-                                    Some(target_index) => {
-                                        self.map_to(data_buffer, nn.to_string(), target_index);
-
-                                    }
-                                    None => {
-                                        warn!("Target is required for: {:?}", triple);
-                                    }
-                                }
-                            }
-                            Some(Term::BlankNode(bn)) => {
-                                let target_index = self.resolve(data_buffer, &bn.to_string());
-                                match target_index {
-                                    Some(target_index) => {
-                                        self.map_to(data_buffer, bn.to_string(), target_index);
-                                    }
-                                    None => {
-                                        warn!("Target is required for: {:?}", triple);
-                                    }
-                                }
-                                self.map_to(data_buffer, bn.to_string(), target_index);
+                        info!("triple: {}", triple);
+                        let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
+                        // this should work when reintroducing unknown buffer
+                        match (index_s, index_o) {
+                            (Some(index_s), Some(index_o)) => {
+                                self.replace_node(data_buffer, index_o, index_s);
+                                self.upgrade_node_type(data_buffer, index_s, ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)));
+                                self.extend_label(data_buffer, index_s, data_buffer.labels[index_o].clone());
+                                self.map_to(data_buffer, data_buffer.labels[index_o].clone(), index_s);
                             }
                             _ => {
-                                warn!("Target is required for: {:?}", triple);
+                                //self.unknown_buffer.insert(triple.clone());
+                                warn!("Target is required for: {}", triple);
                             }
-                        }*/
-                        let target_index =
-                            self.resolve(data_buffer, &triple.target.as_ref().unwrap().to_string());
-
-                        if matches!(triple.target.as_ref(), Some(Term::NamedNode(_))) {
-                            self.upgrade_node_type(
-                                data_buffer,
-                                index,
-                                ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)),
-                            );
-                            if let Some(target) = triple.target.as_ref() {
-                                if let Some(target_index) =
-                                    self.resolve(data_buffer, &target.to_string())
-                                {
-                                    trace!("target_index: {:?}", target_index);
-                                    self.replace_node(data_buffer, index, target_index);
-                                } else {
-                                    self.map_to(data_buffer, target.to_string(), index);
-                                }
-                            }
-                        } else if matches!(triple.target.as_ref(), Some(Term::BlankNode(_))) {
-                            self.map_bnode(
-                                data_buffer,
-                                triple.target.clone().unwrap(),
-                                triple.id.clone(),
-                            );
                         }
-                        let target = triple
-                            .target
-                            .as_ref()
-                            .expect("Target is required")
-                            .to_string();
-                        self.map_to(data_buffer, target, index);
+                        // This works but i dont like it
+                        // match triple.target.as_ref() {
+                        //     Some(Term::NamedNode(nn)) => {
+                        //         let target_index = self.resolve(data_buffer, &nn.to_string());
+                        //         match target_index {
+                        //             Some(target_index) => {
+                        //                 info!("edges_include_map: {:?}", self.edges_include_map.get(&target_index));
+                        //                 self.replace_node(data_buffer, target_index, index);
+                        //                 self.upgrade_node_type(data_buffer, index, ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)));
+                        //                 self.extend_label(data_buffer, index, data_buffer.labels[target_index].clone());
+                        //                 self.map_to(data_buffer, nn.to_string(), index);
+
+                        //             }
+                        //             None => {
+                        //                 warn!("Target is required for: {}", triple);
+                        //             }
+                        //         }
+                        //     }
+                        //     Some(Term::BlankNode(bn)) => {
+                        //         let target_index = self.resolve(data_buffer, &bn.to_string());
+                        //         match target_index {
+                        //             Some(target_index) => {
+                        //                 self.replace_node(data_buffer, target_index, index);
+                        //                 self.map_to(data_buffer, bn.to_string(), target_index);
+                        //             }
+                        //             None => {
+                        //                 warn!("Target is required for: {}", triple);
+                        //             }
+                        //         }
+                        //     }
+                        //     _ => {
+                        //         warn!("Target is required for: {}", triple);
+                        //     }
+                        // }
+                        // let target_index =
+                        //     self.resolve(data_buffer, &triple.target.as_ref().unwrap().to_string());
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
                     // owl::FUNCTIONAL_PROPERTY => {}
