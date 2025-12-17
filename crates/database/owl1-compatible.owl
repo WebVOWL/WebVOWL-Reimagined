@@ -12,6 +12,7 @@
 
     <owl:Ontology rdf:about="http://www.example.com/owl1">
         <owl:versionIRI rdf:resource="http://www.example.com/owl1/v1"/>
+        <rdfs:label xml:lang="en">The OWL1 compatible vocabulary</rdfs:label>
     </owl:Ontology>
 
 
