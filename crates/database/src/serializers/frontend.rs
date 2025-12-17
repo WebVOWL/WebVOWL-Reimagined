@@ -423,10 +423,6 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer.labels[index].push_str(format!("\n{}", label).as_str());
     }
 
-    fn extend_label(&mut self, data_buffer: &mut GraphDisplayData, index: usize, label: String) {
-        data_buffer.labels[index].push_str(format!("\n{}", label).as_str());
-    }
-
     /// Serialize a triple to `data_buffer`.
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
         // TODO: Collect errors and show to frontend
