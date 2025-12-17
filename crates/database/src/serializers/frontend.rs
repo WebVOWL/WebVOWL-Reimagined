@@ -681,7 +681,17 @@ impl GraphDisplayDataSolutionSerializer {
                         self.map_to(data_buffer, target, index);
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
-                    // owl::FUNCTIONAL_PROPERTY => {}
+                    owl::FUNCTIONAL_PROPERTY => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::Owl(OwlType::Edge(OwlEdge::ObjectProperty)),
+                        );
+                        let index = data_buffer.elements.len() - 1;
+                        data_buffer
+                            .characteristics
+                            .insert(index, Characteristic::FunctionalProperty.to_string());
+                    }
                     // owl::HAS_KEY => {}
                     // owl::HAS_SELF => {}
                     // owl::HAS_VALUE => {}
@@ -698,13 +708,17 @@ impl GraphDisplayDataSolutionSerializer {
                         }
                     }
                     owl::INVERSE_FUNCTIONAL_PROPERTY => {
-                        //self.try_insert_characteristic(
-                        // data_buffer,
-                        // term,
-                        // Characteristic::InverseFunctionalProperty)
-                        // TODO: Implement
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::Owl(OwlType::Edge(OwlEdge::ObjectProperty)),
+                        );
+                        let index = data_buffer.elements.len() - 1;
+                        data_buffer
+                            .characteristics
+                            .insert(index, Characteristic::InverseFunctionalProperty.to_string());
                     }
-                    owl::INVERSE_OF => {}
+                    // owl::INVERSE_OF => {}
                     // owl::IRREFLEXIVE_PROPERTY => {}
                     // owl::MAX_CARDINALITY => {}
                     // owl::MAX_QUALIFIED_CARDINALITY => {}
