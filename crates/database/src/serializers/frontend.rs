@@ -537,7 +537,7 @@ impl GraphDisplayDataSolutionSerializer {
                             }
                         }
                     }
-                    owl::DATATYPE_COMPLEMENT_OF => {}
+                    // owl::DATATYPE_COMPLEMENT_OF => {}
                     owl::DATATYPE_PROPERTY => self.insert_edge(
                         data_buffer,
                         &triple,
@@ -731,11 +731,11 @@ impl GraphDisplayDataSolutionSerializer {
                         );
                     }
                     // owl::ONE_OF => {}
-                    owl::ONTOLOGY => {
-                        // TODO: Base must be known before matching.
-                        // Make it a separete variable in the query.
-                        // self.doc_iri = uri.to_string();
-                    }
+                    // owl::ONTOLOGY => {
+                    //     // TODO: Base must be known before matching.
+                    //     // Make it a separete variable in the query.
+                    //     // self.doc_iri = uri.to_string();
+                    // }
                     // owl::ONTOLOGY_PROPERTY => {}
                     // owl::ON_CLASS => {}
                     // owl::ON_DATARANGE => {}
