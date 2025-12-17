@@ -1,39 +1,8 @@
 use crate::{default, general};
+use const_format::{concatcp, formatcp};
 
-pub fn get_default_query() -> String {
-    let patterns = vec![
-        default::NAMED_CLASS,
-        default::EXTERNAL_CLASS,
-        default::DEPRECATED_CLASS,
-        default::EQUIVALENT_CLASS,
-        default::ANONYMOUS_CLASS,
-        default::THING,
-        default::RDFS_CLASS,
-        default::RDFS_RESOURCE,
-        default::RDFS_LITERAL,
-        default::RDFS_DATATYPE,
-        default::INTERSECTION_OF,
-        default::UNION_OF,
-        default::COMPLEMENT,
-        default::DISJOINT_UNION,
-        default::OBJECTPROPERTY,
-        default::DATATYPEPROPERTY,
-        default::SUBCLASSOF,
-        default::INVERSEOF,
-        default::DISJOINTWITH,
-        default::RDFPROPERTY,
-        default::DEPRECATEDPROPERTY,
-        default::EXTERNALPROPERTY,
-        default::VALUESFROM,
-        general::EXTERNALS,
-        general::DEPRECATED,
-        general::LABEL,
-    ];
-
-    let union_clause = patterns.join(" UNION ");
-
-    format!(
-        r#"
+pub const DEFAULT_QUERY: &str = formatcp!(
+    r#"
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -52,7 +21,57 @@ pub fn get_default_query() -> String {
         }}
         ORDER BY ?weight
         "#,
-        union_clause
+    concatcp!(
+        default::NAMED_CLASS,
+        " UNION ",
+        default::EXTERNAL_CLASS,
+        " UNION ",
+        default::DEPRECATED_CLASS,
+        " UNION ",
+        default::EQUIVALENT_CLASS,
+        " UNION ",
+        default::ANONYMOUS_CLASS,
+        " UNION ",
+        default::THING,
+        " UNION ",
+        default::RDFS_CLASS,
+        " UNION ",
+        default::RDFS_RESOURCE,
+        " UNION ",
+        default::RDFS_LITERAL,
+        " UNION ",
+        default::RDFS_DATATYPE,
+        " UNION ",
+        default::INTERSECTION_OF,
+        " UNION ",
+        default::UNION_OF,
+        " UNION ",
+        default::COMPLEMENT,
+        " UNION ",
+        default::DISJOINT_UNION,
+        " UNION ",
+        default::OBJECTPROPERTY,
+        " UNION ",
+        default::DATATYPEPROPERTY,
+        " UNION ",
+        default::SUBCLASSOF,
+        " UNION ",
+        default::INVERSEOF,
+        " UNION ",
+        default::DISJOINTWITH,
+        " UNION ",
+        default::RDFPROPERTY,
+        " UNION ",
+        default::DEPRECATEDPROPERTY,
+        " UNION ",
+        default::EXTERNALPROPERTY,
+        " UNION ",
+        default::VALUESFROM,
+        " UNION ",
+        general::EXTERNALS,
+        " UNION ",
+        general::DEPRECATED,
+        " UNION ",
+        general::LABEL
     )
-    .to_string()
-}
+);

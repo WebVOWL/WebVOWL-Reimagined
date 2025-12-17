@@ -1,12 +1,10 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
+use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
 use crate::components::{icon::Icon, user_input::file_upload::*};
-use grapher::prelude::GraphDisplayData;
-use webvowl_sparql_queries::default_query::get_default_query;
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
-use webvowl_sparql_queries::{DEFAULT_QUERY};
 use web_sys::HtmlInputElement;
 
 #[component]
@@ -170,7 +168,7 @@ fn FetchData() -> impl IntoView {
             <button class="relative flex items-center justify-center p-1 mt-1 rounded text-xs bg-gray-200 text-[#000000]"
             on:click=move |_| {
                 spawn_local(async {
-                    let output_result = handle_internal_sparql(get_default_query()).await;
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
                     match output_result {
                         Ok(graph_data) => {
                             let _ = EVENT_DISPATCHER.rend_write_chan.send(RenderEvent::LoadGraph(graph_data));},

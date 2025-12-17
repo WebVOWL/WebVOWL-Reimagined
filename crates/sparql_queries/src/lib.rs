@@ -8,5 +8,3 @@ pub mod default;
 pub mod general;
 pub mod filter_menu_patterns;
 pub mod default_query;
-
-pub const DEFAULT_QUERY: &str = include_str!("default.rq");
