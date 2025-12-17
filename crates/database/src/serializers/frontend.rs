@@ -11,7 +11,7 @@ use grapher::prelude::{
     Characteristic, ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge, RdfType,
     RdfsEdge, RdfsNode, RdfsType,
 };
-use log::{debug, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use oxrdf::vocab::rdf;
 use rdf_fusion::{
     execution::results::QuerySolutionStream,
@@ -45,48 +45,112 @@ impl Display for Triple {
     }
 }
 pub struct GraphDisplayDataSolutionSerializer {
-    blanknode_mapping: HashMap<String, String>,
-    /// Label to index in data_buffer 
+    /// Stores all resolved elements.
+    ///
+    /// These elements may mutate during serialization
+    /// if new information regarding them is found.
+    /// This also means an element can be completely removed!
+    ///
+    /// - Key = The subject IRI of a triple.
+    /// - Value = The ElementType of `Key`.
+    element_buffer: HashMap<String, ElementType>,
+    /// Keeps track of edges that should point to a node different
+    /// from their definition.
+    ///
+    /// Key
+    /// ---
+    /// The object IRI of an edge triple.
+    ///
+    /// The object is also called:
+    /// - the target of an edge.
+    /// - the range of an edge.
+    ///
+    /// Value
+    /// -----
+    /// The subject IRI of an edge triple.
+    ///
+    /// The subject is also called:
+    /// - the source of an edge.
+    /// - the domain of an edge.
+    ///
+    /// Example
+    /// -------
+    /// Consider the triples:
+    /// ```sparql
+    ///     ex:Mother owl:equivalentClass ex:blanknode1
+    ///     ex:blanknode1 rdf:type owl:Class
+    ///     ex:blanknode1 owl:intersectionOf ex:blanknode2
+    /// ```
+    /// Here `ex:Mother` is equivalent to `ex:blanknode1`,
+    /// which means all edges referencing `ex:blanknode1` should
+    /// be redirected to `ex:Mother`.
+    ///
+    /// Thus, the edges are redirected to:
+    /// ```sparql
+    ///     ex:Mother owl:intersectionOf ex:blanknode2
+    /// ```
+    /// In this case, `blanknode1` is effectively omitted from serialization.
+    edge_redirection: HashMap<String, String>,
+    /// IRI to index in data_buffer.
+    ///
+    /// - Key = The subject OR object IRI
+    /// - Value = Index in data_buffer.elements
     iricache: HashMap<String, usize>,
-    /// Reverse iricache, namely which labels are mapped to each index
-    /// used to remap when nodes are merges
+    /// Reverse iricache, namely which IRIs are mapped to each index.
+    ///
+    /// Used to remap when nodes are merges.
     mapped_to: HashMap<usize, HashSet<String>>,
-    /// Maps from element index to the indices of the edges that include it
-    /// used to remap when nodes are merges
+    /// Maps from element index to the indices of the edges that include it.
+    ///
+    /// Used to remap when nodes are merges.
     edges_include_map: HashMap<usize, HashSet<usize>>,
     /// Stores indices of element instances.
     ///
     /// Used in cases where multiple elements should refer to a particular instance.
     /// E.g. multiple properties referring to the same instance of owl:Thing.
     global_element_mappings: HashMap<ElementType, usize>,
-    /// Stores labels until it's corresponding class/property has been found.
+    /// Stores labels of subject/object.
     ///
-    /// usize = element index in data_buffer.elements
-    /// String = label
-    labels: HashMap<String, String>,
+    /// - Key = The IRI the label belongs to.
+    /// - Value = The label.
+    label_buffer: HashMap<String, String>,
     object_properties: HashMap<String, usize>,
     /// Edges in graph, to avoid duplicates
     edges: HashSet<(usize, ElementType, usize)>,
-    /// Triple that could not be resolved so far
+    /// Stores unresolved triples.
+    ///
+    /// - Key = The subject IRI of the triple
+    /// - Value = The unresolved triple.
     unknown_buffer: HashMap<String, Triple>,
+    /// Stores triples that are impossible to serialize.
+    ///
+    /// This could be caused by various reasons, such as
+    /// visualization of the triple is not supported.
+    ///
+    /// Each element is a tuple of:
+    /// - 0 = The triple.
+    /// - 1 = The reason it failed to serialize.
+    failed_buffer: Vec<(Triple, String)>,
     /// The base IRI of the document.
     ///
-    /// For instance: http://purl.obolibrary.org/obo/envo.owl
+    /// For instance: `http://purl.obolibrary.org/obo/envo.owl`
     document_base: String,
 }
 
 impl GraphDisplayDataSolutionSerializer {
     pub fn new() -> Self {
         Self {
-            blanknode_mapping: HashMap::new(),
+            element_buffer: HashMap::new(),
+            edge_redirection: HashMap::new(),
             iricache: HashMap::new(),
             mapped_to: HashMap::new(),
             edges_include_map: HashMap::new(),
             object_properties: HashMap::new(),
             global_element_mappings: HashMap::new(),
-            labels: HashMap::new(),
+            label_buffer: HashMap::new(),
             edges: HashSet::new(),
             unknown_buffer: HashMap::new(),
+            failed_buffer: Vec::new(),
             document_base: String::new(),
         }
     }
@@ -138,6 +202,7 @@ impl GraphDisplayDataSolutionSerializer {
             data_buffer.cardinalities.len(),
             data_buffer.characteristics.len()
         );
+        warn!("Failed to serialize: {:#?}", self.failed_buffer);
         debug!("{}", data_buffer);
         Ok(())
     }
@@ -148,7 +213,7 @@ impl GraphDisplayDataSolutionSerializer {
         let iri = id_term.to_string();
 
         // Prevent overriding labels
-        if self.labels.contains_key(&iri) {
+        if self.label_buffer.contains_key(&iri) {
             return;
         }
 
@@ -156,7 +221,8 @@ impl GraphDisplayDataSolutionSerializer {
             // Case 1: Label is a rdfs:label OR rdfs:Resource OR rdf:ID
             Some(label) => {
                 if label.to_string() != "" {
-                    self.labels.insert(id_term.to_string(), label.to_string());
+                    self.label_buffer
+                        .insert(id_term.to_string(), label.to_string());
                 } else {
                     debug!("Empty label detected for iri '{iri}'");
                 }
@@ -170,14 +236,16 @@ impl GraphDisplayDataSolutionSerializer {
                     // Case 2.1: Look for fragments in the iri
                     Ok(id_iri) => match id_iri.fragment() {
                         Some(frag) => {
-                            self.labels.insert(id_term.to_string(), frag.to_string());
+                            self.label_buffer
+                                .insert(id_term.to_string(), frag.to_string());
                         }
                         // Case 2.2: Look for path in iri
                         None => {
                             debug!("No fragment found in iri '{iri}'");
                             match id_iri.path().rsplit_once('/') {
                                 Some(path) => {
-                                    self.labels.insert(id_term.to_string(), path.1.to_string());
+                                    self.label_buffer
+                                        .insert(id_term.to_string(), path.1.to_string());
                                 }
                                 None => {
                                     debug!("No path found in iri '{iri}'");
@@ -195,10 +263,10 @@ impl GraphDisplayDataSolutionSerializer {
     }
 
     pub fn resolve(&mut self, data_buffer: &mut GraphDisplayData, x: &String) -> Option<usize> {
-        if self.blanknode_mapping.contains_key(x) {
-            return self.resolve(data_buffer, &self.blanknode_mapping[x].clone());
-        } else if self.iricache.contains_key(x) {
+        if self.iricache.contains_key(x) {
             return Some(self.iricache[x]);
+        } else if self.edge_redirection.contains_key(x) {
+            return self.resolve(data_buffer, &self.edge_redirection[x].clone());
         }
         None
     }
@@ -218,11 +286,20 @@ impl GraphDisplayDataSolutionSerializer {
         (resolved_subject, resolved_object)
     }
 
-    pub fn insert_edge_include(&mut self, data_buffer: &mut GraphDisplayData, edge_index: usize, element_index: usize) {
+    pub fn insert_edge_include(
+        &mut self,
+        data_buffer: &mut GraphDisplayData,
+        edge_index: usize,
+        element_index: usize,
+    ) {
         if self.edges_include_map.contains_key(&element_index) {
-            self.edges_include_map.get_mut(&element_index).unwrap().insert(edge_index);
+            self.edges_include_map
+                .get_mut(&element_index)
+                .unwrap()
+                .insert(edge_index);
         } else {
-            self.edges_include_map.insert(element_index, HashSet::from([edge_index]));
+            self.edges_include_map
+                .insert(element_index, HashSet::from([edge_index]));
         }
     }
 
@@ -275,19 +352,21 @@ impl GraphDisplayDataSolutionSerializer {
                 }
             }
             (None, Some(_)) => {
-                self.unknown_buffer.insert(triple.target.as_ref().unwrap().to_string(), triple.clone());
+                self.unknown_buffer
+                    .insert(triple.target.as_ref().unwrap().to_string(), triple.clone());
                 warn!("Cannot resolve subject of triple:\n {}", triple);
             }
             (Some(_), None) => {
-                self.unknown_buffer.insert(triple.id.to_string(), triple.clone());
+                self.unknown_buffer
+                    .insert(triple.id.to_string(), triple.clone());
                 warn!("Cannot resolve object of triple:\n {}", triple);
             }
             _ => {
-                self.unknown_buffer.insert(triple.id.to_string(), triple.clone());
+                self.unknown_buffer
+                    .insert(triple.id.to_string(), triple.clone());
                 warn!("Cannot resolve subject and object of triple:\n {}", triple);
             }
         }
-        
     }
 
     /// Create a label for an element.
@@ -299,7 +378,7 @@ impl GraphDisplayDataSolutionSerializer {
         triple: &Triple,
         element_type: &ElementType,
     ) {
-        if let Some(label) = self.labels.remove(&triple.id.to_string()) {
+        if let Some(label) = self.label_buffer.remove(&triple.id.to_string()) {
             data_buffer.labels.push(label);
         } else {
             // Fallback label as all elements must have a label.
@@ -384,12 +463,11 @@ impl GraphDisplayDataSolutionSerializer {
             Some(iter) => {
                 if let map = self.mapped_to.get_mut(&new) {
                     for index in iter {
-                       // map.extend(index.clone());
+                        // map.extend(index.clone());
                     }
                 } else {
                     self.mapped_to.insert(new, iter.clone());
                 }
-                
             }
             None => {}
         }
@@ -436,12 +514,21 @@ impl GraphDisplayDataSolutionSerializer {
     }
 
     fn map_bnode(&mut self, data_buffer: &mut GraphDisplayData, k: Term, v: Term) {
-        self.blanknode_mapping.insert(k.to_string(), v.to_string());
+        self.edge_redirection.insert(k.to_string(), v.to_string());
         //self.check_insert_unknowns(data_buffer);
     }
 
     fn extend_label(&mut self, data_buffer: &mut GraphDisplayData, index: usize, label: String) {
         data_buffer.labels[index].push_str(format!("\n{}", label).as_str());
+    }
+
+    /// Appends a string to an element's label.
+    fn extend_element_label(&mut self, element: String, label_to_append: String) {
+        if let Some(label) = self.label_buffer.get_mut(&element) {
+            label.push_str(format!("\n{}", label).as_str());
+        } else {
+            self.label_buffer.insert(element, label_to_append);
+        }
     }
 
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
@@ -583,17 +670,20 @@ impl GraphDisplayDataSolutionSerializer {
                                 self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
                             }
                             (Some(_), None) => {
-                                self.unknown_buffer.insert(triple.id.to_string(), triple.clone());
+                                self.unknown_buffer
+                                    .insert(triple.id.to_string(), triple.clone());
                             }
                             (None, Some(_)) => {
                                 if let Some(target) = &triple.target {
-                                    self.unknown_buffer.insert(target.to_string(), triple.clone());
+                                    self.unknown_buffer
+                                        .insert(target.to_string(), triple.clone());
                                 } else {
                                     warn!("Target is required for: {}", triple);
                                 }
                             }
                             _ => {
-                                self.unknown_buffer.insert(triple.id.to_string(), triple.clone());
+                                self.unknown_buffer
+                                    .insert(triple.id.to_string(), triple.clone());
                             }
                         }
                     }
@@ -633,18 +723,107 @@ impl GraphDisplayDataSolutionSerializer {
                     ),
                     // owl::DISTINCT_MEMBERS => {}
                     owl::EQUIVALENT_CLASS => {
-                        info!("blanknode_mapping | {:?}", self.blanknode_mapping);
-                        info!("mapped_to | {:?}", self.mapped_to);
-                        info!("iricache | {:?}", self.iricache);
-                        info!("triple: {}", triple);
-                        let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
+                        // NOTE: SPARQL query must be sorted as follows:
+                        // 1. Classes
+                        // 2. Equivalents
+                        // ...
+                        // n. Properties
+
+                        // REVIEW: Is it possible for the subject to be a blank node??
+                        match &triple.target {
+                            Some(target) => {
+                                // Generally, all equivalent classes should have
+                                // their edges redirected.
+                                self.edge_redirection
+                                    .insert(target.to_string(), triple.id.to_string());
+
+                                if target.is_named_node() {
+                                    // Case 1:
+                                    // The subject of an equivalentClass relation should
+                                    // become a full-fledged equivalent class. This happens
+                                    // if the subject and object of the equivalentClass relation
+                                    // are both named classes (i.e. not blank nodes).
+                                    //
+                                    // In other words, the object must be removed from existence,
+                                    // and have all references to it (incl. labels) point to
+                                    // the subject.
+                                    let target_str = target.to_string();
+
+                                    // Move object label to subject.
+                                    if let Some(label) = self.label_buffer.remove(&target_str) {
+                                        self.extend_element_label(triple.id.to_string(), label);
+                                    }
+
+                                    // Remove object from existence.
+                                    match self.element_buffer.remove(&target_str) {
+                                        // Case 1.1: Object exists in the elememt buffer
+                                        Some(_) => {
+                                            // REVIEW: Anything that needs to be done here??
+                                        }
+                                        // Case 1.2: Look in the unknown buffer
+                                        None => match self.unknown_buffer.remove(&target_str) {
+                                            Some(_) => {
+                                                // REVIEW: Anything that needs to be done here??
+                                            }
+                                            None => {
+                                                self.failed_buffer.push((triple, "Failed to merge object of equivalence relation into subject: object was not found".to_string()));
+                                                return;
+                                            }
+                                        },
+                                    }
+
+                                    // Upgrade subject to a full-fledged equivalent class
+                                    let new_element =
+                                        ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass));
+                                    match self
+                                        .element_buffer
+                                        .insert(triple.id.to_string(), new_element)
+                                    {
+                                        Some(old_elem) => {
+                                            debug!(
+                                                "Upgraded subject '{}' from {} to {}",
+                                                triple.id, old_elem, new_element
+                                            )
+                                        }
+                                        None => {
+                                            warn!(
+                                                "Upgraded unresolved subject '{}' to {}",
+                                                triple.id, new_element
+                                            )
+                                        }
+                                    }
+                                } else if target.is_blank_node() {
+                                    // Case 2:
+                                    // The subject of an equivalentClass relation should
+                                    // remain unchanged. This happens if the object of the
+                                    // equivalentClass relation is a blank node.
+                                    //
+                                    // In other words, nothing to do here.
+                                } else {
+                                    self.failed_buffer.push((triple, "Visualization of equivalence relations between classes and literals is not supported".to_string()));
+                                }
+                            }
+                            None => {
+                                self.failed_buffer.push((
+                                    triple,
+                                    "Subject of equivalence relation is missing an object"
+                                        .to_string(),
+                                ));
+                            }
+                        }
+
+                        // info!("blanknode_mapping | {:?}", self.edge_redirection);
+                        // info!("mapped_to | {:?}", self.mapped_to);
+                        // info!("iricache | {:?}", self.iricache);
+                        // info!("triple: {}", triple);
+                        // let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
                         // this should work when reintroducing unknown buffer
                         // TODO: We should rework how unknowns are handled
                         // especially blank nodes.
-                        // Instead of working directly with the databuffer, we should keep a temporary 
-                        // datastructure, which we can mutate while serializing, then converting said 
+                        // Instead of working directly with the databuffer, we should keep a temporary
+                        // datastructure, which we can mutate while serializing, then converting said
                         // structure to the databuffer at the end. This will allow us to handle merging/unknowns gracefully.
-                        // this will also allow us to use blanknode mapping (should be renamed), in conjunction with 
+                        // this will also allow us to use blanknode mapping (should be renamed), in conjunction with
                         // iricache to resolve.
                         // An example:
                         // Mother : equivalentClass : blanknode1
@@ -653,26 +832,51 @@ impl GraphDisplayDataSolutionSerializer {
                         // blanknode2 : collection (which we flatten) : blanknode3
                         // blanknode3 : owl:intersectionOf : Parent
                         // blanknode3 : owl:intersectionOf : Warden
-                        // etc. 
+                        // etc.
                         // - When we first meet blanknode1: add to unknown
-                        // 
-                        // 
-                        match (index_s, index_o) {
-                            (Some(index_s), Some(index_o)) => {
-                                self.merge_nodes(data_buffer, index_o, index_s);
-                                if !data_buffer.elements[index_s].eq(&ElementType::Owl(OwlType::Node(OwlNode::AnonymousClass))) {
-                                    self.upgrade_node_type(data_buffer, index_s, ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)));
-                                    self.extend_label(data_buffer, index_s, data_buffer.labels[index_o].clone());
-                                    self.map_to(data_buffer, data_buffer.labels[index_o].clone(), index_s);
-                                } else {
-                                    self.map_to(data_buffer, data_buffer.labels[index_o].clone(), index_s);
-                                }
-                            }
-                            _ => {
-                                //self.unknown_buffer.insert(triple.clone());
-                                warn!("Target is required for: {}", triple);
-                            }
-                        }
+                        //
+
+                        // When that's done, there are two cases to consider:
+                        // -
+                        // - The subject of an equivalentClass relation should
+                        //   remain unchanged. This happens if the the object of the
+                        //   equivalentClass relation is a blank node.
+
+                        // match (index_s, index_o) {
+                        //     (Some(index_s), Some(index_o)) => {
+                        //         self.merge_nodes(data_buffer, index_o, index_s);
+                        //         if !data_buffer.elements[index_s]
+                        //             .eq(&ElementType::Owl(OwlType::Node(OwlNode::AnonymousClass)))
+                        //         {
+                        //             self.upgrade_node_type(
+                        //                 data_buffer,
+                        //                 index_s,
+                        //                 ElementType::Owl(OwlType::Node(OwlNode::EquivalentClass)),
+                        //             );
+                        //             self.extend_label(
+                        //                 data_buffer,
+                        //                 index_s,
+                        //                 data_buffer.labels[index_o].clone(),
+                        //             );
+                        //             self.map_to(
+                        //                 data_buffer,
+                        //                 data_buffer.labels[index_o].clone(),
+                        //                 index_s,
+                        //             );
+                        //         } else {
+                        //             self.map_to(
+                        //                 data_buffer,
+                        //                 data_buffer.labels[index_o].clone(),
+                        //                 index_s,
+                        //             );
+                        //         }
+                        //     }
+                        //     _ => {
+                        //         //self.unknown_buffer.insert(triple.clone());
+                        //         warn!("Target is required for: {}", triple);
+                        //     }
+                        // }
+
                         // This works but i dont like it
                         // match triple.target.as_ref() {
                         //     Some(Term::NamedNode(nn)) => {
@@ -811,7 +1015,7 @@ impl Display for GraphDisplayDataSolutionSerializer {
         for (index, (element, label)) in self.iricache.iter().enumerate() {
             write!(f, "{index}: {element:?} -> {label}\n")?;
         }
-        for (index, (element, label)) in self.blanknode_mapping.iter().enumerate() {
+        for (index, (element, label)) in self.edge_redirection.iter().enumerate() {
             write!(f, "{index}: {element:?} -> {label}\n")?;
         }
         for (index, (element, label)) in self.object_properties.iter().enumerate() {
@@ -824,73 +1028,118 @@ impl Display for GraphDisplayDataSolutionSerializer {
 #[cfg(test)]
 #[allow(unused_must_use)]
 mod test {
-    use oxrdf::NamedNode;
     use super::*;
+    use oxrdf::NamedNode;
 
     #[test]
     fn test_replace_node() {
         let _ = env_logger::builder().is_test(true).try_init();
         let mut serializer = GraphDisplayDataSolutionSerializer::new();
         let mut data_buffer = GraphDisplayData::new();
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#Ontology").unwrap()),
-            target: None,
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Parent").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap()),
-            target: None,
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Mother").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap()),
-            target: None,
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Guardian").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap()),
-            target: None,
-
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap()),
-            target: None,
-
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2000/01/rdf-schema#subClassOf").unwrap()),
-            target: Some(Term::NamedNode(NamedNode::new("http://example.com#Guardian").unwrap())),
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Mother").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2000/01/rdf-schema#subClassOf").unwrap()),
-            target: Some(Term::NamedNode(NamedNode::new("http://example.com#Parent").unwrap())),
-        });
-        serializer.write_node_triple(&mut data_buffer, Triple {
-            id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#unionOf").unwrap()),
-            target: Some(Term::NamedNode(NamedNode::new("http://example.com#Guardian").unwrap())),
-        });
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#Ontology").unwrap(),
+                ),
+                target: None,
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Parent").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap(),
+                ),
+                target: None,
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Mother").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap(),
+                ),
+                target: None,
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Guardian").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap(),
+                ),
+                target: None,
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#Class").unwrap(),
+                ),
+                target: None,
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2000/01/rdf-schema#subClassOf").unwrap(),
+                ),
+                target: Some(Term::NamedNode(
+                    NamedNode::new("http://example.com#Guardian").unwrap(),
+                )),
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Mother").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2000/01/rdf-schema#subClassOf").unwrap(),
+                ),
+                target: Some(Term::NamedNode(
+                    NamedNode::new("http://example.com#Parent").unwrap(),
+                )),
+            },
+        );
+        serializer.write_node_triple(
+            &mut data_buffer,
+            Triple {
+                id: Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap()),
+                element_type: Term::NamedNode(
+                    NamedNode::new("http://www.w3.org/2002/07/owl#unionOf").unwrap(),
+                ),
+                target: Some(Term::NamedNode(
+                    NamedNode::new("http://example.com#Guardian").unwrap(),
+                )),
+            },
+        );
 
         print_graph_display_data(&data_buffer);
         println!("--------------------------------");
-        
+
         let triple = Triple {
             id: Term::NamedNode(NamedNode::new("http://example.com#Guardian").unwrap()),
-            element_type: Term::NamedNode(NamedNode::new("http://www.w3.org/2002/07/owl#equivalentClass").unwrap()),
-            target: Some(Term::NamedNode(NamedNode::new("http://example.com#Warden").unwrap())),
+            element_type: Term::NamedNode(
+                NamedNode::new("http://www.w3.org/2002/07/owl#equivalentClass").unwrap(),
+            ),
+            target: Some(Term::NamedNode(
+                NamedNode::new("http://example.com#Warden").unwrap(),
+            )),
         };
         serializer.write_node_triple(&mut data_buffer, triple);
         print_graph_display_data(&data_buffer);
         println!("data_buffer: {}", data_buffer);
         println!("serializer: {}", serializer);
-
-
     }
-
 
     pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
         for (index, (element, label)) in data_buffer
@@ -904,10 +1153,10 @@ mod test {
         for edge in data_buffer.edges.iter() {
             println!(
                 "{} -> {:?} -> {}",
-                data_buffer.labels[edge[0]], data_buffer.elements[edge[1]], data_buffer.labels[edge[2]]
+                data_buffer.labels[edge[0]],
+                data_buffer.elements[edge[1]],
+                data_buffer.labels[edge[2]]
             );
         }
     }
 }
-
-
