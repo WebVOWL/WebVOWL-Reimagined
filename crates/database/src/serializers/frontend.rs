@@ -183,14 +183,21 @@ impl GraphDisplayDataSolutionSerializer {
         };
     }
 
-    pub fn resolve(&mut self, data_buffer: &mut GraphDisplayData, x: &String) -> Option<usize> {
-        if self.blanknode_mapping.contains_key(x) {
-            return self.resolve(data_buffer, &self.blanknode_mapping[x].clone());
-        } else if self.iricache.contains_key(x) {
-            return Some(self.iricache[x]);
+    /// Find the index of an IRI.
+    ///
+    /// The index can get values from [`GraphDisplayData`].elements and [`GraphDisplayData`].labels.
+    pub fn resolve(&mut self, data_buffer: &mut GraphDisplayData, iri: &String) -> Option<usize> {
+        if self.blanknode_mapping.contains_key(iri) {
+            return self.resolve(data_buffer, &self.blanknode_mapping[iri].clone());
+        } else if self.iricache.contains_key(iri) {
+            return Some(self.iricache[iri]);
         }
         None
     }
+
+    /// Find the indices of the subject and object of a [`Triple`].
+    ///
+    /// The index can get values from [`GraphDisplayData`].elements and [`GraphDisplayData`].labels.
     pub fn resolve_so(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -207,6 +214,7 @@ impl GraphDisplayDataSolutionSerializer {
         (resolved_subject, resolved_object)
     }
 
+    /// Declare a node in the `data_buffer`.
     fn insert_node(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -219,6 +227,7 @@ impl GraphDisplayDataSolutionSerializer {
             .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
     }
 
+    /// Declare an edge in the `data_buffer`.
     fn insert_edge(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -384,6 +393,7 @@ impl GraphDisplayDataSolutionSerializer {
         //self.check_insert_unknowns(data_buffer);
     }
 
+    /// Serialize a triple to `data_buffer`.
     fn write_node_triple(&mut self, data_buffer: &mut GraphDisplayData, triple: Triple) {
         // TODO: Collect errors and show to frontend
         let node_type = triple.element_type.clone();
