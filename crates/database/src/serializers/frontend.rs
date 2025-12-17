@@ -8,8 +8,8 @@ use crate::vocab::owl;
 use fluent_uri::Iri;
 use futures::StreamExt;
 use grapher::prelude::{
-    Characteristic, ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge, RdfType,
-    RdfsEdge, RdfsNode, RdfsType,
+    Characteristic, ElementType, GenericEdge, GenericNode, GenericType, GraphDisplayData, OwlEdge,
+    OwlNode, OwlType, RdfEdge, RdfType, RdfsEdge, RdfsNode, RdfsType,
 };
 use log::{debug, info, trace, warn};
 use oxrdf::vocab::rdf;
@@ -473,7 +473,13 @@ impl GraphDisplayDataSolutionSerializer {
                     }
                     // rdfs::MEMBER => {}
                     // rdfs::RANGE => {}
-                    // rdfs::RESOURCE => {}
+                    rdfs::RESOURCE => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Rdfs(RdfsType::Node(RdfsNode::Resource)),
+                        );
+                    }
                     // rdfs::SEE_ALSO => {}
                     rdfs::SUB_CLASS_OF => self.insert_edge(
                         data_buffer,
@@ -528,7 +534,44 @@ impl GraphDisplayDataSolutionSerializer {
                         ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)),
                     ),
                     // owl::DATA_RANGE => {}
-                    // owl::DEPRECATED => {}
+                    owl::DEPRECATED => {
+                        // TODO: The triple can be both a class or a property.
+                        // We need to resolve the subject iri of the triple to figure out what it is.
+                        match self.resolve(data_buffer, &triple.id.to_string()) {
+                            Some(index) => match data_buffer.elements[index] {
+                                ElementType::Owl(OwlType::Edge(_)) => {
+                                    self.insert_edge(
+                                        data_buffer,
+                                        &triple,
+                                        ElementType::Owl(OwlType::Edge(
+                                            OwlEdge::DeprecatedProperty,
+                                        )),
+                                    );
+                                }
+                                ElementType::Owl(OwlType::Node(_)) => {
+                                    self.insert_node(
+                                        data_buffer,
+                                        triple,
+                                        ElementType::Owl(OwlType::Node(OwlNode::DeprecatedClass)),
+                                    );
+                                }
+                                _ => {
+                                    warn!(
+                                        "Visualization of non-OWL deprecated element is not supported"
+                                    );
+                                } // TODO: Support non-OWL deprecated element
+                                  // ElementType::Rdf(RdfType::Edge(_)) => {}
+                                  // ElementType::Rdfs(RdfsType::Edge(_)) => {}
+                                  // ElementType::Rdfs(RdfsType::Node(_)) => {}
+                                  // ElementType::Generic(GenericType::Edge(_)) => {}
+                                  // ElementType::Generic(GenericType::Node(_)) => {}
+                                  // ElementType::NoDraw => {}
+                            },
+                            None => {
+                                // TODO: Add to unknown_buffer
+                            }
+                        }
+                    }
                     owl::DEPRECATED_CLASS => self.insert_node(
                         data_buffer,
                         triple,
@@ -660,8 +703,23 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::MIN_QUALIFIED_CARDINALITY => {}
                     // owl::NAMED_INDIVIDUAL => {}
                     // owl::NEGATIVE_PROPERTY_ASSERTION => {}
-                    owl::NOTHING => {}
-                    owl::OBJECT_PROPERTY => {}
+                    owl::NOTHING => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Owl(OwlType::Node(OwlNode::Thing)),
+                        );
+                        // FIXME: Hack to overwrite label until a proper ElementType is defined
+                        let len = data_buffer.labels.len() - 1;
+                        data_buffer.labels[len] = "Nothing".to_string();
+                    }
+                    owl::OBJECT_PROPERTY => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            ElementType::Owl(OwlType::Edge(OwlEdge::ObjectProperty)),
+                        );
+                    }
                     // owl::ONE_OF => {}
                     owl::ONTOLOGY => {
                         // TODO: Base must be known before matching.
