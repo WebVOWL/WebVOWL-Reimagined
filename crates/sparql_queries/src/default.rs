@@ -39,7 +39,7 @@ pub const RDFS_CLASS: &str = r#"{
             }"#;
 
 pub const RDFS_RESOURCE: &str = r#"{
-                ?id ?p ?o.
+                ?id a rdf:Resource.
                 FILTER(isIRI(?id) || isBlank(?id))
                 BIND(rdfs:Resource AS ?nodeType)
             }"#;
@@ -74,7 +74,7 @@ pub const INTERSECTION_OF: &str = r#"{
             }"#;
 
 pub const UNION_OF: &str = r#"{
-                ?id owl:unionOf ?list .
+                ?id owl:unionOf ?target .
                 BIND(owl:unionOf AS ?nodeType)
             }"#;
 
@@ -84,7 +84,7 @@ pub const COMPLEMENT: &str = r#"{
             }"#;
 
 pub const DISJOINT_UNION: &str = r#"{
-                ?id owl:disjointUnionOf ?list .
+                ?id owl:disjointUnionOf ?target .
                 BIND(owl:disjointUnionOf AS ?nodeType)
             }"#;
 

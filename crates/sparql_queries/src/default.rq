@@ -144,7 +144,8 @@
         {
             # OBJECT PROPERTY
             ?id a owl:ObjectProperty .
-            OPTIONAL {?id rdfs:range ?target}
+            OPTIONAL {?id rdfs:range ?target }
+            OPTIONAL {?id rdfs:domain ?target }
             BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION

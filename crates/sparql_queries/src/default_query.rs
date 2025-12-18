@@ -13,11 +13,13 @@ pub const DEFAULT_QUERY: &str = formatcp!(
         SELECT *
         WHERE {{
             {{
+            VALUES(
+                ?nodeType
+                ?weight 
+            ) {{(owl:Class 1) }}
                 {}
             }}
-            BIND(
-                IF(?nodeType = owl:Class, 1, 2)
-                AS ?weight)
+            
         }}
         ORDER BY ?weight
         "#,
@@ -73,7 +75,7 @@ pub const DEFAULT_QUERY: &str = formatcp!(
         general::EXTERNALS,
         " UNION ",
         general::DEPRECATED,
-        " UNION ",
-        general::LABEL
+        // " UNION ",
+        //general::LABEL
     )
 );
