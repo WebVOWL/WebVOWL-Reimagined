@@ -28,7 +28,7 @@ pub async fn main() {
     info!("Loaded {} quads", webvowl.session.len().await.unwrap());
 
     let mut data_buffer = GraphDisplayData::new();
-    let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
+    let mut solution_serializer = GraphDisplayDataSolutionSerializer{};
     let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
@@ -40,8 +40,8 @@ pub async fn main() {
     }
     info!("--- GraphDisplayData ---");
     print_graph_display_data(&data_buffer);
-    info!("--- SolutionSerializer ---");
-    info!("{}", solution_serializer);
+    
+
 }
 
 pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
