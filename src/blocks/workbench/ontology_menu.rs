@@ -52,7 +52,8 @@ fn UploadInput() -> impl IntoView {
         total_graph_data,
     } = expect_context::<GraphDataContext>();
     let upload = FileUpload::new();
-    let loading_done = upload.local_action.value();
+    let local_loading_done = upload.local_action.value();
+    let remote_loading_done = upload.remote_action.value();
     let upload_progress = upload.tracker.upload_progress.clone();
     let parsing_status = upload.tracker.parsing_status.clone();
     let parsing_done = upload.tracker.parsing_done.clone();
@@ -60,7 +61,28 @@ fn UploadInput() -> impl IntoView {
     let tracker_file = upload.tracker.clone();
 
     Effect::new(move || {
-        if let Some(value) = loading_done.get() {
+        if let Some(value) = local_loading_done.get() {
+            match value {
+                Ok(_) => spawn_local(async move {
+                    let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
+                    match output_result {
+                        Ok(new_graph_data) => {
+                            graph_data.set(new_graph_data.clone());
+                            total_graph_data.set(new_graph_data.clone());
+                            EVENT_DISPATCHER
+                                .rend_write_chan
+                                .send(RenderEvent::LoadGraph(new_graph_data));
+                        }
+                        Err(e) => error!("{}", e),
+                    }
+                }),
+                Err(e) => error!("{}", e),
+            }
+        }
+    });
+
+    Effect::new(move || {
+        if let Some(value) = remote_loading_done.get() {
             match value {
                 Ok(_) => spawn_local(async move {
                     let output_result = handle_internal_sparql(DEFAULT_QUERY.to_string()).await;
