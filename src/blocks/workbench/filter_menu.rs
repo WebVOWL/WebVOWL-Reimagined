@@ -1,6 +1,5 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
 use crate::components::user_input::file_upload::handle_internal_sparql;
-use webvowl_sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
 use grapher::prelude::{
     Characteristic, ElementType, GenericType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge,
     RdfType, RdfsEdge, RdfsNode, RdfsType,
@@ -10,6 +9,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::error;
 use std::collections::HashMap;
+use webvowl_sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
 
 pub fn update_graph(query: String, graph_data: RwSignal<GraphDisplayData>) {
     spawn_local(async move {
@@ -86,10 +86,10 @@ pub fn FilterMenu() -> impl IntoView {
                         "transitive" => Some(Characteristic::Transitive),
                         "functional" => Some(Characteristic::FunctionalProperty),
                         "inverse functional" => Some(Characteristic::InverseFunctionalProperty),
-                        "symmetric" => Some(Characteristic::Symmetric),
-                        "asymmetric" => Some(Characteristic::Asymmetric),
-                        "reflexive" => Some(Characteristic::Reflexive),
-                        "irreflexive" => Some(Characteristic::Irreflexive),
+                        "symmetric" => Some(Characteristic::SymmetricProperty),
+                        "asymmetric" => Some(Characteristic::AsymmetricProperty),
+                        "reflexive" => Some(Characteristic::ReflexiveProperty),
+                        "irreflexive" => Some(Characteristic::IrreflexiveProperty),
                         _ => None,
                     };
                     if let Some(characteristic) = c {
@@ -145,10 +145,10 @@ pub fn FilterMenu() -> impl IntoView {
         Characteristic::Transitive,
         Characteristic::FunctionalProperty,
         Characteristic::InverseFunctionalProperty,
-        Characteristic::Reflexive,
-        Characteristic::Irreflexive,
-        Characteristic::Symmetric,
-        Characteristic::Asymmetric,
+        Characteristic::ReflexiveProperty,
+        Characteristic::IrreflexiveProperty,
+        Characteristic::SymmetricProperty,
+        Characteristic::AsymmetricProperty,
     ];
     for characteristic in &all_chars {
         initial_char_checks.insert(characteristic.clone(), true);
