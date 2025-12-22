@@ -1,5 +1,5 @@
 [package]
-    authors=["TheRealMorgenfrue"]
+    authors=["TheRealMorgenfrue", "LouiseWolff17", "khmikkelsen"]
     description="Database code for WebVOWL Reimagined"
     edition="2024"
     keywords=["rdf", "graph", "sparql", "datafusion"]
