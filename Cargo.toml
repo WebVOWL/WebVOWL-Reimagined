@@ -1,6 +1,10 @@
 [package]
     authors=[
-        "TheRealMorgenfrue, manfredhod, LouiseWolff17, khmikkelsen, nikarnik",
+        "TheRealMorgenfrue",
+        "manfredhod",
+        "LouiseWolff17",
+        "khmikkelsen",
+        "nikarnik",
     ]
     description="WebVOWL rebuilt from stratch with a strong focus on performance and scalability."
     edition="2024"
