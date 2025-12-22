@@ -1,0 +1,12 @@
+[package]
+    authors=["TheRealMorgenfrue"]
+    description="Performance & Debugging across all crates constituting WebVOWL Reimagined"
+    edition="2024"
+    name="perfdebugger"
+    readme="README.md"
+    version="0.1.0"
+
+
+[dependencies]
+    env_logger="0.11.0"
+    grapher={workspace=true}
