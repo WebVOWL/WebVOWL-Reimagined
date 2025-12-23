@@ -27,6 +27,6 @@ Or use the [docker compose file](/docker-compose.yml) with command `docker-compo
 2. Install the clang compiler toolchain, e.g. `dnf install clang`
 3. Install the mold linker, e.g. `dnf install mold`
 4. Run `cargo install leptosfmt`
-5. Run `cargo install --locked cargo-leptos --version 0.2.42`
+5. Run `cargo install --locked cargo-leptos --version 0.3.2`
     > If you get a compile error `Can't locate FindBin.pm in @INC` you can either install Perl (e.g. `dnf install perl`) or [download a prebuilt binary](https://github.com/leptos-rs/cargo-leptos/releases/latest)
 6. Use the convenience shell file `build.sh` to build the project with different profiles based on the supplied argument. E.g. to build and run a development server, run `./build.sh dev`
