@@ -1,6 +1,6 @@
 [package]
     authors=["TheRealMorgenfrue"]
-    description="Performance & Debugging across all crates constituting WebVOWL Reimagined"
+    description="Performance & Debugging primarily of WasmGrapher, but works across all crates constituting WebVOWL Reimagined"
     edition="2024"
     name="perfdebugger"
     readme="README.md"
@@ -9,4 +9,16 @@
 
 [dependencies]
     env_logger="0.11.0"
-    grapher={workspace=true}
+    log="0.4"
+    tokio="1.48.0"
+    webvowl-database={path="../database"}
+    webvowl-sparql-queries={path="../sparql_queries"}
+
+    [dependencies.grapher]
+        #branch="render_test"
+        default-features=false
+        features=["native", "static"]
+        # git="https://github.com/WebVOWL/WasmGrapher"
+        # optional=true
+        path="../../../RustGrapher"
+        # version="0.3"
