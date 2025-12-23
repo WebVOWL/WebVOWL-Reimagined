@@ -35,7 +35,9 @@
 # Enables a statically linked runtime. Useful for running in e.g. "stratch" Docker containers.
 
 
-[build]
+# Workaround for rustflags not being cumulative
+# https://github.com/rust-lang/cargo/issues/5376#issuecomment-2163350032
+[target.'cfg(all())']
     rustflags=["-Zshare-generics=y", "-Zthreads=0"]
 
 # Docker
