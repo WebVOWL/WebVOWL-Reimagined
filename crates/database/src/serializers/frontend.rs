@@ -386,10 +386,13 @@ impl GraphDisplayDataSolutionSerializer {
         element: String,
         label_to_append: String,
     ) {
+        info!("extending element: {} with label: {}", element, label_to_append);
         if let Some(label) = data_buffer.label_buffer.get_mut(&element) {
-            label.push_str(format!("\n{}", label).as_str());
+            label.push_str(format!("\n{}", label_to_append).as_str());
+            info!("appended to: {}", label);
         } else {
-            data_buffer.label_buffer.insert(element, label_to_append);
+            data_buffer.label_buffer.insert(element.clone(), label_to_append.clone());
+            info!("inserted k v: {} -> {}", element, label_to_append);  
         }
     }
 
