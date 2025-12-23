@@ -28,6 +28,10 @@
 # "+atomics"
 # Enables thread synchronization primitives in the WebAssembly instruction set.
 # This is one of the required steps to allow multi-threading in WebAssembly.
+#
+# "+simd128"
+# Enables simd128 in the WebAssembly instruction set.
+# Increases performance for work benefitting from SIMD.
 ###########################
 # Other features used.
 #
