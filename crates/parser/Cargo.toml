@@ -16,6 +16,7 @@
 [dependencies]
     futures="0.3.31"
     horned-owl={git="https://github.com/phillord/horned-owl", rev="c4f7835ecae70b5e7281dc23b9b7fc6daa497f1d"}
+    log="0.4"
     rdf-fusion="0.1.0"
     tokio="1.48.0"
     tokio-stream="0.1.17"
