@@ -35,11 +35,19 @@ impl WebVOWLStore {
     // TTL format -> (oxittl) RDF XML quads -> (horned_owl) Normalize OWL/RDF -> Quads -> Insert into Oxigraph
     pub async fn insert_file(&self, fs: &Path, lenient: bool) -> Result<(), WebVowlStoreError> {
         let parser = parser_from_format(fs, lenient)?;
-
+        info!("Loading input into database...");
+        let start_time = Instant::now();
         self.session
             .load_from_reader(parser.parser, parser.input.as_slice())
             .await?;
-
+        info!(
+            "Loaded {} quads in {} s",
+            self.session.len().await.unwrap(),
+            Instant::now()
+                .checked_duration_since(start_time)
+                .unwrap_or(Duration::new(0, 0))
+                .as_secs_f32()
+        );
         Ok(())
     }
 
@@ -93,13 +101,14 @@ impl WebVOWLStore {
             let path = file.path();
             let parser = parser_from_format(path, false)?;
 
-            info!("Parsing input...");
+            info!("Loading input into database...");
             let start_time = Instant::now();
             self.session
                 .load_from_reader(parser.parser, parser.input.as_slice())
                 .await?;
             info!(
-                "Parsing complete in {} s",
+                "Loaded {} quads in {} s",
+                self.session.len().await.unwrap(),
                 Instant::now()
                     .checked_duration_since(start_time)
                     .unwrap_or(Duration::new(0, 0))
