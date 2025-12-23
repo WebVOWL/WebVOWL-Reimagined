@@ -78,7 +78,9 @@ impl GraphDisplayDataSolutionSerializer {
             data_buffer.edge_characteristics.len() + data_buffer.node_characteristics.len(),
             0
         );
+        if !data_buffer.failed_buffer.is_empty() {
         warn!("Failed to serialize: {:#?}", data_buffer.failed_buffer);
+        }
         debug!("{}", data_buffer);
         *data = data_buffer.into();
         Ok(())
