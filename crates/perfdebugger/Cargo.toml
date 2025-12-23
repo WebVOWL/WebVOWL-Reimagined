@@ -18,7 +18,7 @@
         #branch="render_test"
         default-features=false
         features=["native", "static"]
-        # git="https://github.com/WebVOWL/WasmGrapher"
+        git="https://github.com/WebVOWL/WasmGrapher"
         # optional=true
-        path="../../../RustGrapher"
+        # path="../../../RustGrapher"
         # version="0.3"
