@@ -4,3 +4,4 @@
 # Rust
 benches
 target
+Cargo.lock
