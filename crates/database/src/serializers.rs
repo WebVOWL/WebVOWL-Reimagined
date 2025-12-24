@@ -1,14 +1,11 @@
-use std::{collections::{HashMap, HashSet}, fmt::{Display, Formatter}};
-
 use grapher::prelude::{ElementType, GraphDisplayData};
 use log::error;
 use oxrdf::Term;
-use rdf_fusion::error;
-
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::{Display, Formatter},
+};
 pub mod frontend;
-pub mod new_ser;
-pub mod vowl_extract;
-
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
 pub struct Triple {
@@ -103,7 +100,7 @@ pub struct SerializationDataBuffer {
     /// ```
     /// In this case, `blanknode1` is effectively omitted from serialization.
     edge_redirection: HashMap<String, String>,
-    
+
     /// Maps from element IRI to a set of the edges that include it.
     ///
     /// Used to remap when nodes are merges.
@@ -118,7 +115,7 @@ pub struct SerializationDataBuffer {
     /// - Key = The IRI the label belongs to.
     /// - Value = The label.
     label_buffer: HashMap<String, String>,
-    
+
     /// Edges in graph, to avoid duplicates
     edge_buffer: HashSet<Edge>,
     /// Maps from edge to its characteristic.
@@ -191,7 +188,11 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
                 (Some(subject_idx), Some(object_idx), Some(label)) => {
                     display_data.elements.push(edge.element_type);
                     display_data.labels.push(label);
-                    display_data.edges.push([*subject_idx, display_data.elements.len() - 1, *object_idx]);
+                    display_data.edges.push([
+                        *subject_idx,
+                        display_data.elements.len() - 1,
+                        *object_idx,
+                    ]);
                 }
                 _ => {
                     error!("Edge not found in iricache: {}", edge);
@@ -203,14 +204,16 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
             let idx = iricache.get(&iri);
             match idx {
                 Some(idx) => {
-                    display_data.characteristics.insert(*idx, characteristics.pop().unwrap());
+                    display_data
+                        .characteristics
+                        .insert(*idx, characteristics.pop().unwrap());
                 }
                 None => {
                     error!("Characteristic not found for node in iricache: {}", iri);
                 }
             }
         }
-        // TODO: handle cardinalities 
+        // TODO: handle cardinalities
 
         display_data
     }
@@ -222,7 +225,11 @@ impl Display for SerializationDataBuffer {
         writeln!(f, "\telement_buffer: {:?}", self.element_buffer)?;
         writeln!(f, "\tedge_redirection: {:?}", self.edge_redirection)?;
         writeln!(f, "\tedges_include_map: {:?}", self.edges_include_map)?;
-        writeln!(f, "\tglobal_element_mappings: {:?}", self.global_element_mappings)?;
+        writeln!(
+            f,
+            "\tglobal_element_mappings: {:?}",
+            self.global_element_mappings
+        )?;
         writeln!(f, "\tlabel_buffer: {:?}", self.label_buffer)?;
         writeln!(f, "\tedge_buffer: {:?}", self.edge_buffer)?;
         writeln!(f, "\tedge_characteristics: {:?}", self.edge_characteristics)?;
