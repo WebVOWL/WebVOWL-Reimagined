@@ -1,18 +1,17 @@
-use crate::components::icon::Icon;
 use super::WorkbenchMenuItems;
+use crate::components::icon::Icon;
 use leptos::prelude::*;
 
-
-pub fn NewWebVOWL() -> impl IntoView {
-    let description = include_str!("../../components/about_description.txt");
+pub fn VowlrDesc() -> impl IntoView {
+    let description = include_str!("../../assets/about_description.txt");
     view! {
         <p>{description}</p>
         <div class="flex gap-4">
-            <a class="text-2xl transition" href="https://github.com/WebVOWL/WebVOWL-Reimagined"> 
-                <Icon icon=icondata::AiGithubFilled/> 
+            <a class="text-2xl transition" href="https://github.com/WebVOWL/WebVOWL-Reimagined">
+                <Icon icon=icondata::AiGithubFilled/>
             </a>
-            <a class="text-2xl transition" href="mailto:cs-25-dat-7-03@student.aau.dk"> 
-                <Icon icon=icondata::IoMail/> 
+            <a class="text-2xl transition" href="mailto:cs-25-dat-7-03@student.aau.dk">
+                <Icon icon=icondata::IoMail/>
             </a> //TODO - Insert the email we can be contacted on.
         </div>
     }
@@ -28,7 +27,7 @@ pub fn AboutMenu() -> impl IntoView {
     view! {
         <WorkbenchMenuItems title="About">
             <Version />
-            <NewWebVOWL />
+            <VowlrDesc />
         </WorkbenchMenuItems>
     }
 }
