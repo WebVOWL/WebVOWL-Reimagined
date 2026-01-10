@@ -18,7 +18,7 @@ use rdf_fusion::{
     execution::results::QuerySolutionStream,
     model::{Term, vocab::rdfs},
 };
-use webvowl_parser::errors::WebVowlStoreError;
+use vowlr_parser::errors::WebVowlStoreError;
 
 pub struct GraphDisplayDataSolutionSerializer {}
 

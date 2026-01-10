@@ -1,10 +1,10 @@
 use super::{GraphDataContext, WorkbenchMenuItems};
-use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
 use crate::components::{icon::Icon, user_input::file_upload::*};
 use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
+use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
 use web_sys::HtmlInputElement;
 
 #[component]

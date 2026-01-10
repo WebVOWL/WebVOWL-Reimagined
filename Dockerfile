@@ -61,7 +61,7 @@ WORKDIR /app
 USER 10001
 
 # Import VOWL-R from the build stage
-COPY --chown=10001 --from=builder /work/target/x86_64-unknown-linux-musl/debug/webvowl-reimagined /app/
+COPY --chown=10001 --from=builder /work/target/x86_64-unknown-linux-musl/debug/vowlr /app/
 COPY --chown=10001 --from=builder /work/target/site /app/site
 
 # Import the CAcertificates from the build stage to enable HTTPS
@@ -93,4 +93,4 @@ ENV LEPTOS_SITE_ROOT=./site
 EXPOSE 8080
 
 # Must match your final server executable name
-CMD ["/app/webvowl-reimagined"]
+CMD ["/app/vowlr"]

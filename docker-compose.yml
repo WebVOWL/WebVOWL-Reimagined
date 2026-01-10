@@ -1,7 +1,7 @@
 services:
-    webvowl-reimagined:
+    vowlr:
         image: ghcr.io/webvowl/webvowl-reimagined:latest
-        container_name: webvowl-reimagined
+        container_name: vowl-r
         ports:
             - 8080:8080
         restart: unless-stopped

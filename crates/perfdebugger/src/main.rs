@@ -4,8 +4,8 @@ use grapher::run;
 use perfdebugger::util::query;
 use std::env;
 use std::path::Path;
-use webvowl_database::store::WebVOWLStore;
-use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
+use vowlr_database::store::VOWLRStore;
+use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
 
 #[tokio::main]
 async fn main() {
@@ -15,7 +15,7 @@ async fn main() {
     if args.len() > 1 {
         let path = Path::new(&args[1]);
 
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store
             .insert_file(&path, false)
             .await

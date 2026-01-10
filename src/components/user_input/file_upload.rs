@@ -15,7 +15,7 @@ use std::path::Path;
 use std::rc::Rc;
 use web_sys::{FileList, FormData};
 #[cfg(feature = "server")]
-use webvowl_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
+use vowlr_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
 #[cfg(feature = "server")]
 use webvowl_database::store::WebVOWLStore;
 
@@ -87,7 +87,7 @@ pub async fn ontology_progress(filename: String) -> Result<TextStream, ServerFnE
     input = MultipartFormData,
 )]
 pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), ServerFnError> {
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
     let mut data = data.into_inner().unwrap();
     let mut count = 0;
     let mut dtype = DataType::UNKNOWN;
@@ -139,7 +139,7 @@ pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnErr
         }
     };
 
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
     let progress_key = url.clone();
     progress::reset(&progress_key);
     let _ = session.start_upload(&url).await;
@@ -180,7 +180,7 @@ pub async fn handle_sparql(
     format: Option<String>,
 ) -> Result<(DataType, usize), ServerFnError> {
     let client = Client::new();
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
 
     let accept_type = match format.as_deref() {
         Some("xml") => DataType::SPARQLXML.mime_type(),
@@ -236,11 +236,11 @@ pub async fn handle_sparql(
 
 #[server (input = Rkyv, output = Rkyv)]
 pub async fn handle_internal_sparql(query: String) -> Result<GraphDisplayData, ServerFnError> {
-    let webvowl = WebVOWLStore::default();
+    let vowlr = VOWLRStore::default();
 
     let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
-    let query_stream = webvowl.session.query(query.as_str()).await.unwrap();
+    let query_stream = vowlr.session.query(query.as_str()).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)

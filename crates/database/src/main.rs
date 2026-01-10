@@ -5,9 +5,9 @@ use log::info;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
 use std::env;
 use std::path::Path;
-use webvowl_database::prelude::GraphDisplayDataSolutionSerializer;
-use webvowl_database::store::WebVOWLStore;
-use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
+use vowlr_database::prelude::GraphDisplayDataSolutionSerializer;
+use vowlr_database::store::VOWLRStore;
+use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
 
 #[tokio::main]
 pub async fn main() {
@@ -20,16 +20,16 @@ pub async fn main() {
     } else {
         path = Path::new("crates/database/owl1-unions-simple.owl");
     }
-    let webvowl = WebVOWLStore::new(session);
-    webvowl
+    let vowlr = VOWLRStore::new(session);
+    vowlr
         .insert_file(&path, false)
         .await
         .expect("Error inserting file");
-    info!("Loaded {} quads", webvowl.session.len().await.unwrap());
+    info!("Loaded {} quads", vowlr.session.len().await.unwrap());
 
     let mut data_buffer = GraphDisplayData::new();
-    let mut solution_serializer = GraphDisplayDataSolutionSerializer{};
-    let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
+    let mut solution_serializer = GraphDisplayDataSolutionSerializer {};
+    let query_stream = vowlr.session.query(DEFAULT_QUERY).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)
@@ -40,8 +40,6 @@ pub async fn main() {
     }
     info!("--- GraphDisplayData ---");
     print_graph_display_data(&data_buffer);
-    
-
 }
 
 pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {

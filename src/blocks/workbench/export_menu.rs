@@ -4,11 +4,11 @@ use futures::StreamExt;
 use leptos::prelude::*;
 use leptos::server_fn::codec::{ByteStream, Streaming};
 #[cfg(feature = "server")]
-use webvowl_database::store::WebVOWLStore;
+use vowlr_database::store::VOWLRStore;
 
 #[server(output = Streaming)]
 pub async fn export_owl() -> Result<ByteStream<ServerFnError>, ServerFnError> {
-    let store = WebVOWLStore::default();
+    let store = VOWLRStore::default();
     let stream = store.serialize_stream().await?;
     Ok(ByteStream::new(stream.map(|chunk| {
         chunk
@@ -52,7 +52,7 @@ pub fn ExportMenu() -> impl IntoView {
                 //<ExportButton label="TeX" icon=icondata::BiExportRegular />
                 //<ExportButton label="TTL" icon=icondata::BiExportRegular />
                 //<ExportButton label="URL" icon=icondata::BiExportRegular />
-                <ExportButton label="RDF" 
+                <ExportButton label="RDF"
                 icon=icondata::BiExportRegular
                 on_click=Callback::new(move |_| {
                     leptos::task::spawn_local(async move {

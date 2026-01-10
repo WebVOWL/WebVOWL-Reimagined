@@ -15,11 +15,11 @@ commands=(
     "RUST_LOG=info cargo leptos build --release --precompress -vv"
     )
 help=(
-    "Builds WebVOWL in development mode (without debug info) and runs it on a local server. This is significantly faster than "dev""
-    "Builds WebVOWL in development mode and runs it on a local server"
-    "Builds WebVOWL in production mode but with debug info and runs it on a local server"
-    "Builds WebVOWL in production mode and runs it on a local server"
-    "Builds WebVOWL in production mode, ready for deployment"
+    "Builds VOWL-R in development mode (without debug info) and runs it on a local server. This is significantly faster than "dev""
+    "Builds VOWL-R in development mode and runs it on a local server"
+    "Builds VOWL-R in production mode but with debug info and runs it on a local server"
+    "Builds VOWL-R in production mode and runs it on a local server"
+    "Builds VOWL-R in production mode, ready for deployment"
     )
 
 valid=0

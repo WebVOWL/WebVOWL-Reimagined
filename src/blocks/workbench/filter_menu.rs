@@ -9,7 +9,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::error;
 use std::collections::HashMap;
-use webvowl_sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
+use vowlr_sparql_queries::filter_menu_patterns::{FilterEdge, FilterNode, generate_sparql_query};
 
 pub fn update_graph(query: String, graph_data: RwSignal<GraphDisplayData>) {
     spawn_local(async move {

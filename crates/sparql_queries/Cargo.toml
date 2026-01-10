@@ -1,18 +1,18 @@
 [package]
-name = "webvowl-sparql-queries"
-version = "0.0.1"
-edition = "2024"
-description = "Shared SPARQL query strings for WebVOWL-Reimagined (WASM-safe)."
-license = "MIT OR Apache-2.0"
+    description="Shared SPARQL query strings for VOWL-R (WASM-safe)."
+    edition="2024"
+    license="MIT OR Apache-2.0"
+    name="vowlr-sparql-queries"
+    version="0.1.0"
 
 [lib]
-path = "src/lib.rs"
+    path="src/lib.rs"
 
 [lints]
-workspace = true
+    workspace=true
 
 [dependencies]
-    const_format = "0.2.35"
+    const_format="0.2.35"
     [dependencies.grapher]
         # branch="new_nodetype"
         features=["webgl"]
@@ -20,5 +20,3 @@ workspace = true
         # optional=true
         # path="../../../RustGrapher"
         # version="0.3"
-
-

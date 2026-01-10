@@ -4,7 +4,7 @@
     edition="2024"
     keywords=["parser", "owl", "rdf"]
     license-file="LICENSE"
-    name="webvowl-parser"
+    name="vowlr-parser"
     readme="README.md"
     repository="https://github.com/WebVOWL/WebVOWL-Reimagined"
     version="0.0.1"

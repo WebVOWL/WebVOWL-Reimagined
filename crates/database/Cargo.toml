@@ -1,10 +1,10 @@
 [package]
     authors=["TheRealMorgenfrue", "LouiseWolff17", "khmikkelsen"]
-    description="Database code for WebVOWL Reimagined"
+    description="Database code for VOWL-R"
     edition="2024"
     keywords=["rdf", "graph", "sparql", "datafusion"]
     license-file="LICENSE"
-    name="webvowl-database"
+    name="vowlr-database"
     readme="README.md"
     repository="https://github.com/WebVOWL/WebVOWL-Reimagined"
     version="0.0.1"

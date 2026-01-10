@@ -1,12 +1,12 @@
 pub mod util {
     use grapher::prelude::GraphDisplayData;
-    use webvowl_database::{
+    use vowlr_database::{
         prelude::{GraphDisplayDataSolutionSerializer, QueryResults},
-        store::WebVOWLStore,
+        store::VOWLRStore,
     };
 
     pub async fn query(query: String) -> Result<GraphDisplayData, String> {
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
 
         let mut data_buffer = GraphDisplayData::new();
         let solution_serializer = GraphDisplayDataSolutionSerializer::new();

@@ -5,18 +5,18 @@ use std::path::Path;
 use std::time::Duration;
 use std::{fs::File, time::Instant};
 
-use webvowl_parser::{
+use vowlr_parser::{
     errors::WebVowlStoreError,
     parser_util::{ResourceType, parse_stream_to, parser_from_format},
 };
 
 static GLOBAL_STORE: std::sync::OnceLock<Store> = std::sync::OnceLock::new();
 
-pub struct WebVOWLStore {
+pub struct VOWLRStore {
     pub session: Store,
     upload_handle: Option<tempfile::NamedTempFile>,
 }
-impl WebVOWLStore {
+impl VOWLRStore {
     pub fn new(session: Store) -> Self {
         Self {
             session,
@@ -125,7 +125,7 @@ pub const DEFAULT_QUERY_1: &str = r#"
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-    PREFIX webvowl: <http://www.example.com/iri#>
+    PREFIX vowlr: <http://www.example.com/iri#>
 
     SELECT ?id ?nodeType ?label
     WHERE {
@@ -260,7 +260,7 @@ mod test {
 
     #[test_resources("crates/database/data/owl-functional/*.ofn")]
     async fn test_ofn_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store
             .insert_file(Path::new(&resource), false)
             .await
@@ -276,7 +276,7 @@ mod test {
     }
     #[test_resources("crates/database/data/owl-rdf/*.owl")]
     async fn test_owl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store
             .insert_file(Path::new(&resource), false)
             .await
@@ -292,7 +292,7 @@ mod test {
     }
     #[test_resources("crates/database/data/owl-ttl/*.ttl")]
     async fn test_ttl_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store
             .insert_file(Path::new(&resource), false)
             .await
@@ -308,7 +308,7 @@ mod test {
     }
     #[test_resources("crates/database/data/owl-xml/*.owx")]
     async fn test_owx_parser_format(resource: &str) -> Result<(), WebVowlStoreError> {
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store
             .insert_file(Path::new(&resource), false)
             .await
@@ -326,7 +326,7 @@ mod test {
     #[test_resources("crates/database/data/owl-functional/*.ofn")]
     async fn test_ofn_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
         let mut out = vec![];
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
         let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
         while let Some(result) = results.next().await {
@@ -340,7 +340,7 @@ mod test {
     #[test_resources("crates/database/data/owl-rdf/*.owl")]
     async fn test_owl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
         let mut out = vec![];
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
         let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
         while let Some(result) = results.next().await {
@@ -354,7 +354,7 @@ mod test {
     #[test_resources("crates/database/data/owl-ttl/*.ttl")]
     async fn test_ttl_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
         let mut out = vec![];
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
         let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
         while let Some(result) = results.next().await {
@@ -368,7 +368,7 @@ mod test {
     #[test_resources("crates/database/data/owl-xml/*.owx")]
     async fn test_owx_parser_stream(resource: &str) -> Result<(), WebVowlStoreError> {
         let mut out = vec![];
-        let store = WebVOWLStore::default();
+        let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
         let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
         while let Some(result) = results.next().await {
