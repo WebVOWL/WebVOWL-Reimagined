@@ -29,3 +29,4 @@
     tokio={workspace=true}
     vowlr-parser={path="../parser"}
     vowlr-sparql-queries={path="../sparql_queries"}
+    vowlr-util={path="../util"}

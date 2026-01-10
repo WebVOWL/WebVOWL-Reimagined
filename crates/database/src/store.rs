@@ -7,8 +7,9 @@ use std::{fs::File, time::Instant};
 
 use vowlr_parser::{
     errors::WebVowlStoreError,
-    parser_util::{ResourceType, parse_stream_to, parser_from_format},
+    parser_util::{parse_stream_to, parser_from_format},
 };
+use vowlr_util::datatypes::DataType;
 
 static GLOBAL_STORE: std::sync::OnceLock<Store> = std::sync::OnceLock::new();
 
@@ -53,7 +54,7 @@ impl VOWLRStore {
 
     pub async fn serialize_to_file(&self, path: &Path) -> Result<(), WebVowlStoreError> {
         let mut file = File::create(path)?;
-        let mut results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        let mut results = parse_stream_to(self.session.stream().await?, DataType::OWL).await?;
         while let Some(result) = results.next().await {
             let result = result.unwrap();
             std::io::Write::write_all(&mut file, &result)?;
@@ -69,7 +70,7 @@ impl VOWLRStore {
             "Store size before export: {}",
             self.session.len().await.unwrap_or(0)
         );
-        let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        let results = parse_stream_to(self.session.stream().await?, DataType::OWL).await?;
         Ok(results)
     }
 
@@ -328,7 +329,7 @@ mod test {
         let mut out = vec![];
         let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
-        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, DataType::OWL).await?;
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
@@ -342,7 +343,7 @@ mod test {
         let mut out = vec![];
         let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
-        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, DataType::OWL).await?;
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
@@ -356,7 +357,7 @@ mod test {
         let mut out = vec![];
         let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
-        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, DataType::OWL).await?;
         while let Some(result) = results.next().await {
             out.extend(result?);
         }
@@ -370,7 +371,7 @@ mod test {
         let mut out = vec![];
         let store = VOWLRStore::default();
         store.insert_file(Path::new(&resource), false).await?;
-        let mut results = parse_stream_to(store.session.stream().await?, ResourceType::OWL).await?;
+        let mut results = parse_stream_to(store.session.stream().await?, DataType::OWL).await?;
         while let Some(result) = results.next().await {
             out.extend(result?);
         }

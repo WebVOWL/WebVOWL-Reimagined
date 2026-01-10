@@ -1,4 +1,3 @@
-use crate::network::DataType;
 use futures::StreamExt;
 use gloo_timers::callback::Interval;
 use grapher::prelude::GraphDisplayData;
@@ -6,18 +5,19 @@ use leptos::prelude::*;
 use leptos::server_fn::ServerFnError;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData, Rkyv, StreamingText, TextStream};
 use leptos::task::spawn_local;
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 #[cfg(feature = "server")]
 use reqwest::Client;
 use std::cell::RefCell;
 #[cfg(feature = "server")]
 use std::path::Path;
 use std::rc::Rc;
-use web_sys::{FileList, FormData};
 #[cfg(feature = "server")]
 use vowlr_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
 #[cfg(feature = "server")]
-use webvowl_database::store::WebVOWLStore;
+use vowlr_database::store::VOWLRStore;
+use vowlr_util::datatypes::DataType;
+use web_sys::{FileList, FormData};
 
 #[cfg(feature = "ssr")]
 mod progress {

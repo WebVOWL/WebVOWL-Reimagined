@@ -1,13 +1,16 @@
-use serde::{Serialize, Deserialize};
+use rkyv::{Archive, Deserialize as RDeserialize, Serialize as RSerialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Supported content types.
+#[repr(C)]
+#[derive(Archive, RDeserialize, RSerialize, Deserialize, Serialize, Debug, Clone)]
 pub enum DataType {
     OWL,
     OFN,
     OWX,
     TTL,
     RDF,
-    Ntriples,
+    NTriples,
     NQuads,
     TriG,
     JsonLd,
@@ -16,7 +19,7 @@ pub enum DataType {
     SPARQLXML,
     SPARQLCSV,
     SPARQLTSV,
-    /// fallback when type cant be determined
+    /// Fallback when type can't be determined.
     UNKNOWN,
 }
 
@@ -29,7 +32,7 @@ impl DataType {
             "owx" => Self::OWX,
             "ttl" => Self::TTL,
             "rdf" => Self::RDF,
-            "nt" => Self::Ntriples,
+            "nt" => Self::NTriples,
             "nq" => Self::NQuads,
             "trig" => Self::TriG,
             "jsonld" => Self::JsonLd,
@@ -37,13 +40,13 @@ impl DataType {
             "srj" | "json" => Self::SPARQLJSON,
             "srx" | "xml" => Self::SPARQLXML,
             "src" | "csv" => Self::SPARQLCSV,
-            "tsv" => Self::SPARQLTSV, //Could not find proper SPARQL Result TSV extension.
+            "tsv" => Self::SPARQLTSV, //TODO: Figure out file extension for TSV and if the file extension of TSV SPARQL Query Result differs.
             _ => Self::UNKNOWN,
         }
     }
 
     // Fixed string literals called by reference as to not allocate new memory each time the function is called
-    /// labels the data extension type
+    /// Get mime type of the data.
     pub fn mime_type(&self) -> &'static str {
         match self {
             Self::OWL => "application/owl+xml",
@@ -51,7 +54,7 @@ impl DataType {
             Self::OWX => "application/owl+xml",
             Self::TTL => "text/turtle",
             Self::RDF => "application/rdf+xml",
-            Self::Ntriples => "application/n-triples",
+            Self::NTriples => "application/n-triples",
             Self::NQuads => "application/n-quads",
             Self::TriG => "application/trig",
             Self::JsonLd => "application/ld+json",
