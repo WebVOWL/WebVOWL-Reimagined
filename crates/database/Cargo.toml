@@ -14,22 +14,18 @@
 
 
 [dependencies]
-    env_logger="0.11"
+    env_logger={workspace=true}
     fluent-uri="0.4.1"
-    futures="0.3.31"
+    futures={workspace=true}
     grapher={workspace=true}
-    horned-owl={git="https://github.com/phillord/horned-owl", rev="c4f7835ecae70b5e7281dc23b9b7fc6daa497f1d"}
-    log="0.4"
+    horned-owl={workspace=true}
+    log={workspace=true}
     memchr="2.7.6"
     oxrdf="0.3.1"
-    rdf-fusion="0.1.0"
-    rkyv="0.8.12"
-    smallvec={version="1.15.1", features=["union"]}
+    rdf-fusion={workspace=true}
+    smallvec={workspace=true}
     tempfile="3.10"
     test-generator="^0.3"
-    tokio="1.48.0"
-    webvowl-parser={path="../parser"}
-    webvowl-sparql-queries={path="../sparql_queries"}
-
-[dev-dependencies]
-    env_logger="*"
+    tokio={workspace=true}
+    vowlr-parser={path="../parser"}
+    vowlr-sparql-queries={path="../sparql_queries"}
