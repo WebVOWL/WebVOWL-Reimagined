@@ -19,7 +19,7 @@
     name="vowlr"
     readme="README.md"
     repository="https://github.com/WebVOWL/WebVOWL-Reimagined"
-    version="0.0.1"
+    version="0.1.0-alpha"
 
 [lib]
     crate-type=["cdylib", "rlib"]

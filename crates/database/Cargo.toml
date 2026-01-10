@@ -7,7 +7,7 @@
     name="vowlr-database"
     readme="README.md"
     repository="https://github.com/WebVOWL/WebVOWL-Reimagined"
-    version="0.0.1"
+    version="0.1.0"
 
 [lib]
     crate-type=["cdylib", "rlib"]

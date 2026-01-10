@@ -20,7 +20,7 @@ pub fn NewWebVOWL() -> impl IntoView {
 
 pub fn Version() -> impl IntoView {
     let version = env!("CARGO_PKG_VERSION");
-    view! {<p><b>{format!("Version {} (pending)", version)}</b></p> } //TODO - Remove pending then beta version is ready to be released
+    view! {<p><b>{format!("Version {}", version)}</b></p> }
 }
 
 #[component]
