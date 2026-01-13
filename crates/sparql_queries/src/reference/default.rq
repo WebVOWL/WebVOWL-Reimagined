@@ -18,26 +18,24 @@
             FILTER(!isIRI(?id))
             BIND("blanknode" AS ?nodeType)
         }
-        # REVIEW: Is this deprecated?
-        # UNION
-        # {
-        #     # Identify Intersections
-        #     # Any node (usually blank) that is the subject of an intersectionOf list
-        #     ?id owl:intersectionOf ?target .
-        #     BIND(owl:intersectionOf AS ?nodeType)
-        # }
-        # REVIEW: Is this deprecated?
-        # UNION
-        # {
-        #     # 3. Identify Unions
-        #     ?id owl:unionOf ?list .
-        #     BIND(owl:unionOf AS ?nodeType)
-        # }
         UNION
         {
-            ?id a owl:Restriction .
-            BIND(owl:Restriction AS ?nodeType)
+            # Identify Intersections
+            # Any node (usually blank) that is the subject of an intersectionOf list
+            ?id owl:intersectionOf ?target .
+            BIND(owl:intersectionOf AS ?nodeType)
         }
+        UNION
+        {
+            # 3. Identify Unions
+            ?id owl:unionOf ?list .
+            BIND(owl:unionOf AS ?nodeType)
+        }
+        # UNION
+        # {
+        #     ?id a owl:Restriction .
+        #     BIND(owl:Restriction AS ?nodeType)
+        # }
         UNION
         {
             # COMPLEMENT
@@ -56,21 +54,12 @@
             ?id owl:equivalentClass ?target
             BIND(owl:equivalentClass AS ?nodeType)
         }
-        # REVIEW: Is this deprecated?
-        # UNION
-        # {
-        #     # DISJONT UNION
-        #     ?id owl:disjointUnionOf ?target .
-        #     BIND(owl:disjointUnionOf AS ?nodeType)
-        # }
-        # REVIEW: Is this deprecated?
-        # UNION
-        # {
-        #     # Identify Intersections
-        #     # Any node (usually blank) that is the subject of an intersectionOf list
-        #     ?id owl:intersectionOf ?target .
-        #     BIND(owl:intersectionOf AS ?nodeType)
-        # }
+        UNION
+        {
+            # DISJONT UNION
+            ?id owl:disjointUnionOf ?target .
+            BIND(owl:disjointUnionOf AS ?nodeType)
+        }
         UNION
         {
             # THING
@@ -150,13 +139,12 @@
             ?id owl:DatatypeProperty ?target
             BIND(owl:DatatypeProperty AS ?nodeType)
         }
-        # REVIEW: Is this deprecated?
-        # UNION
-        # {
-        #     # Identify OWL disjoint with
-        #     ?id owl:disjointWith ?target
-        #     BIND(owl:disjointWith AS ?nodeType)
-        # }
+        UNION
+        {
+            # Identify OWL disjoint with
+            ?id owl:disjointWith ?target
+            BIND(owl:disjointWith AS ?nodeType)
+        }
         UNION
         {
             # DEPRECATED PROPERTY
@@ -236,6 +224,7 @@
             }
         BIND(
             IF(?nodeType = owl:Class, 1, 2)
-            AS ?weight)
+            AS ?weight
+            )
     }
     ORDER BY ?weight
