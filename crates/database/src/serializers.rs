@@ -36,11 +36,13 @@ impl Display for Triple {
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
 pub struct Edge {
-    /// The subject
+    /// The IRI of the edge
+    edge_iri: String,
+    /// The subject IRI
     subject: String,
     /// The element type
     element_type: ElementType,
-    /// The object
+    /// The object IRI
     object: String,
 }
 impl Display for Edge {
