@@ -673,7 +673,7 @@ impl GraphDisplayDataSolutionSerializer {
                                     // remain unchanged. This happens if the object of the
                                     // equivalentClass relation is a blank node.
                                     //
-                                    // In other words, nothing to do here.
+                                    // Thus, the object must be merged into the subject.
                                     let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
                                     match (index_s, index_o) {
                                         (Some(index_s), Some(index_o)) => {
