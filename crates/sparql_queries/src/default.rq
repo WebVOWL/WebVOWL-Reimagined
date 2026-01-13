@@ -3,7 +3,6 @@
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     PREFIX vowlr: <http://www.example.com/iri#>
-    PREFIX xml: <http://www.w3.org/XML/1998/namespace>
 
     SELECT ?id ?nodeType ?target ?label
     WHERE {
@@ -19,19 +18,21 @@
             FILTER(!isIRI(?id))
             BIND("blanknode" AS ?nodeType)
         }
-        UNION
-        {
-            # 2. Identify Intersections
-            # Any node (usually blank) that is the subject of an intersectionOf list
-            ?id owl:intersectionOf ?target .
-            BIND(owl:intersectionOf AS ?nodeType)
-        }
-        UNION
-        {
-            # 3. Identify Unions
-            ?id owl:unionOf ?target .
-            BIND(owl:unionOf AS ?nodeType)
-        }
+        # REVIEW: Is this deprecated?
+        # UNION
+        # {
+        #     # Identify Intersections
+        #     # Any node (usually blank) that is the subject of an intersectionOf list
+        #     ?id owl:intersectionOf ?target .
+        #     BIND(owl:intersectionOf AS ?nodeType)
+        # }
+        # REVIEW: Is this deprecated?
+        # UNION
+        # {
+        #     # 3. Identify Unions
+        #     ?id owl:unionOf ?list .
+        #     BIND(owl:unionOf AS ?nodeType)
+        # }
         UNION
         {
             ?id a owl:Restriction .
@@ -55,19 +56,21 @@
             ?id owl:equivalentClass ?target
             BIND(owl:equivalentClass AS ?nodeType)
         }
-        UNION
-        {
-            # DISJONT UNION
-            ?id owl:disjointUnionOf ?target .
-            BIND(owl:disjointUnionOf AS ?nodeType)
-        }
-        UNION
-        {
-            # 2. Identify Intersections
-            # Any node (usually blank) that is the subject of an intersectionOf list
-            ?id owl:intersectionOf ?target .
-            BIND(owl:intersectionOf AS ?nodeType)
-        }
+        # REVIEW: Is this deprecated?
+        # UNION
+        # {
+        #     # DISJONT UNION
+        #     ?id owl:disjointUnionOf ?target .
+        #     BIND(owl:disjointUnionOf AS ?nodeType)
+        # }
+        # REVIEW: Is this deprecated?
+        # UNION
+        # {
+        #     # Identify Intersections
+        #     # Any node (usually blank) that is the subject of an intersectionOf list
+        #     ?id owl:intersectionOf ?target .
+        #     BIND(owl:intersectionOf AS ?nodeType)
+        # }
         UNION
         {
             # THING
@@ -76,7 +79,7 @@
         }
         UNION
         {
-            # CLASS
+            # RDFS CLASS
             ?id a rdfs:Class .
             FILTER(?id != owl:Class)
             BIND(rdfs:Class AS ?nodeType)
@@ -108,25 +111,8 @@
         UNION
         {
             # 3. Identify datatypes
-            #SELECT ?dt ?nodeType (STR(?dt) AS ?label) 
-            #WHERE{
-            VALUES ?dt{
-                rdf:HTML rdf:PlainLiteral rdf:XMLLiteral xsd:anySimpleType 
-                xsd:anyURI xsd:base64Binary xsd:boolean xsd:byte xsd:date 
-                xsd:dateTime xsd:decimal xsd:double xsd:duration xsd:ENTITY
-                xsd:float xsd:gDay xsd:gMonth xsd:gMonthDay xsd:gYear
-                xsd:gYearMonth xsd:hexBinary xsd:ID xsd:IDREF xsd:int xsd:integer
-                xsd:language xsd:long xsd:Name xsd:NCName xsd:negativeInteger
-                xsd:NMTOKEN xsd:nonNegativeInteger xsd:nonPositiveInteger 
-                xsd:normalizedString xsd:NOTATION xsd:positiveInteger xsd:QName 
-                xsd:short xsd:string xsd:time xsd:token xsd:unsignedByte 
-                xsd:unsignedInt xsd:unsignedLong xsd:unsignedShort
-            }
+            ?id rdfs:Datatype ?target
             BIND(rdfs:Datatype AS ?nodeType)
-            BIND(?dt AS ?labelIRI)
-            BIND(?dt AS ?label)
-
-            #}
         }
         UNION
         {
@@ -138,8 +124,6 @@
         #########
         # EDGES #
         #########
-        # NOTE: If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
-        #       EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
         UNION
         {
             # OBJECT PROPERTY
@@ -150,32 +134,29 @@
         }
         UNION
         {
-            # 4. Identify OWL datatype properties
-            ?id a owl:DatatypeProperty .
-            OPTIONAL {?id rdfs:range ?target}
-            BIND(owl:DatatypeProperty AS ?nodeType)
-        }
-        UNION
-        {
-            # 1. Identify RDF properties
-            ?id a rdf:Property .
-            FILTER NOT EXISTS {?id a owl:ObjectProperty}
-            FILTER NOT EXISTS {?id a owl:DatatypeProperty}
-            OPTIONAL {?id rdfs:range ?target}
+            # Identify RDF properties
+            ?id rdf:Property ?target
             BIND(rdf:Property AS ?nodeType)
         }
         UNION
         {
-            # 2. Identify subclasses
-            ?id rdfs:subClassOf ?target .
+            # Identify subclasses
+            ?id rdfs:subClassOf ?target
             BIND(rdfs:subClassOf AS ?nodeType)
         }
         UNION
         {
-            # 5. Identify OWL disjoint with
-            ?id owl:disjointWith ?target.
-            BIND(owl:disjointWith AS ?nodeType)
+            # Identify OWL datatype properties
+            ?id owl:DatatypeProperty ?target
+            BIND(owl:DatatypeProperty AS ?nodeType)
         }
+        # REVIEW: Is this deprecated?
+        # UNION
+        # {
+        #     # Identify OWL disjoint with
+        #     ?id owl:disjointWith ?target
+        #     BIND(owl:disjointWith AS ?nodeType)
+        # }
         UNION
         {
             # DEPRECATED PROPERTY
@@ -214,8 +195,13 @@
             ?id xml:base ?base .
             BIND(xml:base AS ?nodeType)
         }
+
         UNION
         {
+            # WIP: Identify OWL deprecated properties
+            # ?id owl:deprecated "true"^^<http://www.w3.org/2001/XMLSchema#boolean>
+            # BIND("DeprecatedProperty" AS ?nodeType)
+        
             # DEPRECATED
             ?id owl:deprecated ?target .
             BIND(owl:deprecated AS ?nodeType)
@@ -233,7 +219,7 @@
                 # SERIALIZER
                 # 4. Use fragment identifier of rdf:about, if exists.
                 #    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-node-property-elements
-                # 5. If fragment not found but rdf:about exists, use string after final slash ('/').
+                # 5. If fragment not found but rdf:about exists, use whole string.
                 #    TODO: Insert link to docs about using prefix notation.
                 # 6. Create a fallback label from the ElementType.
                 OPTIONAL { ?id rdfs:label ?theLabel }
