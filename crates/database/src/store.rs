@@ -56,12 +56,13 @@ impl WebVOWLStore {
 
     pub async fn serialize_stream(
         &self,
+        resource_type: ResourceType
     ) -> Result<BoxStream<'static, Result<Vec<u8>, WebVowlStoreError>>, WebVowlStoreError> {
         info!(
             "Store size before export: {}",
             self.session.len().await.unwrap_or(0)
         );
-        let results = parse_stream_to(self.session.stream().await?, ResourceType::OWL).await?;
+        let results = parse_stream_to(self.session.stream().await?, resource_type).await?;
         Ok(results)
     }
 

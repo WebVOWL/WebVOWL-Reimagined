@@ -21,7 +21,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use crate::errors::{WebVowlStoreError, WebVowlStoreErrorKind};
 use std::io;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
 pub enum ResourceType {
     OFN,
     OWX,
@@ -33,6 +33,23 @@ pub enum ResourceType {
     TriG,
     JsonLd,
     N3,
+}
+impl From <String> for ResourceType {
+    fn from(s: String) -> Self {
+        match s.as_str() {
+            "OFN" => ResourceType::OFN,
+            "OWX" => ResourceType::OWX,
+            "RDF" => ResourceType::RDF,
+            "OWL" => ResourceType::OWL,
+            "TTL" => ResourceType::TTL,
+            "NTriples" => ResourceType::NTriples,
+            "NQuads" => ResourceType::NQuads,
+            "TriG" => ResourceType::TriG,
+            "JsonLd" => ResourceType::JsonLd,
+            "N3" => ResourceType::N3,
+            _ => ResourceType::RDF,
+        }
+    }  
 }
 pub enum ParserInput {
     File(Vec<u8>),

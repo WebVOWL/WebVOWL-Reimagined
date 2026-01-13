@@ -98,7 +98,6 @@ fn get_edge_pattern(edge: &FilterEdge) -> Option<String> {
 pub fn generate_sparql_query(
     node_checks: &HashMap<FilterNode, bool>,
     edge_checks: &HashMap<FilterEdge, bool>,
-    char_checks: &HashMap<Characteristic, bool>,
 ) -> String {
     let mut patterns: Vec<String> = Vec::new();
 
