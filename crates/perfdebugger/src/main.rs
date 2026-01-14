@@ -5,7 +5,7 @@ use perfdebugger::util::query;
 use std::env;
 use std::path::Path;
 use vowlr_database::store::VOWLRStore;
-use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
+use vowlr_sparql_queries::prelude::DEFAULT_QUERY;
 
 #[tokio::main]
 async fn main() {

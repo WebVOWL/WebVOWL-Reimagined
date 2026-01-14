@@ -7,7 +7,7 @@ use std::env;
 use std::path::Path;
 use vowlr_database::prelude::GraphDisplayDataSolutionSerializer;
 use vowlr_database::store::VOWLRStore;
-use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
+use vowlr_sparql_queries::prelude::DEFAULT_QUERY;
 
 #[tokio::main]
 pub async fn main() {
@@ -29,7 +29,7 @@ pub async fn main() {
 
     let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer {};
-    let query_stream = vowlr.session.query(DEFAULT_QUERY).await.unwrap();
+    let query_stream = vowlr.session.query(DEFAULT_QUERY.as_str()).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)
