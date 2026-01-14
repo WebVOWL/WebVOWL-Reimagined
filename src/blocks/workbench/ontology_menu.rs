@@ -4,7 +4,7 @@ use grapher::prelude::{EVENT_DISPATCHER, RenderEvent};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
-use vowlr_sparql_queries::default_query::DEFAULT_QUERY;
+use vowlr_sparql_queries::prelude::DEFAULT_QUERY;
 use web_sys::HtmlInputElement;
 
 #[component]
