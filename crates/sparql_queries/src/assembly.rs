@@ -1,3 +1,10 @@
+use crate::{
+    element_type_injection::SparqlSnippet, prelude::GENERAL_SNIPPETS, snippets::void::VOID,
+};
+use grapher::prelude::ElementType;
+use std::collections::HashMap;
+
+// TODO: Remove when automatic prefix fetching is implemented.
 pub const DEFAULT_PREFIXES: [&str; 6] = [
     "owl: <http://www.w3.org/2002/07/owl#>",
     "rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
@@ -7,6 +14,7 @@ pub const DEFAULT_PREFIXES: [&str; 6] = [
     "xml: <http://www.w3.org/XML/1998/namespace>",
 ];
 
+/// Compiles snippets of SPARQL code into full-fledged SPARQL queries.
 pub struct QueryAssembler;
 
 impl QueryAssembler {
@@ -15,7 +23,7 @@ impl QueryAssembler {
     /// `prefixes` is the collection of prefixes to use.
     /// An example of a prefix is: `owl: <http://www.w3.org/2002/07/owl#>`.
     ///
-    /// `snippets` is the collection of SPARQL snippets to use, defined in the module [`snippets.rs`].
+    /// `snippets` is the collection of SPARQL snippets to use.
     pub fn assemble_query(prefixes: Vec<&str>, snippets: Vec<&'static str>) -> String {
         format!(
             r#"
@@ -42,5 +50,21 @@ impl QueryAssembler {
                 .collect::<Vec<_>>()
                 .join(" UNION "),
         )
+    }
+
+    /// Construct a filtered SPARQL query based on the truth value of entries in `element_filter`.
+    pub fn assemble_filtered_query(element_filter: &HashMap<ElementType, bool>) -> String {
+        let mut snippets = element_filter
+            .iter()
+            .filter(|&(_, &checked)| checked)
+            .map(|(elem, _)| elem.snippet())
+            .collect::<Vec<&str>>();
+
+        if snippets.len() > 0 {
+            snippets.extend(GENERAL_SNIPPETS);
+        } else {
+            snippets.push(VOID);
+        }
+        Self::assemble_query(DEFAULT_PREFIXES.into(), snippets)
     }
 }

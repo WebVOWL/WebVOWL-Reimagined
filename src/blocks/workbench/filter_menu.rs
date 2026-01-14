@@ -13,7 +13,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{debug, error};
 use std::collections::HashMap;
-use vowlr_sparql_queries::filter_menu_patterns::generate_sparql_query;
+use vowlr_sparql_queries::prelude::QueryAssembler;
 
 use classes::{is_owl_class, is_rdf_class};
 use filtergroup::FilterGroup;
@@ -109,11 +109,16 @@ pub fn FilterMenu() -> impl IntoView {
     let open_properties = RwSignal::new(false);
     // let (open_chars, set_open_chars) = signal(false);
 
-    // Effect::new(move || {
-    //     let query = generate_sparql_query(element_checks.get() /* , char_checks.get()*/);
-    //     debug!("{}", query);
-    //     update_graph(query, graph_data);
-    // });
+    Effect::watch(
+        move || element_checks.get(),
+        move |checks, _, _| {
+            let query =
+                QueryAssembler::assemble_filtered_query(checks /* , char_checks.get()*/);
+            leptos::logging::log!("{}", query);
+            update_graph(query, graph_data);
+        },
+        false,
+    );
 
     view! {
         <WorkbenchMenuItems title="Filter by Type">

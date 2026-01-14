@@ -6,7 +6,6 @@
 
 mod assembly;
 mod element_type_injection;
-pub mod filter_menu_patterns;
 mod snippets;
 
 /// Exports all the core types of the library.
@@ -15,9 +14,10 @@ pub mod prelude {
     use std::sync::LazyLock;
 
     use crate::assembly::DEFAULT_PREFIXES;
-    use crate::assembly::QueryAssembler;
+    pub use crate::assembly::QueryAssembler;
     use crate::snippets::general::{LABEL, LIST_FLATTENING, OWL_DEPRECATED, XML_BASE};
     use crate::snippets::snippets_from_enum;
+    use crate::snippets::void::VOID;
 
     /// SPARQL snippets that should generally be included in all queries.
     pub static GENERAL_SNIPPETS: [&str; 4] = [XML_BASE, LIST_FLATTENING, OWL_DEPRECATED, LABEL];
