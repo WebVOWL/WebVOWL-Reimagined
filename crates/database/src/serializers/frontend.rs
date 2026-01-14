@@ -251,8 +251,8 @@ impl GraphDisplayDataSolutionSerializer {
                 Some(edge)
             }
             (None, Some(obj_iri)) => {
-                data_buffer.unknown_buffer.insert(obj_iri, triple.clone());
                 warn!("Cannot resolve subject of triple:\n {}", triple);
+                data_buffer.unknown_buffer.insert(obj_iri, triple.clone());
                 None
             }
             (Some(sub_iri), None) => {
