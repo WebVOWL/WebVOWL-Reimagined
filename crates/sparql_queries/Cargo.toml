@@ -13,10 +13,4 @@
 
 [dependencies]
     const_format="0.2.35"
-    [dependencies.grapher]
-        # branch="new_nodetype"
-        features=["webgl"]
-        git="https://github.com/WebVOWL/WasmGrapher"
-        # optional=true
-        # path="../../../RustGrapher"
-        # version="0.3"
+    grapher={workspace=true}
