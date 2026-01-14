@@ -90,7 +90,7 @@ fn UploadInput() -> impl IntoView {
                         Ok(new_graph_data) => {
                             graph_data.set(new_graph_data.clone());
                             total_graph_data.set(new_graph_data.clone());
-                            EVENT_DISPATCHER
+                            let _ = EVENT_DISPATCHER
                                 .rend_write_chan
                                 .send(RenderEvent::LoadGraph(new_graph_data));
                         }

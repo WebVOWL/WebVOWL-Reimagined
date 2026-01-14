@@ -27,7 +27,7 @@ pub fn update_graph(query: String, graph_data: RwSignal<GraphDisplayData>) {
         match output_result {
             Ok(new_graph_data) => {
                 graph_data.set(new_graph_data.clone());
-                EVENT_DISPATCHER
+                let _ = EVENT_DISPATCHER
                     .rend_write_chan
                     .send(RenderEvent::LoadGraph(new_graph_data));
             }
