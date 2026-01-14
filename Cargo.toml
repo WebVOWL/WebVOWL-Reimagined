@@ -77,8 +77,6 @@
     rayon="1.10"
     reqwest={version="0.12.24", optional=true, features=["json", "stream"]}
     rkyv={workspace=true}
-    strum="0.27"
-    strum_macros="0.27"
     tokio={workspace=true, optional=true}
     vowlr-database={path="crates/database", optional=true}
     vowlr-parser={path="crates/parser", optional=true}
