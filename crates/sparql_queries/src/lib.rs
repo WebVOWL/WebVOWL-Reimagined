@@ -17,7 +17,6 @@ pub mod prelude {
     pub use crate::assembly::QueryAssembler;
     use crate::snippets::general::{LABEL, LIST_FLATTENING, OWL_DEPRECATED, XML_BASE};
     use crate::snippets::snippets_from_enum;
-    use crate::snippets::void::VOID;
 
     /// SPARQL snippets that should generally be included in all queries.
     pub static GENERAL_SNIPPETS: [&str; 4] = [XML_BASE, LIST_FLATTENING, OWL_DEPRECATED, LABEL];
