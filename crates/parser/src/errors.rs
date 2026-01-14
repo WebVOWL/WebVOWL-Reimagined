@@ -5,7 +5,9 @@ use std::{
 
 use horned_owl::error::HornedError;
 use rdf_fusion::{
-    error::LoaderError, execution::sparql::error::QueryEvaluationError, model::{IriParseError, StorageError},
+    error::LoaderError,
+    execution::sparql::error::QueryEvaluationError,
+    model::{IriParseError, StorageError},
 };
 use tokio::task::JoinError;
 
