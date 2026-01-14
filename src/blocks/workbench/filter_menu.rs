@@ -126,12 +126,10 @@ pub fn FilterMenu() -> impl IntoView {
                 <button
                     class="text-sm text-blue-600 hover:text-blue-800"
                     on:click=move |_| {
+                        let c = element_checks.get();
                         element_checks
                             .update(|map| {
-                                let target = !element_checks
-                                    .get_untracked()
-                                    .values()
-                                    .all(|&v| v);
+                                let target = !c.values().all(|&v| v);
                                 for (_, v) in map.iter_mut() {
                                     *v = target;
                                 }

@@ -28,7 +28,7 @@ where
                                 <input
                                     type="checkbox"
                                     prop:checked=move || {
-                                        *checks.get().get(&item).unwrap_or(&true)
+                                        *checks.read().get(&item).unwrap_or(&true)
                                     }
                                     on:change=move |_| {
                                         checks
@@ -41,10 +41,10 @@ where
                             </label>
                             <div class="text-sm text-gray-600">
                                 {move || {
-                                    if *checks.get().get(&item).unwrap_or(&true) {
-                                        format!("{}", *counts.get().get(&item).unwrap_or(&0))
+                                    if *checks.read().get(&item).unwrap_or(&true) {
+                                        format!("{}", *counts.read().get(&item).unwrap_or(&0))
                                     } else {
-                                        format!("(0/{})", *counts.get().get(&item).unwrap_or(&0))
+                                        format!("(0/{})", *counts.read().get(&item).unwrap_or(&0))
                                     }
                                 }}
                             </div>

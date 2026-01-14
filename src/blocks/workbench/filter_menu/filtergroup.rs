@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use std::{collections::HashMap, hash::Hash};
 
 use super::filtertype::FilterType;
@@ -14,76 +14,80 @@ pub fn FilterGroup<T>(
 where
     T: std::fmt::Display + Copy + Clone + Eq + Hash + Send + Sync + 'static,
 {
-    view! {
-        <div class="pb-2 mb-2 border-b">
-            <div class="flex gap-2 justify-between items-center">
-                <button
-                    class="flex-1 py-2 text-left hover:bg-gray-100"
-                    on:click=move |_| is_open.update(|v| *v = !*v)
-                >
-                    <div class="flex justify-between items-center">
-                        <div class="font-medium">
-                            {
+    if items.len() == 0 {
+        Either::Left(())
+    } else {
+        Either::Right(view! {
+            <div class="pb-2 mb-2 border-b">
+                <div class="flex gap-2 justify-between items-center">
+                    <button
+                        class="flex-1 py-2 text-left hover:bg-gray-100"
+                        on:click=move |_| is_open.update(|v| *v = !*v)
+                    >
+                        <div class="flex justify-between items-center">
+                            <div class="font-medium">
+                                {
+                                    let i = items.clone();
+                                    move || {
+                                        let read_counts = counts.read();
+                                        let read_checks = checks.read();
+                                        let total_count: usize = i
+                                            .iter()
+                                            .map(|item| read_counts.get(item).unwrap_or(&0))
+                                            .sum();
+                                        let rendered: usize = i
+                                            .iter()
+                                            .map(|item| {
+                                                if *read_checks.get(item).unwrap_or(&true) {
+                                                    *read_counts.get(item).unwrap_or(&0)
+                                                } else {
+                                                    0
+                                                }
+                                            })
+                                            .sum();
+                                        format!("{}: ({}/{})", name, rendered, total_count)
+                                    }
+                                }
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {move || if *is_open.read() { "▾" } else { "▸" }}
+                            </div>
+                        </div>
+                    </button>
+                    <label class="flex gap-1 items-center">
+                        <input
+                            type="checkbox"
+                            class="w-4 h-4 cursor-pointer"
+                            prop:checked={
                                 let i = items.clone();
                                 move || {
-                                    let read_counts = counts.read();
-                                    let read_checks = checks.read_untracked();
-                                    let total_count: usize = i
-                                        .iter()
-                                        .map(|item| read_counts.get(item).unwrap_or(&0))
-                                        .sum();
-                                    let rendered: usize = i
-                                        .iter()
-                                        .map(|item| {
-                                            if *read_checks.get(item).unwrap_or(&true) {
-                                                *read_counts.get(item).unwrap_or(&0)
-                                            } else {
-                                                0
-                                            }
-                                        })
-                                        .sum();
-                                    format!("{}: ({}/{})", name, rendered, total_count)
+                                    let read_checks = checks.get();
+                                    i.iter().all(|item| *read_checks.get(item).unwrap_or(&true))
                                 }
                             }
-                        </div>
-                        <div class="text-sm text-gray-500">
-                            {move || if is_open.get() { "▾" } else { "▸" }}
-                        </div>
-                    </div>
-                </button>
-                <label class="flex gap-1 items-center">
-                    <input
-                        type="checkbox"
-                        class="w-4 h-4 cursor-pointer"
-                        prop:checked={
-                            let i = items.clone();
-                            move || {
-                                let read_checks = checks.read_untracked();
-                                i.iter().all(|item| *read_checks.get(item).unwrap_or(&true))
+                            on:change={
+                                let i = items.clone();
+                                move |_| {
+                                    let c = checks.get();
+                                    checks
+                                        .update(|map| {
+                                            let all_enabled = i
+                                                .iter()
+                                                .all(|item| *c.get(item).unwrap_or(&true));
+                                            for item in &i {
+                                                map.insert(*item, !all_enabled);
+                                            }
+                                        });
+                                }
                             }
-                        }
-                        on:change={
-                            let i = items.clone();
-                            move |_| {
-                                checks
-                                    .update(|map| {
-                                        let read_checks = checks.read_untracked();
-                                        let all_enabled = i
-                                            .iter()
-                                            .all(|item| *read_checks.get(item).unwrap_or(&true));
-                                        for item in &i {
-                                            map.insert(*item, !all_enabled);
-                                        }
-                                    });
-                            }
-                        }
-                    />
-                </label>
-            </div>
+                        />
+                    </label>
+                </div>
 
-            <FilterType<
-            T,
-        > is_open=is_open items=items checks=checks counts=counts />
-        </div>
+                <FilterType<
+                T,
+            > is_open=is_open items=items checks=checks counts=counts />
+            </div>
+        })
     }
 }
