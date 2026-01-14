@@ -1,5 +1,4 @@
 use std::{
-    fmt::{Display, Formatter},
     io::{Error, ErrorKind},
     panic::Location,
 };
