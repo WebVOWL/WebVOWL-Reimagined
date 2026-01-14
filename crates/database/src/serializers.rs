@@ -37,7 +37,7 @@ impl Display for Triple {
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
 pub struct Edge {
     /// The IRI of the edge
-    edge_iri: String,
+    // edge_iri: String,
     /// The subject IRI
     subject: String,
     /// The element type
