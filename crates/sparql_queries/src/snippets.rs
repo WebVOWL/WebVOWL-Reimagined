@@ -1,9 +1,8 @@
 pub mod general;
-pub mod owl;
-pub mod rdf_vocab;
+pub mod void;
 
 use crate::element_type_injection::SparqlSnippet;
-use grapher::prelude::IntoEnumIterator;
+use grapher::prelude::strum::IntoEnumIterator;
 
 pub fn snippets_from_enum<T>() -> Vec<&'static str>
 where
