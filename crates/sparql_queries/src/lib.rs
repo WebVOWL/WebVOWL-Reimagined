@@ -2,9 +2,38 @@
 //!
 //! This crate is intentionally dependency-free and WASM-safe so it can be used by:
 //! - the SSR/server side (via `vowlr-database`)
-//! - the client/wasm side (via `vowlr-reimagined`)
+//! - the client/wasm side (via `vowlr`)
 
-pub mod default;
-pub mod default_query;
+mod assembly;
+mod element_type_injection;
 pub mod filter_menu_patterns;
-pub mod general;
+mod snippets;
+
+/// Exports all the core types of the library.
+pub mod prelude {
+    use grapher::prelude::{OwlEdge, OwlNode, RdfEdge, RdfsEdge, RdfsNode};
+    use std::sync::LazyLock;
+
+    use crate::assembly::DEFAULT_PREFIXES;
+    use crate::assembly::QueryAssembler;
+    use crate::snippets::general::{LABEL, LIST_FLATTENING, OWL_DEPRECATED, XML_BASE};
+    use crate::snippets::snippets_from_enum;
+
+    /// SPARQL snippets that should generally be included in all queries.
+    pub static GENERAL_SNIPPETS: [&str; 4] = [XML_BASE, LIST_FLATTENING, OWL_DEPRECATED, LABEL];
+
+    /// The default query contains all classes and properties supported by VOWL-R.
+    pub static DEFAULT_QUERY: LazyLock<String> = LazyLock::new(|| {
+        let snippets = vec![
+            snippets_from_enum::<OwlNode>(),
+            snippets_from_enum::<OwlEdge>(),
+            snippets_from_enum::<RdfEdge>(),
+            snippets_from_enum::<RdfsNode>(),
+            snippets_from_enum::<RdfsEdge>(),
+            GENERAL_SNIPPETS.into(),
+        ]
+        .concat();
+
+        QueryAssembler::assemble_query(DEFAULT_PREFIXES.into(), snippets)
+    });
+}
