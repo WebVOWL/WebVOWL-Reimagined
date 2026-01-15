@@ -76,7 +76,7 @@ impl GraphDisplayDataSolutionSerializer {
             0
         );
         if !data_buffer.failed_buffer.is_empty() {
-            warn!("Failed to serialize: {:#?}", data_buffer.failed_buffer);
+            error!("Failed to serialize: {:#?}", data_buffer.failed_buffer);
         }
         debug!("{}", data_buffer);
         *data = data_buffer.into();
