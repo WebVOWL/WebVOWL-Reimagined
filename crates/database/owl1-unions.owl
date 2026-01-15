@@ -76,6 +76,8 @@
     <!-- http://www.example.com/owl1#Person -->
 
     <owl:Class rdf:about="http://www.example.com/owl1#Person"/>
+    <owl:Class rdf:about="http://www.example.com/owl1#Guardian"/>
+    <owl:Class rdf:about="http://www.example.com/owl1#ParentOrGuardian"/>
 
 
 
@@ -92,6 +94,19 @@
                         <owl:someValuesFrom rdf:resource="http://www.example.com/owl1#Person"/>
                     </owl:Restriction>
                 </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+
+     <!-- http://www.example.com/owl1#ParentOrGuardian -->
+
+    <owl:Class rdf:about="http://www.example.com/owl1#ParentOrGuardian">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Parent"/>
+                    <rdf:Description rdf:about="http://www.example.com/owl1#Guardian"/>
+                </owl:unionOf>
             </owl:Class>
         </owl:equivalentClass>
     </owl:Class>

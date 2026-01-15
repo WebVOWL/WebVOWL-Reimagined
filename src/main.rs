@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
 
     let pkg_name = env!("CARGO_PKG_NAME");
     let pkg_version = env!("CARGO_PKG_VERSION");
+
     info!("Starting {pkg_name} server [v{pkg_version}]");
 
     let conf = get_configuration(None).unwrap();
