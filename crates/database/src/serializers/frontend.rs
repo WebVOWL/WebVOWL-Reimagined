@@ -151,25 +151,18 @@ impl GraphDisplayDataSolutionSerializer {
         data_buffer: &mut SerializationDataBuffer,
         mut x: String,
     ) -> Option<String> {
-        if data_buffer.element_buffer.contains_key(&x) {
-            info!(
-                "resolved: {}: {}",
-                x,
-                data_buffer.element_buffer.get(&x).unwrap()
-            );
+        if let Some(elem) = data_buffer.element_buffer.get(&x) {
+            info!("resolved: {}: {}", x, elem);
             return Some(x);
         }
+
         while let Some(redirected) = data_buffer.edge_redirection.get(&x) {
             let new_x = redirected.clone();
-            if data_buffer.element_buffer.contains_key(&new_x) {
-                info!(
-                    "resolved: {}: {}",
-                    new_x,
-                    data_buffer.element_buffer.get(&new_x).unwrap()
-                );
-                return Some(new_x);
+            if let Some(elem) = data_buffer.element_buffer.get(&x) {
+                info!("resolved: {}: {}", x, elem);
+                return Some(x);
             }
-            info!("checked: {} ", x);
+            debug!("checked: {} ", x);
             x = new_x;
         }
         None
