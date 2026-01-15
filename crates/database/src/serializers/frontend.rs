@@ -573,7 +573,13 @@ impl GraphDisplayDataSolutionSerializer {
                     }
                     // rdfs::MEMBER => {}
                     // rdfs::RANGE => {}
-                    // rdfs::RESOURCE => {}
+                    rdfs::RESOURCE => {
+                        self.insert_node(
+                            data_buffer,
+                            triple,
+                            ElementType::Rdfs(RdfsType::Node(RdfsNode::Resource)),
+                        );
+                    }
                     // rdfs::SEE_ALSO => {}
                     rdfs::SUB_CLASS_OF => {
                         self.insert_edge(
