@@ -193,18 +193,6 @@
     overflow-checks=false
     panic="abort"
 
-# This profile is a production release of the server binary with debug info.
-# Used by developers to test and debug a production release
-[profile.preview]
-    debug=true
-    inherits="release"
-
-# This profile is a production release of the WebAssembly module with debug info.
-# Used by developers to test and debug a production release
-[profile.wasm-preview]
-    debug=true
-    inherits="release"
-
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
     inherits="release"
