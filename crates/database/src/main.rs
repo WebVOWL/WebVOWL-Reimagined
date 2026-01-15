@@ -28,7 +28,7 @@ pub async fn main() {
     info!("Loaded {} quads", webvowl.session.len().await.unwrap());
 
     let mut data_buffer = GraphDisplayData::new();
-    let mut solution_serializer = GraphDisplayDataSolutionSerializer{};
+    let solution_serializer = GraphDisplayDataSolutionSerializer{};
     let query_stream = webvowl.session.query(DEFAULT_QUERY).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
@@ -45,6 +45,7 @@ pub async fn main() {
 }
 
 pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
+    info!("--- Elements ---");
     for (index, (element, label)) in data_buffer
         .elements
         .iter()
@@ -53,10 +54,19 @@ pub fn print_graph_display_data(data_buffer: &GraphDisplayData) {
     {
         info!("{index}: {element:?} -> {label}");
     }
+    info!("--- Edges ---");
     for edge in data_buffer.edges.iter() {
         info!(
             "{} -> {:?} -> {}",
             data_buffer.labels[edge[0]], data_buffer.elements[edge[1]], data_buffer.labels[edge[2]]
         );
+    }
+    info!("--- Characteristics ---");
+    for (iri, characteristics) in data_buffer.characteristics.iter() {
+        info!("{} -> {:?}", iri, characteristics);
+    }
+    info!("--- Cardinalities ---");
+    for (iri, cardinality) in data_buffer.cardinalities.iter() {
+        info!("{} -> {:?}", iri, cardinality);
     }
 }
