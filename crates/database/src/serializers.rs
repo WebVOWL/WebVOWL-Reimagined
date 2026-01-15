@@ -1,10 +1,12 @@
-use grapher::prelude::{ElementType, GraphDisplayData};
-use log::error;
-use oxrdf::Term;
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Formatter},
 };
+
+use grapher::prelude::{ElementType, GraphDisplayData};
+use log::error;
+use oxrdf::Term;
+
 pub mod frontend;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
@@ -19,18 +21,18 @@ pub struct Triple {
 
 impl Display for Triple {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Triple {{")?;
-        writeln!(f, "\tsubject: {}", self.id)?;
-        writeln!(f, "\telement_type: {}", self.element_type,)?;
-        writeln!(
+        write!(f, "Triple{{ ")?;
+        write!(f, "{} - ", self.id)?;
+        write!(f, "{} - ", self.element_type,)?;
+        write!(
             f,
-            "\tobject: {}",
+            "{}",
             self.target
                 .as_ref()
                 .map(|t| t.to_string())
                 .unwrap_or_default(),
         )?;
-        writeln!(f, "}}")
+        write!(f, "}}")
     }
 }
 
@@ -47,11 +49,12 @@ pub struct Edge {
 }
 impl Display for Edge {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Edge {{")?;
-        writeln!(f, "\tsubject: {}", self.subject)?;
-        writeln!(f, "\telement_type: {}", self.element_type)?;
-        writeln!(f, "\tobject: {}", self.object)?;
-        writeln!(f, "}}")
+        write!(
+            f,
+            "Edge{{ {} - {} - {} }}",
+            self.subject, self.element_type, self.object
+        )?;
+        Ok(())
     }
 }
 
@@ -89,6 +92,7 @@ pub struct SerializationDataBuffer {
     /// Consider the triples:
     /// ```sparql
     ///     ex:Mother owl:equivalentClass ex:blanknode1
+    ///
     ///     ex:blanknode1 rdf:type owl:Class
     ///     ex:blanknode1 owl:intersectionOf ex:blanknode2
     /// ```
@@ -118,6 +122,12 @@ pub struct SerializationDataBuffer {
     /// - Value = The label.
     label_buffer: HashMap<String, String>,
 
+    /// Stores labels of edges.
+    ///
+    /// - Key = The edge.
+    /// - Value = The label.
+    edge_label_buffer: HashMap<Edge, String>,
+
     /// Edges in graph, to avoid duplicates
     edge_buffer: HashSet<Edge>,
     /// Maps from edge to its characteristic.
@@ -128,7 +138,8 @@ pub struct SerializationDataBuffer {
 
     /// Stores unresolved triples.
     ///
-    /// - Key = The subject IRI of the triple
+    /// - Key = The unresolved IRI of the triple
+    ///   can be either the subject, object or both (in this case, subject is used)
     /// - Value = The unresolved triple.
     unknown_buffer: HashMap<String, Triple>,
     /// Stores triples that are impossible to serialize.
@@ -153,6 +164,7 @@ impl SerializationDataBuffer {
             edges_include_map: HashMap::new(),
             global_element_mappings: HashMap::new(),
             label_buffer: HashMap::new(),
+            edge_label_buffer: HashMap::new(),
             edge_buffer: HashSet::new(),
             unknown_buffer: HashMap::new(),
             failed_buffer: Vec::new(),
@@ -184,7 +196,7 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
         for edge in self.edge_buffer.iter() {
             let subject_idx = iricache.get(&edge.subject);
             let object_idx = iricache.get(&edge.object);
-            let maybe_label = self.label_buffer.remove(&edge.subject);
+            let maybe_label = self.edge_label_buffer.remove(&edge);
 
             match (subject_idx, object_idx, maybe_label) {
                 (Some(subject_idx), Some(object_idx), Some(label)) => {
@@ -195,6 +207,15 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
                         display_data.elements.len() - 1,
                         *object_idx,
                     ]);
+                }
+                (Some(_), Some(_), None) => {
+                    error!("Label in edge not found in iricache: {}", edge.subject);
+                }
+                (None, _, _) => {
+                    error!("Subject in edge not found in iricache: {}", edge.subject);
+                }
+                (_, None, _) => {
+                    error!("Object in edge not found in iricache: {}", edge.object);
                 }
                 _ => {
                     error!("Edge not found in iricache: {}", edge);
@@ -224,21 +245,45 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
 impl Display for SerializationDataBuffer {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "SerializationDataBuffer {{")?;
-        writeln!(f, "\telement_buffer: {:?}", self.element_buffer)?;
-        writeln!(f, "\tedge_redirection: {:?}", self.edge_redirection)?;
-        writeln!(f, "\tedges_include_map: {:?}", self.edges_include_map)?;
-        writeln!(
-            f,
-            "\tglobal_element_mappings: {:?}",
-            self.global_element_mappings
-        )?;
-        writeln!(f, "\tlabel_buffer: {:?}", self.label_buffer)?;
-        writeln!(f, "\tedge_buffer: {:?}", self.edge_buffer)?;
+        writeln!(f, "\tdocument_base: {}", self.document_base)?;
+        writeln!(f, "\telement_buffer:")?;
+        for (iri, element) in self.element_buffer.iter() {
+            writeln!(f, "\t\t{} : {}", iri, element)?;
+        }
+        writeln!(f, "\tedge_redirection:")?;
+        for (iri, subject) in self.edge_redirection.iter() {
+            writeln!(f, "\t\t{} -> {}", iri, subject)?;
+        }
+        writeln!(f, "\tedges_include_map: ")?;
+        for (iri, edges) in self.edges_include_map.iter() {
+            writeln!(f, "\t\t{} : {{", iri)?;
+            for edge in edges.iter() {
+                writeln!(f, "\t\t\t{}", edge)?;
+            }
+            writeln!(f, "\t\t}}")?;
+        }
+        writeln!(f, "\tglobal_element_mappings:")?;
+        for (element, index) in self.global_element_mappings.iter() {
+            writeln!(f, "\t\t{} : {}", element, index)?;
+        }
+        writeln!(f, "\tlabel_buffer:")?;
+        for (iri, label) in self.label_buffer.iter() {
+            writeln!(f, "\t\t{} : {}", iri, label)?;
+        }
+        writeln!(f, "\tedge_buffer:")?;
+        for edge in self.edge_buffer.iter() {
+            writeln!(f, "\t\t{}", edge)?;
+        }
         writeln!(f, "\tedge_characteristics: {:?}", self.edge_characteristics)?;
         writeln!(f, "\tnode_characteristics: {:?}", self.node_characteristics)?;
-        writeln!(f, "\tunknown_buffer: {:?}", self.unknown_buffer)?;
-        writeln!(f, "\tfailed_buffer: {:?}", self.failed_buffer)?;
-        writeln!(f, "\tdocument_base: {:?}", self.document_base)?;
+        writeln!(f, "\tunknown_buffer:")?;
+        for (iri, triple) in self.unknown_buffer.iter() {
+            writeln!(f, "\t\t{} : {}", iri, triple)?;
+        }
+        writeln!(f, "\tfailed_buffer:")?;
+        for (triple, reason) in self.failed_buffer.iter() {
+            writeln!(f, "\t\t{} : {}", triple, reason)?;
+        }
         writeln!(f, "}}")
     }
 }
