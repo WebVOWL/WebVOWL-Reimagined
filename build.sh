@@ -1,23 +1,19 @@
 #!/bin/bash
 #cargo update &&
 modes=(
-    "fastdev"
     "dev"
     "preview"
     "release"
     "binary"
 )
 commands=(
-    "RUST_LOG=info cargo leptos watch -v"
-    "RUST_LOG=debug cargo leptos watch --wasm-debug -v"
-    "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
+    "RUST_BACKTRACE=1 RUST_LOG=info cargo leptos watch -v"
+    "RUST_BACKTRACE=1 RUST_LOG=debug cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --release --precompress -v"
     "RUST_LOG=info cargo leptos build --release --precompress -vv"
     )
 help=(
-    "Builds VOWL-R in development mode (without debug info) and runs it on a local server. This is significantly faster than "dev""
     "Builds VOWL-R in development mode and runs it on a local server"
-    "Builds VOWL-R in production mode but with debug info and runs it on a local server"
     "Builds VOWL-R in production mode and runs it on a local server"
     "Builds VOWL-R in production mode, ready for deployment"
     )
