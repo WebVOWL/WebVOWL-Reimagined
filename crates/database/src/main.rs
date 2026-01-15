@@ -3,11 +3,11 @@ use env_logger::Env;
 use grapher::prelude::GraphDisplayData;
 use log::info;
 use rdf_fusion::{execution::results::QueryResults, store::Store};
+use webvowl_sparql_queries::default_query::DEFAULT_QUERY;
 use std::env;
 use std::path::Path;
 use webvowl_database::prelude::GraphDisplayDataSolutionSerializer;
 use webvowl_database::store::WebVOWLStore;
-use webvowl_sparql_queries::DEFAULT_QUERY;
 
 #[tokio::main]
 pub async fn main() {
