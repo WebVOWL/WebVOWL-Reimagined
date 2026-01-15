@@ -58,7 +58,7 @@ impl SparqlSnippet for RdfsNode {
             }
             RdfsNode::Resource => {
                 r#"{
-                ?id ?p ?o.
+                ?id a rdfs:Resource .
                 FILTER(isIRI(?id) || isBlank(?id))
                 BIND(rdfs:Resource AS ?nodeType)
                 }"#
