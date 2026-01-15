@@ -1,20 +1,19 @@
 //! Provides SPARQL query snippets for generic querying across vocabularies.
 
-/// Flatten RDF lists. Currently only supports select OWL types.
-pub const LIST_FLATTENING: &str = r#"{
-            # BRIDGE: Start at the Named Class, jump to the intermediate node
-            ?id ?connector ?intermediateNode .
-            FILTER(isIRI(?id)) 
+/// Flatten collections. Currently only supports select OWL types.
+pub const COLLECTIONS: &str = r#"{
+            ?target ?nodeType ?intermediate .
+            ?intermediate rdf:first ?firstItem .
+            ?intermediate rdf:rest*/rdf:first ?id .
+            FILTER(?nodeType IN (
+                owl:intersectionOf, 
+                owl:unionOf, 
+                owl:oneOf,
+                owl:disjointUnionOf
+            ))
 
-            # Match the logic property (unionOf, etc) on the intermediate node
-            ?intermediateNode ?nodeType ?blanknode .
-
-            # Flatten the list from the blanknode
-            ?blanknode rdf:rest*/rdf:first ?target .
-
-            # Filter for Logic Types
-            FILTER(?nodeType IN (owl:intersectionOf, owl:unionOf, owl:oneOf, owl:disjointUnionOf, owl:disjointWith))
-            FILTER(?target != rdf:nil)
+            # 6. Safety: Remove nil to avoid phantom edges
+            # FILTER(?label != rdf:nil)
             }"#;
 
 /// External classes.
