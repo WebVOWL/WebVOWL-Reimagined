@@ -472,8 +472,7 @@ impl GraphDisplayDataSolutionSerializer {
         match &triple.element_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
-                // TODO: Handle errors gracefully (and show to frontend)
-                panic!(
+                error!(
                     "Illegal blank node during serialization: '{}'",
                     bnode.to_string()
                 );
