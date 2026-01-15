@@ -184,7 +184,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
             let file = File::open(path)?;
             let mut reader = BufReader::new(file);
 
-            info!("Parsing OWL input...");
+            info!("Parsing OFN input...");
             let start_time = Instant::now();
 
             let (ont, _): (RcComponentMappedOntology, _) =
@@ -221,7 +221,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
             let file = File::open(path)?;
             let mut reader = BufReader::new(file);
 
-            info!("Parsing OWL input...");
+            info!("Parsing OWX input...");
             let start_time = Instant::now();
 
             let ontology = owx::reader::read::<
