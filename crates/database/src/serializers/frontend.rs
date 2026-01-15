@@ -177,11 +177,9 @@ impl GraphDisplayDataSolutionSerializer {
             Some(target) => self.resolve(data_buffer, target.to_string()),
             None => {
                 warn!("Cannot resolve object of triple:\n {}", triple);
-                info!("triple: {}", triple);
                 for (k, v) in data_buffer.unknown_buffer.iter() {
-                    info!("unknown: {} -> {}", k, v);
+                    info!("unknown_buffer: {} -> {}", k, v);
                 }
-                info!("edge_redirection: ");
                 for (k, v) in data_buffer.edge_redirection.iter() {
                     info!("edge_redirection: {} -> {}", k, v);
                 }
@@ -471,10 +469,7 @@ impl GraphDisplayDataSolutionSerializer {
 
     fn write_node_triple(&self, data_buffer: &mut SerializationDataBuffer, triple: Triple) {
         // TODO: Collect errors and show to frontend
-        let node_type = triple.element_type.clone();
-        let test_triple = triple.clone();
-        info!("{}", test_triple);
-        match node_type {
+        match &triple.element_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
                 // TODO: Handle errors gracefully (and show to frontend)
