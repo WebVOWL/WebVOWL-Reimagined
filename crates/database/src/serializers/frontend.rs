@@ -798,14 +798,14 @@ impl GraphDisplayDataSolutionSerializer {
                             );
                         }
                     }
-                    owl::INVERSE_FUNCTIONAL_PROPERTY => {
-                        //self.try_insert_characteristic(
-                        // data_buffer,
-                        // term,
-                        // Characteristic::InverseFunctionalProperty)
-                        // TODO: Implement
-                    }
-                    owl::INVERSE_OF => {}
+                    // TODO owl::INVERSE_FUNCTIONAL_PROPERTY => {
+                    //     //self.try_insert_characteristic(
+                    //     // data_buffer,
+                    //     // term,
+                    //     // Characteristic::InverseFunctionalProperty)
+                    //     // TODO: Implement
+                    // }
+                    // TODO owl::INVERSE_OF => {}
                     // owl::IRREFLEXIVE_PROPERTY => {}
                     // owl::MAX_CARDINALITY => {}
                     // owl::MAX_QUALIFIED_CARDINALITY => {}
@@ -814,14 +814,20 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::MIN_QUALIFIED_CARDINALITY => {}
                     // owl::NAMED_INDIVIDUAL => {}
                     // owl::NEGATIVE_PROPERTY_ASSERTION => {}
-                    owl::NOTHING => {}
-                    owl::OBJECT_PROPERTY => {}
-                    // owl::ONE_OF => {}
-                    owl::ONTOLOGY => {
-                        // TODO: Base must be known before matching.
-                        // Make it a separete variable in the query.
-                        // self.doc_iri = uri.to_string();
+                    // TODO owl::NOTHING => {}
+                    owl::OBJECT_PROPERTY => {
+                        self.insert_edge(
+                            data_buffer,
+                            &triple,
+                            Some(ElementType::Owl(OwlType::Edge(OwlEdge::ObjectProperty))),
+                        );
                     }
+                    // owl::ONE_OF => {}
+                    // TODO owl::ONTOLOGY => {
+                    //     // TODO: Base must be known before matching.
+                    //     // Make it a separete variable in the query.
+                    //     // self.doc_iri = uri.to_string();
+                    // }
                     // owl::ONTOLOGY_PROPERTY => {}
                     // owl::ON_CLASS => {}
                     // owl::ON_DATARANGE => {}
@@ -847,16 +853,16 @@ impl GraphDisplayDataSolutionSerializer {
                     ),
                     // owl::TOP_DATA_PROPERTY => {}
                     // owl::TOP_OBJECT_PROPERTY => {}
-                    owl::TRANSITIVE_PROPERTY => {
-                        match self.insert_edge(data_buffer, &triple, ElementType::NoDraw) {
-                            Some(edge) => {
-                                data_buffer
-                                    .edge_characteristics
-                                    .insert(edge, vec![Characteristic::Transitive.to_string()]);
-                            }
-                            _ => {}
-                        }
-                    }
+                    // TODO owl::TRANSITIVE_PROPERTY => {
+                    //     match self.insert_edge(data_buffer, &triple, Some(ElementType::NoDraw)) {
+                    //         Some(edge) => {
+                    //             data_buffer
+                    //                 .edge_characteristics
+                    //                 .insert(edge, vec![Characteristic::Transitive.to_string()]);
+                    //         }
+                    //         _ => {}
+                    //     }
+                    // }
                     owl::UNION_OF => {
                         self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
                         if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
