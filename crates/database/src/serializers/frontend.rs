@@ -12,7 +12,7 @@ use grapher::prelude::{
     RdfsEdge, RdfsNode, RdfsType,
 };
 use log::{debug, info, warn};
-use oxrdf::{BlankNode, NamedNode, vocab::rdf};
+use oxrdf::{vocab::rdf};
 use rdf_fusion::{
     execution::results::QuerySolutionStream,
     model::{Term, vocab::rdfs},
@@ -998,7 +998,7 @@ impl GraphDisplayDataSolutionSerializer {
 #[allow(unused_must_use)]
 mod test {
     use super::*;
-    use oxrdf::{Literal, NamedNode};
+    use oxrdf::{Literal, NamedNode, BlankNode};
 
     #[test]
     fn test_replace_node() {
