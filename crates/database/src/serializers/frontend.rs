@@ -80,6 +80,7 @@ impl GraphDisplayDataSolutionSerializer {
         }
         debug!("{}", data_buffer);
         *data = data_buffer.into();
+        debug!("{}", data);
         Ok(())
     }
 
@@ -417,12 +418,8 @@ impl GraphDisplayDataSolutionSerializer {
                 if edge.subject == *old {
                     edge.subject = new.clone();
                 }
-                data_buffer
-                    .edges_include_map
-                    .get_mut(new)
-                    .unwrap()
-                    .insert(edge.clone());
-                data_buffer.edge_buffer.insert(edge);
+                data_buffer.edge_buffer.insert(edge.clone());
+                self.insert_edge_include(data_buffer, new.clone(), edge.clone());
             }
             info!("new_edges: ");
             for edge in data_buffer.edge_buffer.iter() {
@@ -904,11 +901,11 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::IMPORTS => {}
                     // owl::INCOMPATIBLE_WITH => {}
                     owl::INTERSECTION_OF => {
-                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
-                        if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
+                        let edge = self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
+                        if let Some(edge) = edge {
                             self.upgrade_node_type(
                                 data_buffer,
-                                index,
+                                edge.subject,
                                 ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
                             );
                         }
@@ -973,14 +970,15 @@ impl GraphDisplayDataSolutionSerializer {
                         }
                     }
                     owl::UNION_OF => {
-                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
-                        if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
+                        let edge = self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
+                        if let Some(edge) = edge {
                             self.upgrade_node_type(
                                 data_buffer,
-                                index,
-                                ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
+                                edge.subject,
+                                ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
                             );
                         }
+
                     }
                     // owl::VERSION_INFO => {}
                     // owl::VERSION_IRI => {}
