@@ -1,6 +1,5 @@
 use std::{
     collections::HashSet,
-    ops::DerefMut,
     time::{Duration, Instant},
 };
 
@@ -312,6 +311,7 @@ impl GraphDisplayDataSolutionSerializer {
     /// Create a label for an element.
     ///
     /// Note: must be called AFTER adding the element to `databuffer.elements`.
+    #[allow(unused)]
     fn insert_label(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -385,6 +385,7 @@ impl GraphDisplayDataSolutionSerializer {
     /// Create an ElementType for use in one solution.
     ///
     /// No call restrictions!
+    #[allow(unused)]
     fn insert_local(
         &mut self,
         data_buffer: &mut GraphDisplayData,
@@ -613,7 +614,7 @@ impl GraphDisplayDataSolutionSerializer {
                     owl::COMPLEMENT_OF => {
                         let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
                         match (index_s, index_o) {
-                            (Some(index), Some(target)) => {
+                            (Some(_), Some(target)) => {
                                 self.upgrade_node_type(
                                     data_buffer,
                                     target,
