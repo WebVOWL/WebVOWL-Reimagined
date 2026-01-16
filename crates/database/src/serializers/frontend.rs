@@ -218,6 +218,29 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    pub fn redirect_iri(
+        &self,
+        data_buffer: &mut SerializationDataBuffer,
+        old: &String,
+        new: &String,
+    ) {
+        data_buffer.edge_redirection.insert(
+            old.to_string(), 
+            new.to_string());
+        self.check_unknown_buffer(data_buffer, old);
+    }
+
+    pub fn check_unknown_buffer(
+        &self,
+        data_buffer: &mut SerializationDataBuffer,
+        iri: &String,
+    )  {
+        let triple = data_buffer.unknown_buffer.remove(iri);
+        if let Some(triple) = triple {
+            self.write_node_triple(data_buffer, triple);   
+        }
+    }
+
     fn insert_node(
         &self,
         data_buffer: &mut SerializationDataBuffer,
@@ -240,15 +263,7 @@ impl GraphDisplayDataSolutionSerializer {
             .element_buffer
             .insert(triple.id.to_string(), node_type);
 
-        if let Some(triple) = data_buffer.unknown_buffer.remove(&triple.id.to_string()) {
-            info!("checking triple in unknown buffer: {}", triple);
-            self.write_node_triple(data_buffer, triple);
-        } else if let Some(target) = triple.target {
-            if let Some(triple) = data_buffer.unknown_buffer.remove(&target.to_string()) {
-                info!("checking triple in unknown buffer: {}", triple);
-                self.write_node_triple(data_buffer, triple);
-            }
-        }
+        self.check_unknown_buffer(data_buffer, &triple.id.to_string());
     }
 
     fn insert_edge(
@@ -400,7 +415,7 @@ impl GraphDisplayDataSolutionSerializer {
     fn merge_nodes(&self, data_buffer: &mut SerializationDataBuffer, old: String, new: String) {
         data_buffer.element_buffer.remove(&old);
         self.update_edges(data_buffer, &old, &new);
-        data_buffer.edge_redirection.insert(old.to_string(), new);
+        self.redirect_iri(data_buffer, &old, &new);
     }
 
     fn update_edges(&self, data_buffer: &mut SerializationDataBuffer, old: &String, new: &String) {
@@ -767,10 +782,10 @@ impl GraphDisplayDataSolutionSerializer {
                                         }
                                         (Some(index_s), None) => {
                                             debug!("Some, None -> redirecting");
-                                            data_buffer.edge_redirection.insert(
-                                                triple.target.unwrap().to_string(),
-                                                index_s,
-                                            );
+                                            self.redirect_iri(
+                                                data_buffer,
+                                                 &triple.target.unwrap().to_string(), 
+                                                 &index_s);
                                         }
                                         _ => {
                                             debug!("None -> unknown buffer");
@@ -976,7 +991,7 @@ impl GraphDisplayDataSolutionSerializer {
                             self.upgrade_node_type(
                                 data_buffer,
                                 edge.subject,
-                                ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
+                                ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
                             );
                         }
 
