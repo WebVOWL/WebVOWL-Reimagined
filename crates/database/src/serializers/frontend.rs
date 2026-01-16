@@ -71,6 +71,7 @@ pub struct GraphDisplayDataSolutionSerializer {
     ///
     /// For instance: http://purl.obolibrary.org/obo/envo.owl
     document_base: String,
+    has_ontology: bool,
 }
 
 impl GraphDisplayDataSolutionSerializer {
@@ -85,6 +86,7 @@ impl GraphDisplayDataSolutionSerializer {
             labels: HashMap::new(),
             edges: HashSet::new(),
             document_base: String::new(),
+            has_ontology: false,
         }
     }
 
@@ -243,12 +245,15 @@ impl GraphDisplayDataSolutionSerializer {
         &mut self,
         data_buffer: &mut GraphDisplayData,
         triple: Triple,
-        node_type: ElementType,
+        mut node_type: ElementType,
     ) {
+        if triple.id.is_named_node() && self.is_external(&triple.id.to_string()){
+            node_type = ElementType::Owl(OwlType::Node(OwlNode::ExternalClass));
+        }
         data_buffer.elements.push(node_type);
         self.insert_label(data_buffer, &triple, &node_type);
         self.iricache
-            .insert(triple.id.to_string(), data_buffer.elements.len() - 1);
+            .insert(triple.id.to_string(), data_buffer.labels.len() - 1);
     }
 
     /// Declare an edge in the `data_buffer`.
@@ -256,9 +261,13 @@ impl GraphDisplayDataSolutionSerializer {
         &mut self,
         data_buffer: &mut GraphDisplayData,
         triple: &Triple,
-        edge_type: ElementType,
+        mut edge_type: ElementType,
     ) {
         let (maybe_sub_idx, maybe_obj_idx) = self.resolve_so(data_buffer, &triple);
+
+        if triple.id.is_named_node() && self.is_external(&triple.id.to_string()) {
+            edge_type = ElementType::Owl(OwlType::Edge(OwlEdge::ExternalProperty));
+        }
 
         let mut edge = match edge_type {
             ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)) => self
@@ -421,6 +430,14 @@ impl GraphDisplayDataSolutionSerializer {
 
     fn extend_label(&mut self, data_buffer: &mut GraphDisplayData, index: usize, label: String) {
         data_buffer.labels[index].push_str(format!("\n{}", label).as_str());
+    }
+
+    fn is_external(&self, iri: &str) -> bool {
+        let iri = iri.trim_start_matches('<').trim_end_matches('>');
+        let base = self.document_base.trim_start_matches('<').trim_end_matches('>');
+
+        let external = !iri.starts_with(base);
+        external
     }
 
     /// Serialize a triple to `data_buffer`.
@@ -772,11 +789,16 @@ impl GraphDisplayDataSolutionSerializer {
                         );
                     }
                     // owl::ONE_OF => {}
-                    // owl::ONTOLOGY => {
-                    //     // TODO: Base must be known before matching.
-                    //     // Make it a separete variable in the query.
-                    //     // self.doc_iri = uri.to_string();
-                    // }
+                    owl::ONTOLOGY => {
+                        // TODO: Base must be known before matching.
+                        // Make it a separete variable in the query.
+                        // self.doc_iri = uri.to_string();
+                        if !self.has_ontology {
+                            self.document_base = triple.id.to_string();
+                            self.has_ontology = true;
+                            info!("Found owl:Ontology: {}", self.document_base);
+                        }
+                    }
                     // owl::ONTOLOGY_PROPERTY => {}
                     // owl::ON_CLASS => {}
                     // owl::ON_DATARANGE => {}

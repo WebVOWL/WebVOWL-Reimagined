@@ -21,6 +21,11 @@
         }
         UNION
         {
+            ?id a owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
+        }
+        UNION
+        {
             # 2. Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?target .
@@ -265,7 +270,9 @@
                 )
             }
         BIND(
-            IF(?nodeType = owl:Class, 1, 2)
+            IF(?nodeType = owl:Ontology, 0,
+                IF(?nodeType = owl:Class, 1, 2)
+            )
             AS ?weight)
     }
     ORDER BY ?weight
