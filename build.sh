@@ -9,7 +9,7 @@ modes=(
 )
 commands=(
     "RUST_LOG=info cargo leptos watch -v"
-    "RUST_LOG=debug cargo leptos watch --wasm-debug -v"
+    "RUST_LOG=debug, datafusion=off, datafusion_physical_plan=off cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --bin-cargo-args=--profile=preview --lib-cargo-args=--profile=wasm-preview --precompress --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --release --precompress -v"
     "RUST_LOG=info cargo leptos build --release --precompress -vv"

@@ -51,7 +51,7 @@ impl Display for Edge {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Edge{{ {} - {} - {} }}",
+            "Edge{{ {} - {:?} - {} }}",
             self.subject, self.element_type, self.object
         )?;
         Ok(())
@@ -177,6 +177,7 @@ impl SerializationDataBuffer {
 
 impl Into<GraphDisplayData> for SerializationDataBuffer {
     fn into(mut self) -> GraphDisplayData {
+        
         let mut display_data = GraphDisplayData::new();
         let mut iricache: HashMap<String, usize> = HashMap::new();
         for (iri, element) in self.element_buffer.into_iter() {
@@ -188,7 +189,10 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
                     iricache.insert(iri, display_data.elements.len() - 1);
                 }
                 None => {
-                    error!("Label not found for iri: {}", iri);
+                    error!("Label not found for iri: {}, using default", iri);
+                    display_data.labels.push(element.to_string());
+                    display_data.elements.push(element);
+                    iricache.insert(iri, display_data.elements.len() - 1);
                 }
             }
         }
