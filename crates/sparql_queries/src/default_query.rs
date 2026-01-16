@@ -16,7 +16,9 @@ pub const DEFAULT_QUERY: &str = formatcp!(
                 {}
             }}
             BIND(
-                IF(?nodeType = owl:Class, 1, 2)
+                IF(?nodeType = owl:Ontology, 0,
+                    IF(?nodeType = owl:Class, 1, 2)
+                )
                 AS ?weight)
         }}
         ORDER BY ?weight

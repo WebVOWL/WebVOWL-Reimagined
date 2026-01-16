@@ -1,4 +1,8 @@
 //Nodes
+pub const ONTOLOGY: &str = r#"{
+                ?id a owl:Ontology .
+                BIND(owl:Ontology AS ?nodeType)
+            }"#;
 pub const NAMED_CLASS: &str = r#"{
                 ?id a owl:Class .
                 FILTER(isIRI(?id))
