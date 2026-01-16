@@ -51,8 +51,7 @@ impl SparqlSnippet for RdfsNode {
             }
             RdfsNode::Literal => {
                 r#"{
-                ?id rdfs:label ?label.
-                FILTER(isLiteral(?label))
+                ?id a rdfs:Literal .
                 BIND(rdfs:Literal AS ?nodeType)
                 }"#
             }

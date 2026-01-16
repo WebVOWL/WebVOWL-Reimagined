@@ -77,10 +77,8 @@
         UNION
         {
             # LITERAL
-            ?id rdfs:label ?label.
-            FILTER(isLiteral(?label))
+            ?id a rdfs:Literal .
             BIND(rdfs:Literal AS ?nodeType)
-            # OPTIONAL {?id rdfs:comment ?label}
             
         }
         UNION {
