@@ -327,6 +327,7 @@ impl GraphDisplayDataSolutionSerializer {
         old: &String,
         new: &String,
     ) {
+        debug!("Redirecting '{}' to '{}'", old, new);
         data_buffer
             .edge_redirection
             .insert(old.to_string(), new.to_string());
@@ -1406,7 +1407,6 @@ impl GraphDisplayDataSolutionSerializer {
                         match &triple.target {
                             Some(target) => {
                                 if target.is_named_node() {
-                                    debug!("is named node");
                                     // Case 1:
                                     // The subject of an equivalentClass relation should
                                     // become a full-fledged equivalent class. This happens
@@ -1467,14 +1467,12 @@ impl GraphDisplayDataSolutionSerializer {
                                     // Case 2:
                                     // The subject of an equivalentClass relation should
                                     // could either be start of a collection or anon class
-                                    debug!("is blank node");
                                     let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
                                     match (index_s, index_o) {
                                         (Some(index_s), Some(index_o)) => {
                                             self.merge_nodes(data_buffer, index_o, index_s);
                                         }
                                         (Some(index_s), None) => {
-                                            debug!("Some, None -> redirecting");
                                             self.redirect_iri(
                                                 data_buffer,
                                                 &triple.target.unwrap().to_string(),
@@ -1482,7 +1480,6 @@ impl GraphDisplayDataSolutionSerializer {
                                             );
                                         }
                                         _ => {
-                                            debug!("None -> unknown buffer");
                                             self.add_to_unknown_buffer(
                                                 data_buffer,
                                                 target.to_string(),
