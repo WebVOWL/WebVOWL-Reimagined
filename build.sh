@@ -2,12 +2,10 @@
 #cargo update &&
 modes=(
     "dev"
-    "preview"
     "release"
     "binary"
 )
 commands=(
-    "RUST_BACKTRACE=1 RUST_LOG=info cargo leptos watch -v"
     "RUST_BACKTRACE=1 RUST_LOG=debug cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --release --precompress -v"
     "RUST_LOG=info cargo leptos build --release --precompress -vv"
