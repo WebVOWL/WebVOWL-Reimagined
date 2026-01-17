@@ -2,7 +2,7 @@
 
 /// Flatten collections. Currently only supports select OWL types.
 pub const COLLECTIONS: &str = r#"{
-            ?target ?nodeType ?intermediate .
+            ?id ?nodeType ?intermediate .
             ?intermediate rdf:first ?firstItem .
             ?intermediate rdf:rest*/rdf:first ?id .
             FILTER(?nodeType IN (
