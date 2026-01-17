@@ -2,9 +2,9 @@
 
 /// Flatten collections. Currently only supports select OWL types.
 pub const COLLECTIONS: &str = r#"{
-            ?target ?nodeType ?intermediate .
+            ?id ?nodeType ?intermediate .
             ?intermediate rdf:first ?firstItem .
-            ?intermediate rdf:rest*/rdf:first ?id .
+            ?intermediate rdf:rest*/rdf:first ?target .
             FILTER(?nodeType IN (
                 owl:intersectionOf, 
                 owl:unionOf, 

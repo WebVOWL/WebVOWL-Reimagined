@@ -119,6 +119,7 @@ impl GraphDisplayDataSolutionSerializer {
         }
         debug!("{}", data_buffer);
         *data = data_buffer.into();
+        debug!("{}", data);
         Ok(())
     }
 
@@ -320,6 +321,27 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    pub fn redirect_iri(
+        &self,
+        data_buffer: &mut SerializationDataBuffer,
+        old: &String,
+        new: &String,
+    ) {
+        data_buffer
+            .edge_redirection
+            .insert(old.to_string(), new.to_string());
+        self.check_unknown_buffer(data_buffer, old);
+    }
+
+    pub fn check_unknown_buffer(&self, data_buffer: &mut SerializationDataBuffer, iri: &String) {
+        let triple = data_buffer.unknown_buffer.remove(iri);
+        if let Some(triples) = triple {
+            for triple in triples {
+                self.write_node_triple(data_buffer, triple);
+            }
+        }
+    }
+
     fn insert_node(
         &self,
         data_buffer: &mut SerializationDataBuffer,
@@ -339,6 +361,7 @@ impl GraphDisplayDataSolutionSerializer {
         }
 
         self.add_to_element_buffer(&mut data_buffer.node_element_buffer, triple, node_type);
+        self.check_unknown_buffer(data_buffer, &triple.id.to_string());
     }
 
     /// Inserts an edge triple into the serialization buffer,
@@ -352,7 +375,7 @@ impl GraphDisplayDataSolutionSerializer {
         triple: &Triple,
         edge_type: ElementType,
         label: Option<String>,
-    ) {
+    ) -> Option<Edge> {
         let (maybe_sub_idx, maybe_obj_idx) = self.resolve_so(data_buffer, &triple);
 
         // let mut edge = match edge_type {
@@ -384,6 +407,7 @@ impl GraphDisplayDataSolutionSerializer {
                 data_buffer
                     .edge_label_buffer
                     .insert(edge.clone(), label.unwrap_or(edge_type.to_string()));
+                return Some(edge);
             }
             (None, Some(obj_iri)) => {
                 warn!("Cannot resolve subject of triple:\n {}", triple);
@@ -397,6 +421,7 @@ impl GraphDisplayDataSolutionSerializer {
                 self.add_to_unknown_buffer(data_buffer, triple.id.to_string(), triple.clone());
             }
         }
+        None
     }
 
     // /// Creates nodes as targets for edges without one in the solution.
@@ -459,7 +484,7 @@ impl GraphDisplayDataSolutionSerializer {
         debug!("Merging node '{old}' into '{new}'");
         data_buffer.node_element_buffer.remove(&old);
         self.update_edges(data_buffer, &old, &new);
-        data_buffer.edge_redirection.insert(old.to_string(), new);
+        self.redirect_iri(data_buffer, &old, &new);
     }
 
     fn update_edges(&self, data_buffer: &mut SerializationDataBuffer, old: &String, new: &String) {
@@ -478,12 +503,8 @@ impl GraphDisplayDataSolutionSerializer {
                 if edge.subject == *old {
                     edge.subject = new.clone();
                 }
-                data_buffer
-                    .edges_include_map
-                    .get_mut(new)
-                    .unwrap()
-                    .insert(edge.clone());
-                data_buffer.edge_buffer.insert(edge);
+                data_buffer.edge_buffer.insert(edge.clone());
+                self.insert_edge_include(data_buffer, new.clone(), edge.clone());
             }
             // info!("new_edges: ");
             // for edge in data_buffer.edge_buffer.iter() {
@@ -1324,42 +1345,13 @@ impl GraphDisplayDataSolutionSerializer {
                         ElementType::Owl(OwlType::Node(OwlNode::Class)),
                     ),
                     owl::COMPLEMENT_OF => {
-                        let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
-                        match (index_s, index_o) {
-                            (Some(_), Some(target)) => {
+                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
+                        if let Some(_) = triple.target {
+                            if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
                                 self.upgrade_node_type(
                                     data_buffer,
-                                    target,
+                                    index,
                                     ElementType::Owl(OwlType::Node(OwlNode::Complement)),
-                                );
-                                self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
-                            }
-                            (Some(_), None) => {
-                                self.add_to_unknown_buffer(
-                                    data_buffer,
-                                    triple.id.to_string(),
-                                    triple.clone(),
-                                );
-                            }
-                            (None, Some(_)) => {
-                                if let Some(target) = &triple.target {
-                                    self.add_to_unknown_buffer(
-                                        data_buffer,
-                                        target.to_string(),
-                                        triple.clone(),
-                                    );
-                                } else {
-                                    data_buffer
-                                        .failed_buffer
-                                        .push((Some(triple), "Failed to find target".to_string()));
-                                    return;
-                                }
-                            }
-                            _ => {
-                                self.add_to_unknown_buffer(
-                                    data_buffer,
-                                    triple.id.to_string(),
-                                    triple.clone(),
                                 );
                             }
                         }
@@ -1483,9 +1475,10 @@ impl GraphDisplayDataSolutionSerializer {
                                         }
                                         (Some(index_s), None) => {
                                             debug!("Some, None -> redirecting");
-                                            data_buffer.edge_redirection.insert(
-                                                triple.target.unwrap().to_string(),
-                                                index_s,
+                                            self.redirect_iri(
+                                                data_buffer,
+                                                &triple.target.unwrap().to_string(),
+                                                &index_s,
                                             );
                                         }
                                         _ => {
@@ -1518,11 +1511,12 @@ impl GraphDisplayDataSolutionSerializer {
                     // owl::IMPORTS => {}
                     // owl::INCOMPATIBLE_WITH => {}
                     owl::INTERSECTION_OF => {
-                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
-                        if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
+                        let edge =
+                            self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
+                        if let Some(edge) = edge {
                             self.upgrade_node_type(
                                 data_buffer,
-                                index,
+                                edge.subject,
                                 ElementType::Owl(OwlType::Node(OwlNode::IntersectionOf)),
                             );
                         }
@@ -1594,11 +1588,12 @@ impl GraphDisplayDataSolutionSerializer {
                     //     }
                     // }
                     owl::UNION_OF => {
-                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
-                        if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
+                        let edge =
+                            self.insert_edge(data_buffer, &triple, ElementType::NoDraw, None);
+                        if let Some(edge) = edge {
                             self.upgrade_node_type(
                                 data_buffer,
-                                index,
+                                edge.subject,
                                 ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
                             );
                         }

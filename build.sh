@@ -6,7 +6,7 @@ modes=(
     "binary"
 )
 commands=(
-    "RUST_BACKTRACE=1 RUST_LOG=debug cargo leptos watch --wasm-debug -v"
+    "RUST_BACKTRACE=1 RUST_LOG=debug, datafusion=off, datafusion_physical_plan=off cargo leptos watch --wasm-debug -v"
     "RUST_LOG=info cargo leptos watch --release --precompress -v"
     "RUST_LOG=info cargo leptos build --release --precompress -vv"
     )
