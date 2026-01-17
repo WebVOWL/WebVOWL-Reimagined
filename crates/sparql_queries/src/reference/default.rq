@@ -114,9 +114,7 @@
         UNION
         {
             # OBJECT PROPERTY
-            ?id a owl:ObjectProperty .
-            OPTIONAL {?id rdfs:range ?target }
-            OPTIONAL {?id rdfs:domain ?target }
+            ?id a owl:ObjectProperty
             BIND(owl:ObjectProperty AS ?nodeType)
         }
         UNION
@@ -147,7 +145,6 @@
         {
             # DEPRECATED PROPERTY
             ?id a owl:DeprecatedProperty .
-            OPTIONAL {?id rdfs:range ?target}
             BIND(owl:DeprecatedProperty AS ?nodeType)
         }
         UNION

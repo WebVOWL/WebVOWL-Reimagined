@@ -184,7 +184,6 @@ impl SparqlSnippet for OwlEdge {
             OwlEdge::DeprecatedProperty => {
                 r#"{
                 ?id a owl:DeprecatedProperty .
-                OPTIONAL {?id rdfs:range ?target}
                 BIND(owl:DeprecatedProperty AS ?nodeType)
                 }"#
             }
@@ -201,9 +200,7 @@ impl SparqlSnippet for OwlEdge {
             }
             OwlEdge::ObjectProperty => {
                 r#"{
-                ?id a owl:ObjectProperty .
-                OPTIONAL {?id rdfs:range ?target }
-                OPTIONAL {?id rdfs:domain ?target }
+                ?id a owl:ObjectProperty
                 BIND(owl:ObjectProperty AS ?nodeType)
                 }"#
             }
