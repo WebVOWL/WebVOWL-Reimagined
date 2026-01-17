@@ -28,7 +28,7 @@ pub async fn main() {
     info!("Loaded {} quads", vowlr.session.len().await.unwrap());
 
     let mut data_buffer = GraphDisplayData::new();
-    let solution_serializer = GraphDisplayDataSolutionSerializer {};
+    let solution_serializer = GraphDisplayDataSolutionSerializer::new();
     let query_stream = vowlr.session.query(DEFAULT_QUERY.as_str()).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
