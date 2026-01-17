@@ -171,11 +171,11 @@
         {
             # VALUES FROM
             {
-                ?id owl:someValuesFrom ?target .
+                ?id owl:someValuesFrom ?target
             }
             UNION
             {
-                ?id owl:allValuesFrom ?target .
+                ?id owl:allValuesFrom ?target
             }
             BIND("ValuesFrom" AS ?nodeType)
         }
