@@ -50,15 +50,30 @@ pub const OWL_DEPRECATED: &str = r#"{
 /// 3. Use rdf:ID, if exists.
 ///    https://www.w3.org/TR/rdf-syntax-grammar/#section-Syntax-ID-xml-base
 pub const LABEL: &str = r#"{
-                OPTIONAL { ?id rdfs:label ?theLabel }
-                OPTIONAL { ?id rdf:resource ?resLabel }
-                OPTIONAL { ?id rdf:ID ?idLabel }
-                BIND (
-                    COALESCE(
-                        IF( BOUND(?theLabel), ?theLabel, 1/0 ),
-                        IF( BOUND(?resLabel), ?resLabel, 1/0 ),
-                        IF( BOUND(?idLabel), ?idLabel, 1/0 ),
-                        ""
-                    ) AS ?label
-                )
+            OPTIONAL { ?id rdfs:label ?theLabel }
+            OPTIONAL { ?id rdf:resource ?resLabel }
+            OPTIONAL { ?id rdf:ID ?idLabel }
+            BIND (
+                COALESCE(
+                    IF( BOUND(?theLabel), ?theLabel, 1/0 ),
+                    IF( BOUND(?resLabel), ?resLabel, 1/0 ),
+                    IF( BOUND(?idLabel), ?idLabel, 1/0 ),
+                    ""
+                ) AS ?label
+            )
+            }"#;
+
+/// Find the domain and range of any property.
+pub const DOMAIN_AND_RANGE: &str = r#"{
+            {
+                # Domain
+                ?id rdfs:domain ?target
+                BIND(rdfs:domain AS ?nodeType)
+            }
+            UNION
+            {
+                # Range
+                ?id rdfs:range ?target
+                BIND(rdfs:range AS ?nodeType)
+            }
             }"#;

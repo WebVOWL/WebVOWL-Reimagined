@@ -155,6 +155,20 @@
         }
         UNION
         {
+            {
+                # Domain
+                ?id rdfs:domain ?target
+                BIND(rdfs:domain AS ?nodeType)
+            }
+            UNION
+            {
+                # Range
+                ?id rdfs:range ?target
+                BIND(rdfs:range AS ?nodeType)
+            }
+        }
+        UNION
+        {
             # VALUES FROM
             {
                 ?id owl:someValuesFrom ?target .

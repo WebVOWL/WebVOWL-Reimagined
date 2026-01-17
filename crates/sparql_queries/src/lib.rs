@@ -15,11 +15,19 @@ pub mod prelude {
 
     use crate::assembly::DEFAULT_PREFIXES;
     pub use crate::assembly::QueryAssembler;
-    use crate::snippets::general::{COLLECTIONS, LABEL, OWL_DEPRECATED, XML_BASE};
+    use crate::snippets::general::{
+        COLLECTIONS, DOMAIN_AND_RANGE, LABEL, OWL_DEPRECATED, XML_BASE,
+    };
     use crate::snippets::snippets_from_enum;
 
     /// SPARQL snippets that should generally be included in all queries.
-    pub static GENERAL_SNIPPETS: [&str; 4] = [XML_BASE, COLLECTIONS, OWL_DEPRECATED, LABEL];
+    pub static GENERAL_SNIPPETS: [&str; 5] = [
+        XML_BASE,
+        COLLECTIONS,
+        DOMAIN_AND_RANGE,
+        OWL_DEPRECATED,
+        LABEL,
+    ];
 
     /// The default query contains all classes and properties supported by VOWL-R.
     pub static DEFAULT_QUERY: LazyLock<String> = LazyLock::new(|| {
