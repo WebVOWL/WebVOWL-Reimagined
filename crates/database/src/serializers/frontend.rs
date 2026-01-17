@@ -12,7 +12,7 @@ use grapher::prelude::{
     RdfsEdge, RdfsNode, RdfsType,
 };
 use log::{debug, info, warn};
-use oxrdf::{vocab::rdf};
+use oxrdf::vocab::rdf;
 use rdf_fusion::{
     execution::results::QuerySolutionStream,
     model::{Term, vocab::rdfs},
@@ -224,9 +224,9 @@ impl GraphDisplayDataSolutionSerializer {
         old: &String,
         new: &String,
     ) {
-        data_buffer.edge_redirection.insert(
-            old.to_string(), 
-            new.to_string());
+        data_buffer
+            .edge_redirection
+            .insert(old.to_string(), new.to_string());
         self.check_unknown_buffer(data_buffer, old);
     }
 
@@ -627,34 +627,14 @@ impl GraphDisplayDataSolutionSerializer {
                         ElementType::Owl(OwlType::Node(OwlNode::Class)),
                     ),
                     owl::COMPLEMENT_OF => {
-                        let (index_s, index_o) = self.resolve_so(data_buffer, &triple);
-                        match (index_s, index_o) {
-                            (Some(_), Some(target)) => {
+                        self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
+                        if let Some(_) = triple.target {
+                            if let Some(index) = self.resolve(data_buffer, triple.id.to_string()) {
                                 self.upgrade_node_type(
                                     data_buffer,
-                                    target,
+                                    index,
                                     ElementType::Owl(OwlType::Node(OwlNode::Complement)),
                                 );
-                                self.insert_edge(data_buffer, &triple, ElementType::NoDraw);
-                            }
-                            (Some(_), None) => {
-                                data_buffer
-                                    .unknown_buffer
-                                    .insert(triple.id.to_string(), triple.clone());
-                            }
-                            (None, Some(_)) => {
-                                if let Some(target) = &triple.target {
-                                    data_buffer
-                                        .unknown_buffer
-                                        .insert(target.to_string(), triple.clone());
-                                } else {
-                                    warn!("Target is required for: {}", triple);
-                                }
-                            }
-                            _ => {
-                                data_buffer
-                                    .unknown_buffer
-                                    .insert(triple.id.to_string(), triple.clone());
                             }
                         }
                     }
@@ -994,7 +974,6 @@ impl GraphDisplayDataSolutionSerializer {
                                 ElementType::Owl(OwlType::Node(OwlNode::UnionOf)),
                             );
                         }
-
                     }
                     // owl::VERSION_INFO => {}
                     // owl::VERSION_IRI => {}
