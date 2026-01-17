@@ -4,7 +4,7 @@
 pub const COLLECTIONS: &str = r#"{
             ?id ?nodeType ?intermediate .
             ?intermediate rdf:first ?firstItem .
-            ?intermediate rdf:rest*/rdf:first ?id .
+            ?intermediate rdf:rest*/rdf:first ?target .
             FILTER(?nodeType IN (
                 owl:intersectionOf, 
                 owl:unionOf, 
