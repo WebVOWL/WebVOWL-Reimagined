@@ -360,7 +360,7 @@ impl GraphDisplayDataSolutionSerializer {
             return;
         }
 
-        let new_type = if self.is_external(data_buffer, &triple.id.to_string()) {
+        let new_type = if self.is_external(data_buffer, &triple.id) {
             ElementType::Owl(OwlType::Node(OwlNode::ExternalClass))
         } else {
             node_type
@@ -382,13 +382,12 @@ impl GraphDisplayDataSolutionSerializer {
         label: Option<String>,
     ) -> Option<Edge> {
         // Skip external check for NoDraw edges - they should always retain their type
-        let new_type = if edge_type != ElementType::NoDraw
-            && self.is_external(data_buffer, &triple.id.to_string())
-        {
-            ElementType::Owl(OwlType::Edge(OwlEdge::ExternalProperty))
-        } else {
-            edge_type
-        };
+        let new_type =
+            if edge_type != ElementType::NoDraw && self.is_external(data_buffer, &triple.id) {
+                ElementType::Owl(OwlType::Edge(OwlEdge::ExternalProperty))
+            } else {
+                edge_type
+            };
 
         match self.resolve_so(data_buffer, &triple) {
             (Some(sub_iri), Some(obj_iri)) => {
@@ -423,14 +422,15 @@ impl GraphDisplayDataSolutionSerializer {
         None
     }
 
-    fn is_external(&self, data_buffer: &SerializationDataBuffer, iri: &str) -> bool {
-        match &data_buffer.document_base {
-            Some(base) => !iri.starts_with(base),
-            None => {
-                warn!("Cannot determine externals: Missing document base!");
-                false
+    fn is_external(&self, data_buffer: &SerializationDataBuffer, iri: &Term) -> bool {
+        !iri.is_blank_node()
+            && match &data_buffer.document_base {
+                Some(base) => !iri.to_string().starts_with(base),
+                None => {
+                    warn!("Cannot determine externals: Missing document base!");
+                    false
+                }
             }
-        }
     }
 
     fn merge_nodes(&self, data_buffer: &mut SerializationDataBuffer, old: String, new: String) {
