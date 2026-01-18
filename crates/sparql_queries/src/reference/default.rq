@@ -21,6 +21,11 @@
         }
         UNION
         {
+            ?id a owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
+        }
+        UNION
+        {
             # Identify Intersections
             # Any node (usually blank) that is the subject of an intersectionOf list
             ?id owl:intersectionOf ?target .
@@ -205,6 +210,23 @@
         }
         UNION
         {
+            # Characteristics
+            VALUES ?char {
+                owl:TransitiveProperty
+                owl:FunctionalProperty
+                owl:InverseFunctionalProperty
+                owl:ReflexiveProperty
+                owl:IrreflexiveProperty
+                owl:SymmetricProperty
+                owl:AsymmetricProperty
+                owl:hasKey
+            }
+            ?id a ?char .
+            OPTIONAL {?id rdfs:range ?target}
+            BIND(?char as ?nodeType)
+        }
+        UNION
+        {
                 # Find labels for elements in the following order:
                 # SPARQL
                 # 1. Use rdfs:label, if exists.
@@ -232,7 +254,9 @@
                 )
             }
         BIND(
-            IF(?nodeType = owl:Class, 1, 2)
+            IF(?nodeType = owl:Ontology, 0,
+                IF(?nodeType = owl:Class, 1, 2)
+            )
             AS ?weight
             )
     }

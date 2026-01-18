@@ -1,4 +1,5 @@
 mod classes;
+mod element_legend_injection;
 mod filtergroup;
 mod filtertype;
 mod meta_filter;
@@ -21,7 +22,7 @@ use meta_filter::filter;
 use properties::is_property;
 use special_operators::is_set_operator;
 
-pub fn update_graph(query: String, graph_data: RwSignal<GraphDisplayData>) {
+fn update_graph(query: String, graph_data: RwSignal<GraphDisplayData>) {
     spawn_local(async move {
         let output_result = handle_internal_sparql(query).await;
         match output_result {
