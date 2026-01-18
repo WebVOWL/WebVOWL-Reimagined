@@ -16,7 +16,7 @@ use grapher::prelude::{
     Characteristic, ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge, RdfType,
     RdfsEdge, RdfsNode, RdfsType,
 };
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 use oxrdf::{IriParseError, NamedNode, vocab::rdf};
 use rdf_fusion::{
     execution::results::QuerySolutionStream,
@@ -198,17 +198,16 @@ impl GraphDisplayDataSolutionSerializer {
         }
 
         while let Some(redirected) = data_buffer.edge_redirection.get(&x) {
+            trace!("Redirected: {} -> {}", x, redirected);
             let new_x = redirected.clone();
-            if let Some(elem) = data_buffer.node_element_buffer.get(&x) {
-                debug!("Resolved: {}: {}", x, elem);
-                return Some(x);
-            } else {
-                if let Some(elem) = data_buffer.edge_element_buffer.get(&x) {
-                    debug!("Resolved: {}: {}", x, elem);
-                    return Some(x);
-                }
+            if let Some(elem) = data_buffer.node_element_buffer.get(&new_x) {
+                debug!("Resolved: {}: {}", new_x, elem);
+                return Some(new_x);
+            } else if let Some(elem) = data_buffer.edge_element_buffer.get(&new_x) {
+                debug!("Resolved: {}: {}", new_x, elem);
+                return Some(new_x);
             }
-            debug!("Checked: {} ", x);
+            debug!("Checked: {} ", new_x);
             x = new_x;
         }
         None
@@ -410,13 +409,15 @@ impl GraphDisplayDataSolutionSerializer {
                     .insert(edge.clone(), label.unwrap_or(edge_type.to_string()));
                 return Some(edge);
             }
-            (None, Some(obj_iri)) => {
+            (None, Some(_)) => {
                 warn!("Cannot resolve subject of triple:\n {}", triple);
-                self.add_to_unknown_buffer(data_buffer, obj_iri, triple.clone());
+                self.add_to_unknown_buffer(data_buffer, triple.id.to_string(), triple.clone());
             }
-            (Some(sub_iri), None) => {
-                // resolve_so already warns about unresolved object. No need to repeat it here.
-                self.add_to_unknown_buffer(data_buffer, sub_iri, triple.clone());
+            (Some(_), None) => {
+                if let Some(obj_iri) = &triple.target {
+                    // resolve_so already warns about unresolved object. No need to repeat it here.
+                    self.add_to_unknown_buffer(data_buffer, obj_iri.to_string(), triple.clone());
+                }
             }
             _ => {
                 self.add_to_unknown_buffer(data_buffer, triple.id.to_string(), triple.clone());
@@ -986,6 +987,7 @@ impl GraphDisplayDataSolutionSerializer {
 
     fn write_node_triple(&self, data_buffer: &mut SerializationDataBuffer, triple: Triple) {
         // TODO: Collect errors and show to frontend
+        trace!("{}", triple);
         match &triple.element_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
@@ -1002,6 +1004,7 @@ impl GraphDisplayDataSolutionSerializer {
                 let value = literal.value();
                 match value {
                     "blanknode" => {
+                        info!("Visualizing blank node: {}", triple.id);
                         self.insert_node(
                             data_buffer,
                             &triple,
