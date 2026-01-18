@@ -9,16 +9,8 @@
 
 [dependencies]
     env_logger="0.11.0"
+    grapher={workspace=true, features=["native", "static"]}
     log="0.4"
     tokio="1.48.0"
     vowlr-database={path="../database"}
     vowlr-sparql-queries={path="../sparql_queries"}
-
-    [dependencies.grapher]
-        #branch="render_test"
-        default-features=false
-        features=["native", "static"]
-        git="https://github.com/WebVOWL/WasmGrapher"
-        # optional=true
-        # path="../../../RustGrapher"
-        # version="0.3"
