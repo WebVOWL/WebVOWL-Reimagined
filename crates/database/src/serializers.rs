@@ -22,8 +22,8 @@ pub struct Triple {
 impl Display for Triple {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Triple{{ ")?;
-        write!(f, "{} - ", self.id)?;
-        write!(f, "{} - ", self.element_type,)?;
+        write!(f, "{} - ", self.id.to_string())?;
+        write!(f, "{} - ", self.element_type)?;
         write!(
             f,
             "{}",
@@ -348,7 +348,8 @@ impl Display for SerializationDataBuffer {
         }
         writeln!(f, "\tunknown_buffer:")?;
         for (iri, triples) in self.unknown_buffer.iter() {
-            writeln!(f, "\t\t{} : {:#?}", iri, triples)?;
+            write!(f, "\t\t{} : ", iri)?;
+            writeln!(f, "{}", triples.iter().map(|t| t.to_string()).collect::<Vec<String>>().join("\n"))?;
         }
         writeln!(f, "\tfailed_buffer:")?;
         for (triple, reason) in self.failed_buffer.iter() {
