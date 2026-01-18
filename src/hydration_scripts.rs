@@ -81,13 +81,13 @@ pub fn HydrationScripts(
         if let Some(sc) = Owner::current_shared_context() {
             sc.set_is_hydrating(false);
         }
-        include_str!("./scripts/island_script.js")
+        include_str!("./assets/scripts/island_script.js")
     } else {
-        include_str!("./scripts/hydration_script.js")
+        include_str!("./assets/scripts/hydration_script.js")
     };
 
     let islands_router = islands_router
-        .then_some(include_str!("./scripts/islands_routing.js"))
+        .then_some(include_str!("./assets/scripts/islands_routing.js"))
         .unwrap_or_default();
 
     let root = root.unwrap_or_default();

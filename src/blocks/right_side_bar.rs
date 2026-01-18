@@ -126,7 +126,7 @@ pub fn SelectionDetails() -> impl IntoView {
 
 #[component]
 pub fn RightSidebar() -> impl IntoView {
-    let is_open = RwSignal::new(true);
+    let is_open = RwSignal::new(false);
     view! {
         <div data-sidebar-open=move || is_open.get().to_string()>
             <button

@@ -28,14 +28,23 @@
 # "+atomics"
 # Enables thread synchronization primitives in the WebAssembly instruction set.
 # This is one of the required steps to allow multi-threading in WebAssembly.
+#
+# "+simd128"
+# Enables simd128 in the WebAssembly instruction set.
+# Increases performance for work benefitting from SIMD.
 ###########################
 # Other features used.
 #
 # "+crt-static"
 # Enables a statically linked runtime. Useful for running in e.g. "stratch" Docker containers.
+#
+# "-Zpre-link-args"
+# https://users.rust-lang.org/t/why-isnt-zpre-link-args-stabilized-yet/130162
+# https://github.com/rust-lang/rust/issues/57837
 
-
-[build]
+# Workaround for rustflags not being cumulative
+# https://github.com/rust-lang/cargo/issues/5376#issuecomment-2163350032
+[target.'cfg(all())']
     rustflags=["-Zshare-generics=y", "-Zthreads=0"]
 
 # Docker
@@ -46,7 +55,18 @@
         "-Clinker-plugin-lto",
         "-Clink-arg=-fuse-ld=mold",
         "-Clink-arg=-flto",
+        # "-Zpre-link-args=/usr/lib/libmimalloc.so",
     ]
+    # TODO: Investigate performance influence of target-features:
+    # - https://web.archive.org/web/20210208132927/http://assemblyrequired.crashworks.org/timing-square-root/
+    # - https://doc.rust-lang.org/rustc/codegen-options/index.html?highlight=target-feature#target-feature
+    # TODO: Investigate Profile-guided optimization:
+    # - https://doc.rust-lang.org/rustc/profile-guided-optimization.html
+    # TODO: Investigate implementing performance reports similar to CodSpeed:
+    # - [Example] https://github.com/tobixdev/rdf-fusion/pull/166
+    # - https://codspeed.io/
+    # TODO: Use Criterion for smaller benchmarks, e.g. test a datastructure, function etc.
+    # - https://docs.rs/criterion/latest/criterion/
 
 # Local dev server
 [target.x86_64-unknown-linux-gnu]
@@ -58,6 +78,7 @@
     rustflags=[
         "-Clink-arg=--max-memory=4294967296",
         "-Ctarget-feature=+atomics",
+        "-Ctarget-feature=+simd128",
         '--cfg',
         'getrandom_backend="wasm_js"',
     ]

@@ -1,4 +1,3 @@
-use crate::network::DataType;
 use futures::StreamExt;
 use gloo_timers::callback::Interval;
 use grapher::prelude::GraphDisplayData;
@@ -6,18 +5,19 @@ use leptos::prelude::*;
 use leptos::server_fn::ServerFnError;
 use leptos::server_fn::codec::{MultipartData, MultipartFormData, Rkyv, StreamingText, TextStream};
 use leptos::task::spawn_local;
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 #[cfg(feature = "server")]
 use reqwest::Client;
 use std::cell::RefCell;
 #[cfg(feature = "server")]
 use std::path::Path;
 use std::rc::Rc;
+#[cfg(feature = "server")]
+use vowlr_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
+#[cfg(feature = "server")]
+use vowlr_database::store::VOWLRStore;
+use vowlr_util::datatypes::DataType;
 use web_sys::{FileList, FormData};
-#[cfg(feature = "server")]
-use webvowl_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
-#[cfg(feature = "server")]
-use webvowl_database::store::WebVOWLStore;
 
 #[cfg(feature = "ssr")]
 mod progress {
@@ -87,7 +87,7 @@ pub async fn ontology_progress(filename: String) -> Result<TextStream, ServerFnE
     input = MultipartFormData,
 )]
 pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), ServerFnError> {
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
     let mut data = data.into_inner().unwrap();
     let mut count = 0;
     let mut dtype = DataType::UNKNOWN;
@@ -99,11 +99,7 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
             progress::reset(&name);
             let _ = session.start_upload(&name).await;
 
-            dtype = Path::new(&name)
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .map(DataType::from_extension)
-                .unwrap_or(DataType::UNKNOWN);
+            dtype = Path::new(&name).into();
         } else {
             warn!("Received empty file string");
         }
@@ -139,17 +135,13 @@ pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnErr
         }
     };
 
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
     let progress_key = url.clone();
     progress::reset(&progress_key);
     let _ = session.start_upload(&url).await;
 
     let mut total = 0;
-    let dtype = Path::new(&url)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map(DataType::from_extension)
-        .unwrap_or(DataType::UNKNOWN);
+    let dtype = Path::new(&url).into();
 
     let mut stream = resp.bytes_stream();
     while let Some(chunk_result) = stream.next().await {
@@ -180,7 +172,7 @@ pub async fn handle_sparql(
     format: Option<String>,
 ) -> Result<(DataType, usize), ServerFnError> {
     let client = Client::new();
-    let mut session = WebVOWLStore::default();
+    let mut session = VOWLRStore::default();
 
     let accept_type = match format.as_deref() {
         Some("xml") => DataType::SPARQLXML.mime_type(),
@@ -236,11 +228,11 @@ pub async fn handle_sparql(
 
 #[server (input = Rkyv, output = Rkyv)]
 pub async fn handle_internal_sparql(query: String) -> Result<GraphDisplayData, ServerFnError> {
-    let webvowl = WebVOWLStore::default();
+    let vowlr = VOWLRStore::default();
 
     let mut data_buffer = GraphDisplayData::new();
     let mut solution_serializer = GraphDisplayDataSolutionSerializer::new();
-    let query_stream = webvowl.session.query(query.as_str()).await.unwrap();
+    let query_stream = vowlr.session.query(query.as_str()).await.unwrap();
     if let QueryResults::Solutions(solutions) = query_stream {
         solution_serializer
             .serialize_nodes_stream(&mut data_buffer, solutions)

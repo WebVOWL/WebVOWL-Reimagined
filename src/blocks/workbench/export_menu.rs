@@ -4,13 +4,11 @@ use futures::StreamExt;
 use leptos::prelude::*;
 use leptos::server_fn::codec::{ByteStream, Streaming};
 #[cfg(feature = "server")]
-use webvowl_database::store::WebVOWLStore;
-#[cfg(feature = "server")]
-use webvowl_parser::parser_util::ResourceType;
+use vowlr_database::store::VOWLRStore;
 
 #[server(output = Streaming)]
 pub async fn export_owl(resource_type: String) -> Result<ByteStream<ServerFnError>, ServerFnError> {
-    let store = WebVOWLStore::default();
+    let store = VOWLRStore::default();
     let stream = store.serialize_stream(resource_type.into()).await?;
     Ok(ByteStream::new(stream.map(|chunk| {
         chunk
@@ -33,7 +31,7 @@ pub fn ExportButton(
 
     view! {
         <button
-            class="relative flex items-center justify-center gap-1 h-10 w-40 m-2 bg-gray-200 text-[#000000] rounded-sm font-semibold hover:bg-[#dd9900] transition-colors cursor-pointer"
+            class="flex relative gap-1 justify-center items-center m-2 w-40 h-10 font-semibold bg-gray-200 rounded-sm transition-colors cursor-pointer text-[#000000] hover:bg-[#dd9900]"
             on:click=onclick_handler
         >
             <Icon icon=icon />
@@ -115,7 +113,9 @@ pub fn download_ontology(resource_type: &str, progress_message: RwSignal<String>
 pub fn download_ontology(resource_type: &str, progress_message: RwSignal<String>) {
     let _ = resource_type;
     progress_message.set("Ontology export is only available in the browser build.".to_string());
-    leptos::logging::warn!("download_ontology invoked on non-wasm target; skipping client download");
+    leptos::logging::warn!(
+        "download_ontology invoked on non-wasm target; skipping client download"
+    );
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -152,13 +152,13 @@ pub fn ExportMenu() -> impl IntoView {
 
     view! {
         <WorkbenchMenuItems title="Export Ontology">
-            <div class="flex justify-center flex-wrap w-full">
-                //<ExportButton label="Json" icon=icondata::BiExportRegular />
-                //<ExportButton label="SVG" icon=icondata::BiExportRegular />
-                //<ExportButton label="TeX" icon=icondata::BiExportRegular />
-                //<ExportButton label="URL" icon=icondata::BiExportRegular />
-                <ExportButton 
-                    label="OWL" 
+            <div class="flex flex-wrap justify-center w-full">
+                // <ExportButton label="Json" icon=icondata::BiExportRegular />
+                // <ExportButton label="SVG" icon=icondata::BiExportRegular />
+                // <ExportButton label="TeX" icon=icondata::BiExportRegular />
+                // <ExportButton label="URL" icon=icondata::BiExportRegular />
+                <ExportButton
+                    label="OWL"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
@@ -173,40 +173,40 @@ pub fn ExportMenu() -> impl IntoView {
                         move |_| download_ontology("RDF", progress_message)
                     })
                 />
-                <ExportButton 
-                    label="TTL" 
+                <ExportButton
+                    label="TTL"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
                         move |_| download_ontology("TTL", progress_message)
                     })
                 />
-                <ExportButton 
-                    label="N-Triples" 
+                <ExportButton
+                    label="N-Triples"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
                         move |_| download_ontology("NTriples", progress_message)
                     })
                 />
-                <ExportButton 
-                    label="N-Quads" 
+                <ExportButton
+                    label="N-Quads"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
                         move |_| download_ontology("NQuads", progress_message)
                     })
                 />
-                <ExportButton 
-                    label="OFN" 
+                <ExportButton
+                    label="OFN"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
                         move |_| download_ontology("OFN", progress_message)
                     })
                 />
-                <ExportButton 
-                    label="OWX" 
+                <ExportButton
+                    label="OWX"
                     icon=icondata::BiExportRegular
                     on_click=Callback::new({
                         let progress_message = progress_message;
@@ -217,11 +217,14 @@ pub fn ExportMenu() -> impl IntoView {
             </div>
             {move || {
                 let msg = progress_message.get();
-                (!msg.is_empty()).then(|| view! {
-                    <div class="w-full text-center text-sm mt-2 text-gray-600">
-                        {msg}
-                    </div>
-                })
+                (!msg.is_empty())
+                    .then(|| {
+                        view! {
+                            <div class="mt-2 w-full text-sm text-center text-gray-600">
+                                {msg}
+                            </div>
+                        }
+                    })
             }}
         </WorkbenchMenuItems>
     }

@@ -1,3 +1,3 @@
-# Database crate for WebVOWL
+# Database crate for VOWL-R
 
 Work in progress

@@ -1,56 +1,27 @@
-use std::{
-    fs::File,
-    io::{BufReader, Cursor, Write},
-    path::Path,
-};
-
+use crate::errors::{WebVowlStoreError, WebVowlStoreErrorKind};
 use futures::{StreamExt, stream::BoxStream};
 use horned_owl::{
     io::{rdf::reader::ConcreteRDFOntology, *},
     model::{RcAnnotatedComponent, RcStr},
     ontology::component_mapped::RcComponentMappedOntology,
 };
+use log::info;
 use rdf_fusion::{
     execution::results::QuadStream,
     io::{JsonLdProfileSet, RdfFormat, RdfParser, RdfSerializer},
-    model::{GraphName},
+    model::GraphName,
+};
+use std::io;
+use std::{
+    fs::File,
+    io::{BufReader, Cursor, Write},
+    path::Path,
+    time::{Duration, Instant},
 };
 use tokio::sync::mpsc::{self, UnboundedSender};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+use vowlr_util::datatypes::DataType;
 
-use crate::errors::{WebVowlStoreError, WebVowlStoreErrorKind};
-use std::io;
-
-#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
-pub enum ResourceType {
-    OFN,
-    OWX,
-    RDF,
-    OWL,
-    TTL,
-    NTriples,
-    NQuads,
-    TriG,
-    JsonLd,
-    N3,
-}
-impl From <String> for ResourceType {
-    fn from(s: String) -> Self {
-        match s.as_str() {
-            "OFN" => ResourceType::OFN,
-            "OWX" => ResourceType::OWX,
-            "RDF" => ResourceType::RDF,
-            "OWL" => ResourceType::OWL,
-            "TTL" => ResourceType::TTL,
-            "NTriples" => ResourceType::NTriples,
-            "NQuads" => ResourceType::NQuads,
-            "TriG" => ResourceType::TriG,
-            "JsonLd" => ResourceType::JsonLd,
-            "N3" => ResourceType::N3,
-            _ => ResourceType::RDF,
-        }
-    }  
-}
 pub enum ParserInput {
     File(Vec<u8>),
     Buffer(Cursor<Vec<u8>>),
@@ -76,46 +47,46 @@ pub struct PreparedParser {
     pub input: ParserInput,
 }
 
-pub fn path_type(path: &Path) -> Option<ResourceType> {
+pub fn path_type(path: &Path) -> Option<DataType> {
     match path.extension().and_then(|s| s.to_str()) {
-        Some("ofn") => Some(ResourceType::OFN),
-        Some("owx") => Some(ResourceType::OWX),
-        Some("rdf") => Some(ResourceType::RDF),
-        Some("owl") => Some(ResourceType::OWL),
-        Some("ttl") => Some(ResourceType::TTL),
-        Some("nt") => Some(ResourceType::NTriples),
-        Some("nq") => Some(ResourceType::NQuads),
-        Some("trig") => Some(ResourceType::TriG),
-        Some("jsonld") => Some(ResourceType::JsonLd),
-        Some("n3") => Some(ResourceType::N3),
+        Some("ofn") => Some(DataType::OFN),
+        Some("owx") => Some(DataType::OWX),
+        Some("rdf") => Some(DataType::RDF),
+        Some("owl") => Some(DataType::OWL),
+        Some("ttl") => Some(DataType::TTL),
+        Some("nt") => Some(DataType::NTriples),
+        Some("nq") => Some(DataType::NQuads),
+        Some("trig") => Some(DataType::TriG),
+        Some("jsonld") => Some(DataType::JsonLd),
+        Some("n3") => Some(DataType::N3),
         _ => None,
     }
 }
-pub fn format_from_resource_type(resource_type: &ResourceType) -> Option<RdfFormat> {
+pub fn format_from_resource_type(resource_type: &DataType) -> Option<RdfFormat> {
     match resource_type {
-        ResourceType::RDF => Some(RdfFormat::RdfXml),
-        ResourceType::TTL => Some(RdfFormat::Turtle),
-        ResourceType::NTriples => Some(RdfFormat::NTriples),
-        ResourceType::NQuads => Some(RdfFormat::NQuads),
-        ResourceType::TriG => Some(RdfFormat::TriG),
-        ResourceType::JsonLd => Some(RdfFormat::JsonLd {
+        DataType::RDF => Some(RdfFormat::RdfXml),
+        DataType::TTL => Some(RdfFormat::Turtle),
+        DataType::NTriples => Some(RdfFormat::NTriples),
+        DataType::NQuads => Some(RdfFormat::NQuads),
+        DataType::TriG => Some(RdfFormat::TriG),
+        DataType::JsonLd => Some(RdfFormat::JsonLd {
             profile: JsonLdProfileSet::default(),
         }),
-        ResourceType::N3 => Some(RdfFormat::N3),
-        ResourceType::OWL => Some(RdfFormat::RdfXml),
+        DataType::N3 => Some(RdfFormat::N3),
+        DataType::OWL => Some(RdfFormat::RdfXml),
         _ => None,
     }
 }
 pub async fn parse_stream_to(
     mut stream: QuadStream,
-    output_type: ResourceType,
+    output_type: DataType,
 ) -> Result<BoxStream<'static, Result<Vec<u8>, WebVowlStoreError>>, WebVowlStoreError> {
     match output_type {
-        ResourceType::OFN | ResourceType::OWX | ResourceType::OWL => {
+        DataType::OFN | DataType::OWX | DataType::OWL => {
             let (tx, rx) = mpsc::unbounded_channel();
             let mut buf = Vec::new();
             let mut serializer =
-                RdfSerializer::from_format(format_from_resource_type(&ResourceType::OWL).ok_or(
+                RdfSerializer::from_format(format_from_resource_type(&DataType::OWL).ok_or(
                     WebVowlStoreErrorKind::InvalidInput(format!(
                         "Unsupported output type: {:?}",
                         output_type
@@ -131,28 +102,21 @@ pub async fn parse_stream_to(
             tokio::task::spawn_blocking(move || {
                 let mut writer = ChannelWriter { sender: tx.clone() };
                 let result = (|| match output_type {
-                    ResourceType::OFN => {
-                        let (ont, prefix)
-                        : (RcComponentMappedOntology, _) = ofn::reader::read(
-                                &mut reader, ParserConfiguration::default())?;
-                        ofn::writer::write(
-                            &mut writer, 
-                            &ont, 
-                            Some(&prefix))?;
+                    DataType::OFN => {
+                        let (ont, prefix): (RcComponentMappedOntology, _) =
+                            ofn::reader::read(&mut reader, ParserConfiguration::default())?;
+                        ofn::writer::write(&mut writer, &ont, Some(&prefix))?;
                         writer.flush()?;
                         Ok(writer)
                     }
-                    ResourceType::OWX => {
+                    DataType::OWX => {
                         let (ont, prefix): (RcComponentMappedOntology, _) =
                             owx::reader::read(&mut reader, ParserConfiguration::default())?;
-                        owx::writer::write(
-                            &mut writer, 
-                            &ont, 
-                            Some(&prefix))?;
+                        owx::writer::write(&mut writer, &ont, Some(&prefix))?;
                         writer.flush()?;
                         Ok(writer)
                     }
-                    ResourceType::OWL => {
+                    DataType::OWL => {
                         let (ont, _): (ConcreteRDFOntology<RcStr, RcAnnotatedComponent>, _) =
                             rdf::reader::read(&mut reader, ParserConfiguration::default())?;
                         rdf::writer::write(&mut writer, &ont.into())?;
@@ -172,7 +136,8 @@ pub async fn parse_stream_to(
                 }
             });
             Ok(UnboundedReceiverStream::new(rx)
-            .map(|result| result.map_err(WebVowlStoreError::from)).boxed())
+                .map(|result| result.map_err(WebVowlStoreError::from))
+                .boxed())
         }
         _ => {
             let (tx, rx) = mpsc::unbounded_channel();
@@ -180,13 +145,13 @@ pub async fn parse_stream_to(
                 let mut writer = ChannelWriter { sender: tx.clone() };
                 let result = (|| async {
                     let mut serializer =
-                    RdfSerializer::from_format(format_from_resource_type(&output_type).ok_or(
-                        WebVowlStoreErrorKind::InvalidInput(format!(
-                            "Unsupported output type: {:?}",
-                            output_type
-                        )),
-                    )?)
-                    .for_writer(&mut writer);
+                        RdfSerializer::from_format(format_from_resource_type(&output_type).ok_or(
+                            WebVowlStoreErrorKind::InvalidInput(format!(
+                                "Unsupported output type: {:?}",
+                                output_type
+                            )),
+                        )?)
+                        .for_writer(&mut writer);
                     while let Some(quad) = stream.next().await {
                         serializer.serialize_quad(&quad?)?;
                     }
@@ -199,7 +164,8 @@ pub async fn parse_stream_to(
                 }
             });
             Ok(UnboundedReceiverStream::new(rx)
-            .map(|result| result.map_err(WebVowlStoreError::from)).boxed())
+                .map(|result| result.map_err(WebVowlStoreError::from))
+                .boxed())
         }
     }
 }
@@ -212,39 +178,88 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
         //.with_default_graph(NamedNode::new(format!("file:://{}", path_str)).unwrap());
         if lenient { parser.lenient() } else { parser }
     };
-    let t_pat: Option<ResourceType> = path_type(path);
+    let t_pat: Option<DataType> = path_type(path);
     let prepared = match t_pat {
-        Some(ResourceType::OFN) => {
+        Some(DataType::OFN) => {
             let file = File::open(path)?;
             let mut reader = BufReader::new(file);
+
+            info!("Parsing OFN input...");
+            let start_time = Instant::now();
+
             let (ont, _): (RcComponentMappedOntology, _) =
                 ofn::reader::read(&mut reader, ParserConfiguration::default())?;
 
+            info!(
+                "Parsing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
+
+            info!("Writing to RDF...");
+            let start_time = Instant::now();
+
             let mut buf = Vec::new();
             rdf::writer::write(&mut buf, &ont)?;
+
+            info!(
+                "Writing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
+
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::RdfXml),
                 input: ParserInput::Buffer(Cursor::new(buf)),
             })
         }
-        Some(ResourceType::OWX) => {
+        Some(DataType::OWX) => {
             let file = File::open(path)?;
             let mut reader = BufReader::new(file);
+
+            info!("Parsing OWX input...");
+            let start_time = Instant::now();
+
             let ontology = owx::reader::read::<
                 RcStr,
                 ConcreteRDFOntology<RcStr, RcAnnotatedComponent>,
                 _,
             >(&mut reader, ParserConfiguration::default())?;
 
+            info!(
+                "Parsing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
+
+            info!("Writing to RDF...");
+            let start_time = Instant::now();
+
             let mut buf = Vec::new();
             rdf::writer::write(&mut buf, &ontology.0.into())?;
 
+            info!(
+                "Writing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::RdfXml),
                 input: ParserInput::Buffer(Cursor::new(buf)),
             })
         }
-        Some(ResourceType::OWL) => {
+        Some(DataType::OWL) => {
+            info!("Parsing OWL input...");
+            let start_time = Instant::now();
+
             let b = horned_owl::model::Build::<RcStr>::new();
             let iri = horned_owl::resolve::path_to_file_iri(&b, path);
             let (ontology, _) = rdf::closure_reader::read::<
@@ -253,43 +268,62 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
                 ConcreteRDFOntology<RcStr, RcAnnotatedComponent>,
             >(&iri, ParserConfiguration::default())?;
 
+            info!(
+                "Parsing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
+
+            info!("Writing to RDF...");
+            let start_time = Instant::now();
+
             let mut buf = Vec::new();
             rdf::writer::write(&mut buf, &ontology.into())?;
+
+            info!(
+                "Writing completed in {} s",
+                Instant::now()
+                    .checked_duration_since(start_time)
+                    .unwrap_or(Duration::new(0, 0))
+                    .as_secs_f32()
+            );
 
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::RdfXml),
                 input: ParserInput::Buffer(Cursor::new(buf)),
             })
         }
-        Some(ResourceType::TTL) => {
+        Some(DataType::TTL) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::Turtle),
                 input,
             })
         }
-        Some(ResourceType::NTriples) => {
+        Some(DataType::NTriples) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::NTriples),
                 input,
             })
         }
-        Some(ResourceType::NQuads) => {
+        Some(DataType::NQuads) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::NQuads),
                 input,
             })
         }
-        Some(ResourceType::TriG) => {
+        Some(DataType::TriG) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::TriG),
                 input,
             })
         }
-        Some(ResourceType::JsonLd) => {
+        Some(DataType::JsonLd) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::JsonLd {
@@ -298,7 +332,7 @@ pub fn parser_from_format(path: &Path, lenient: bool) -> Result<PreparedParser, 
                 input,
             })
         }
-        Some(ResourceType::N3) => {
+        Some(DataType::N3) => {
             let input = ParserInput::from_path(path)?;
             Ok(PreparedParser {
                 parser: make_parser(RdfFormat::N3),

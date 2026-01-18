@@ -5,7 +5,7 @@ use leptos_meta::*;
 #[component]
 pub fn Home() -> impl IntoView {
     view! {
-        <Title text="WebVOWL Reimagined" />
+        <Title text="VOWL-R" />
         <main class="-z-99">
             <canvas class="fixed -z-98 size-full" id="canvas" />
             <NewWorkbench />

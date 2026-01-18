@@ -1,3 +1,3 @@
-# Parsers for WebVOWL
+# Parsers for VOWL-R
 
 Work in progress

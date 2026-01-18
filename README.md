@@ -1,6 +1,6 @@
-# WebVOWL Reimagined
+# VOWL-R: WebVOWL Reimagined
 
-This branch tracks development of WebVOWL Reimagined, which is a total rewrite of WebVOWL in Rust.
+This branch tracks development of VOWL-R, which is a total rewrite of WebVOWL in Rust.
 
 ## Run using Docker
 
@@ -12,10 +12,10 @@ Or use the [docker compose file](/docker-compose.yml) with command `docker-compo
 
 0. Make sure Docker is installed
 1. Clone the project locally, e.g. `git clone https://github.com/WebVOWL/WebVOWL-Reimagined.git`
-2. Make sure you're in the WebVOWL folder, e.g. `cd WebVOWL-Reimagined`
-3. To build the docker image run `docker build . -t webvowl-reimagined-dev`
-4. To start the docker image run `docker run -p 8080:8080 webvowl-reimagined-dev`
-5. Visit [http://localhost:8080](http://localhost:8080) to use WebVOWL
+2. Make sure you're in the VOWL-R folder, e.g. `cd WebVOWL-Reimagined`
+3. To build the docker image run `docker build . -t vowlr-dev`
+4. To start the docker image run `docker run -p 8080:8080 vowlr-dev`
+5. Visit [http://localhost:8080](http://localhost:8080) to use VOWL-R
 
 ## Development setup
 
@@ -27,6 +27,6 @@ Or use the [docker compose file](/docker-compose.yml) with command `docker-compo
 2. Install the clang compiler toolchain, e.g. `dnf install clang`
 3. Install the mold linker, e.g. `dnf install mold`
 4. Run `cargo install leptosfmt`
-5. Run `cargo install --locked cargo-leptos --version 0.2.42`
+5. Run `cargo install --locked cargo-leptos --version 0.3.2`
     > If you get a compile error `Can't locate FindBin.pm in @INC` you can either install Perl (e.g. `dnf install perl`) or [download a prebuilt binary](https://github.com/leptos-rs/cargo-leptos/releases/latest)
 6. Use the convenience shell file `build.sh` to build the project with different profiles based on the supplied argument. E.g. to build and run a development server, run `./build.sh dev`

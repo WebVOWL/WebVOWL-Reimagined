@@ -1,4 +1,4 @@
-//! Provides ready to use [`NamedNodeRef`](oxrdf::NamedNodeRef)s for basic RDF vocabularies.
+//! Provides ready to use [`NamedNodeRef`](oxrdf::NamedNodeRef)s for OWL vocabularies.
 
 #![allow(unused)]
 pub mod owl {

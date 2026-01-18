@@ -1,9 +1,9 @@
+// Leptos' view macro tends to be heavy on recursion, especially with many nested views.
 #![recursion_limit = "256"]
-//! This crate contains the client- and server code for the new WebVOWL.
-
 // For JS naming compatibility
 #![allow(non_snake_case)]
 
+// The entry-point of the client-side graph renderer.
 #[cfg(target_arch = "wasm32")]
 pub use grapher::init_render;
 
@@ -13,14 +13,13 @@ pub use grapher::init_render;
 #[cfg(feature = "wasm")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
-pub mod network;
-
 pub mod app;
 pub mod blocks;
 pub mod components;
 pub mod hydration_scripts;
 pub mod pages;
 
+// Hydration code for the frontend.
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
