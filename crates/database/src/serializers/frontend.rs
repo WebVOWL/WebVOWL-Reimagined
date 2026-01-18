@@ -381,7 +381,10 @@ impl GraphDisplayDataSolutionSerializer {
         edge_type: ElementType,
         label: Option<String>,
     ) -> Option<Edge> {
-        let new_type = if self.is_external(data_buffer, &triple.id.to_string()) {
+        // Skip external check for NoDraw edges - they should always retain their type
+        let new_type = if edge_type != ElementType::NoDraw
+            && self.is_external(data_buffer, &triple.id.to_string())
+        {
             ElementType::Owl(OwlType::Edge(OwlEdge::ExternalProperty))
         } else {
             edge_type
