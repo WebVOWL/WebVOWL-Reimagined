@@ -27,6 +27,14 @@ pub const XML_BASE: &str = r#"{
             BIND(xml:base AS ?nodeType)
             }"#;
 
+/// External classes.
+///
+/// Get the base URI of the document.
+pub const ONTOLOGY: &str = r#"{
+            ?id a owl:Ontology .
+            BIND(owl:Ontology AS ?nodeType)
+            }"#;
+
 /// Generic, deprecated OWL elements.
 ///
 /// This query is still work-in-progress.

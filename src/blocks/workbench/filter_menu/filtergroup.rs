@@ -1,7 +1,7 @@
+use super::element_legend_injection::ElementLegend;
+use super::filtertype::FilterType;
 use leptos::{either::Either, prelude::*};
 use std::{collections::HashMap, hash::Hash};
-
-use super::filtertype::FilterType;
 
 #[component]
 pub fn FilterGroup<T>(
@@ -12,7 +12,7 @@ pub fn FilterGroup<T>(
     #[prop(into)] counts: Signal<HashMap<T, usize>>,
 ) -> impl IntoView
 where
-    T: std::fmt::Display + Copy + Clone + Eq + Hash + Send + Sync + 'static,
+    T: std::fmt::Display + ElementLegend + Copy + Clone + Eq + Hash + Send + Sync + 'static,
 {
     if items.len() == 0 {
         Either::Left(())

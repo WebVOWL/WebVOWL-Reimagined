@@ -13,8 +13,8 @@ use crate::{
 use fluent_uri::Iri;
 use futures::StreamExt;
 use grapher::prelude::{
-    Characteristic, ElementType, GraphDisplayData, OwlEdge, OwlNode, OwlType, RdfEdge, RdfType,
-    RdfsEdge, RdfsNode, RdfsType,
+    Characteristic, ElementType, GenericEdge, GenericNode, GenericType, GraphDisplayData, OwlEdge,
+    OwlNode, OwlType, RdfEdge, RdfType, RdfsEdge, RdfsNode, RdfsType,
 };
 use log::{debug, error, info, trace, warn};
 use oxrdf::{IriParseError, NamedNode, vocab::rdf};
@@ -360,7 +360,12 @@ impl GraphDisplayDataSolutionSerializer {
             return;
         }
 
-        self.add_to_element_buffer(&mut data_buffer.node_element_buffer, triple, node_type);
+        let new_type = if self.is_external(data_buffer, &triple.id.to_string()) {
+            ElementType::Owl(OwlType::Node(OwlNode::ExternalClass))
+        } else {
+            node_type
+        };
+        self.add_to_element_buffer(&mut data_buffer.node_element_buffer, triple, new_type);
         self.check_unknown_buffer(data_buffer, &triple.id.to_string());
     }
 
@@ -376,28 +381,17 @@ impl GraphDisplayDataSolutionSerializer {
         edge_type: ElementType,
         label: Option<String>,
     ) -> Option<Edge> {
-        let (maybe_sub_idx, maybe_obj_idx) = self.resolve_so(data_buffer, &triple);
+        let new_type = if self.is_external(data_buffer, &triple.id.to_string()) {
+            ElementType::Owl(OwlType::Edge(OwlEdge::ExternalProperty))
+        } else {
+            edge_type
+        };
 
-        // let mut edge = match edge_type {
-        //     ElementType::Owl(OwlType::Edge(OwlEdge::DatatypeProperty)) => self
-        //         .handle_missing_edges(
-        //             data_buffer,
-        //             ElementType::Rdfs(RdfsType::Node(RdfsNode::Literal)),
-        //             maybe_sub_idx,
-        //             maybe_obj_idx,
-        //         ),
-        //     _ => self.handle_missing_edges(
-        //         data_buffer,
-        //         ElementType::Owl(OwlType::Node(OwlNode::Thing)),
-        //         maybe_sub_idx,
-        //         maybe_obj_idx,
-        //     ),
-        // };
-        match (maybe_sub_idx, maybe_obj_idx) {
+        match self.resolve_so(data_buffer, &triple) {
             (Some(sub_iri), Some(obj_iri)) => {
                 let edge = Edge {
                     subject: sub_iri.clone(),
-                    element_type: edge_type,
+                    element_type: new_type,
                     object: obj_iri.clone(),
                 };
                 data_buffer.edge_buffer.insert(edge.clone());
@@ -406,7 +400,7 @@ impl GraphDisplayDataSolutionSerializer {
 
                 data_buffer
                     .edge_label_buffer
-                    .insert(edge.clone(), label.unwrap_or(edge_type.to_string()));
+                    .insert(edge.clone(), label.unwrap_or(new_type.to_string()));
                 return Some(edge);
             }
             (None, Some(_)) => {
@@ -426,61 +420,15 @@ impl GraphDisplayDataSolutionSerializer {
         None
     }
 
-    // /// Creates nodes as targets for edges without one in the solution.
-    // ///
-    // /// If no domain and/or range axiom is defined for a property, owl:Thing is used as domain and/or range.
-    // /// EXCEPT datatype properties without a defined range. Here, rdfs:Literal is used as range instead.
-    // ///
-    // /// Procedure:
-    // /// If NOT rdfs:Datatype:
-    // /// - Property missing domain OR range:
-    // ///   - Create new owl:Thing for this property.
-    // /// - Property missing domain AND range:
-    // ///   - Create a new owl:Thing (if not created previously) and use this instance for ALL edges in this category.
-    // /// IF rdfs:Datatype:
-    // /// - Property missing domain AND/OR range:
-    // ///   - Create new rdfs:Literal for this property
-    // fn handle_missing_edges(
-    //     &mut self,
-    //     data_buffer: &mut GraphDisplayData,
-    //     node_to_create: ElementType,
-    //     maybe_sub_idx: Option<usize>,
-    //     maybe_obj_idx: Option<usize>,
-    // ) -> [usize; 3] {
-    //     // Case: missing domain AND range
-    //     // if maybe_sub_idx.is_none() && maybe_obj_idx.is_none() {
-    //     //     if let Some(global_idx) = self.global_element_mappings.get(&node_to_create) {
-    //     //         [*global_idx, 0, *global_idx]
-    //     //     } else {
-    //     //         // Create global node type
-    //     //         let global_idx = self.insert_global(data_buffer, node_to_create);
-    //     //         [global_idx, 0, global_idx]
-    //     //     }
-    //     // // Case: missing domain OR range
-    //     // } else {
-    //     //     let sub_idx = maybe_sub_idx.unwrap_or(self.insert_local(data_buffer, node_to_create));
-    //     //     let obj_idx = maybe_obj_idx.unwrap_or(self.insert_local(data_buffer, node_to_create));
-    //     //     [sub_idx, 0, obj_idx]
-    //     // }
-    // }
-
-    // /// Insert an ElementType into the global element mapping.
-    // ///
-    // /// May only be called once for each ElementType!
-    // ///
-    // /// Use [`insert_local`] if multiple calls are required for each ElementType.
-    // fn insert_global(
-    //     &mut self,
-    //     data_buffer: &mut GraphDisplayData,
-    //     element_to_create: ElementType,
-    // ) -> usize {
-    //     // let elem_idx = data_buffer.elements.len();
-    //     // self.global_element_mappings
-    //     //     .insert(element_to_create, elem_idx);
-    //     // data_buffer.labels.push(element_to_create.to_string());
-    //     // data_buffer.elements.push(element_to_create);
-    //     // elem_idx
-    // }
+    fn is_external(&self, data_buffer: &SerializationDataBuffer, iri: &str) -> bool {
+        match &data_buffer.document_base {
+            Some(base) => !iri.starts_with(base),
+            None => {
+                warn!("Cannot determine externals: Missing document base!");
+                false
+            }
+        }
+    }
 
     fn merge_nodes(&self, data_buffer: &mut SerializationDataBuffer, old: String, new: String) {
         debug!("Merging node '{old}' into '{new}'");
@@ -492,6 +440,7 @@ impl GraphDisplayDataSolutionSerializer {
     fn update_edges(&self, data_buffer: &mut SerializationDataBuffer, old: &String, new: &String) {
         let old_edges = data_buffer.edges_include_map.remove(old);
         if let Some(old_edges) = old_edges {
+            debug!("Updating edges from '{}' to '{}'", old, new);
             // info!("old_edges: ");
             // for edge in old_edges.iter() {
             //     info!("edge: {} ", edge);
@@ -985,6 +934,7 @@ impl GraphDisplayDataSolutionSerializer {
         }
     }
 
+    /// Serialize a triple to `data_buffer`.
     fn write_node_triple(&self, data_buffer: &mut SerializationDataBuffer, triple: Triple) {
         // TODO: Collect errors and show to frontend
         trace!("{}", triple);
@@ -1504,7 +1454,7 @@ impl GraphDisplayDataSolutionSerializer {
                         }
                     }
                     // owl::EQUIVALENT_PROPERTY => {}
-                    // owl::FUNCTIONAL_PROPERTY => {}
+                    // TODO owl::FUNCTIONAL_PROPERTY => {}
                     // owl::HAS_KEY => {}
                     // owl::HAS_SELF => {}
                     // owl::HAS_VALUE => {}
@@ -1547,11 +1497,21 @@ impl GraphDisplayDataSolutionSerializer {
                         );
                     }
                     // owl::ONE_OF => {}
-                    // TODO owl::ONTOLOGY => {
-                    //     // TODO: Base must be known before matching.
-                    //     // Make it a separete variable in the query.
-                    //     // self.doc_iri = uri.to_string();
-                    // }
+                    owl::ONTOLOGY => {
+                        if let Some(base) = &data_buffer.document_base {
+                            warn!(
+                                "Attempting to override document base '{}' with new base '{}'. Skipping",
+                                base,
+                                triple.id.to_string()
+                            );
+                        } else {
+                            // Remove ">" to enable substring matching
+                            let id = triple.id.to_string();
+                            let base = id[0..id.len() - 1].to_string();
+                            info!("Using document base: '{}'", base);
+                            data_buffer.document_base = Some(base);
+                        }
+                    }
                     // owl::ONTOLOGY_PROPERTY => {}
                     // owl::ON_CLASS => {}
                     // owl::ON_DATARANGE => {}

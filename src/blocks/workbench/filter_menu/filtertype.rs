@@ -1,3 +1,5 @@
+use super::element_legend_injection::ElementLegend;
+use leptos::either::Either;
 use leptos::prelude::*;
 use std::{collections::HashMap, hash::Hash};
 
@@ -9,7 +11,7 @@ pub fn FilterType<T>(
     #[prop(into)] counts: Signal<HashMap<T, usize>>,
 ) -> impl IntoView
 where
-    T: std::fmt::Display + Copy + Clone + Eq + Hash + Send + Sync + 'static,
+    T: std::fmt::Display + ElementLegend + Copy + Clone + Eq + Hash + Send + Sync + 'static,
 {
     view! {
         <div style=move || {
@@ -22,6 +24,29 @@ where
             {items
                 .into_iter()
                 .map(|item| {
+                    let legend_view = match item.legend() {
+                        Some(file) => {
+                            Either::Left(
+                                view! {
+                                    <img
+                                        src=file
+                                        alt=format!("{} legend", item.to_string())
+                                        class="object-contain w-8 h-8"
+                                    />
+                                },
+                            )
+                        }
+                        None => {
+                            Either::Right(
+                                view! {
+                                    <div
+                                        class="w-8 h-8 bg-gray-50 rounded border border-gray-200 border-dashed"
+                                        aria-hidden="true"
+                                    ></div>
+                                },
+                            )
+                        }
+                    };
                     view! {
                         <div class="flex justify-between items-center py-1 text-sm text-gray-700">
                             <label class="flex gap-3 items-center cursor-pointer">
@@ -37,7 +62,9 @@ where
                                             });
                                     }
                                 />
-                                <span>{item.to_string()}</span>
+                                <div class="flex gap-2 items-center">
+                                    {legend_view} <span>{item.to_string()}</span>
+                                </div>
                             </label>
                             <div class="text-sm text-gray-600">
                                 {move || {

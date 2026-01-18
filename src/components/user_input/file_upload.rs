@@ -99,11 +99,7 @@ pub async fn handle_local(data: MultipartData) -> Result<(DataType, usize), Serv
             progress::reset(&name);
             let _ = session.start_upload(&name).await;
 
-            dtype = Path::new(&name)
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .map(DataType::from_extension)
-                .unwrap_or(DataType::UNKNOWN);
+            dtype = Path::new(&name).into();
         } else {
             warn!("Received empty file string");
         }
@@ -145,11 +141,7 @@ pub async fn handle_remote(url: String) -> Result<(DataType, usize), ServerFnErr
     let _ = session.start_upload(&url).await;
 
     let mut total = 0;
-    let dtype = Path::new(&url)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map(DataType::from_extension)
-        .unwrap_or(DataType::UNKNOWN);
+    let dtype = Path::new(&url).into();
 
     let mut stream = resp.bytes_stream();
     while let Some(chunk_result) = stream.next().await {

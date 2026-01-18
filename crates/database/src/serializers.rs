@@ -207,7 +207,7 @@ pub struct SerializationDataBuffer {
     /// The base IRI of the document.
     ///
     /// For instance: `http://purl.obolibrary.org/obo/envo.owl`
-    document_base: String,
+    document_base: Option<String>,
 }
 impl SerializationDataBuffer {
     pub fn new() -> Self {
@@ -224,7 +224,7 @@ impl SerializationDataBuffer {
             unknown_edge_buffer: HashMap::new(),
             unknown_buffer: HashMap::new(),
             failed_buffer: Vec::new(),
-            document_base: String::new(),
+            document_base: None,
             edge_characteristics: HashMap::new(),
             node_characteristics: HashMap::new(),
         }
@@ -233,7 +233,6 @@ impl SerializationDataBuffer {
 
 impl Into<GraphDisplayData> for SerializationDataBuffer {
     fn into(mut self) -> GraphDisplayData {
-        
         let mut display_data = GraphDisplayData::new();
         let mut iricache: HashMap<String, usize> = HashMap::new();
         for (iri, element) in self.node_element_buffer.into_iter() {
@@ -305,7 +304,11 @@ impl Into<GraphDisplayData> for SerializationDataBuffer {
 impl Display for SerializationDataBuffer {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "SerializationDataBuffer {{")?;
-        writeln!(f, "\tdocument_base: {}", self.document_base)?;
+        writeln!(
+            f,
+            "\tdocument_base: {}",
+            self.document_base.as_ref().unwrap_or(&"".to_string())
+        )?;
         writeln!(f, "\tnode_element_buffer:")?;
         for (iri, element) in self.node_element_buffer.iter() {
             writeln!(f, "\t\t{} : {}", iri, element)?;

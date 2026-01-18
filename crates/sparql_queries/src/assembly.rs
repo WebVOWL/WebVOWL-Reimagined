@@ -32,9 +32,11 @@ impl QueryAssembler {
             WHERE {{
                 {}
                 BIND(
-                    IF(?nodeType = owl:Class, 1, 2)
-                    AS ?weight
+                    IF(?nodeType = owl:Ontology, 0,
+                        IF(?nodeType = owl:Class, 1, 2)
                     )
+                    AS ?weight
+                )
             }}
             ORDER BY ?weight
         "#,
