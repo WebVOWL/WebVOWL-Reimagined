@@ -940,7 +940,7 @@ impl GraphDisplayDataSolutionSerializer {
     /// Serialize a triple to `data_buffer`.
     fn write_node_triple(&self, data_buffer: &mut SerializationDataBuffer, triple: Triple) {
         // TODO: Collect errors and show to frontend
-        trace!("{}", triple);
+        debug!("{}", triple);
         match &triple.element_type {
             Term::BlankNode(bnode) => {
                 // The query must never put blank nodes in the ?nodeType variable
