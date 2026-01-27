@@ -13,9 +13,7 @@ use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
 #[cfg(feature = "server")]
-use vowlr_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults};
-#[cfg(feature = "server")]
-use vowlr_database::store::VOWLRStore;
+use vowlr_database::prelude::{GraphDisplayDataSolutionSerializer, QueryResults, VOWLRStore};
 use vowlr_util::datatypes::DataType;
 use web_sys::{FileList, FormData};
 
